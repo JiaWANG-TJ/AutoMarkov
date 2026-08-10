@@ -2668,7 +2668,14 @@ AutoMarkov 不机械地为每个字段创建一个智能体，而是根据不同
 - `OODHandoffSpec`；
 - `ValidationClaim`。
 
-每个 artifact 由 immutable envelope 与 immutable payload 组成。`payload_hash` 是第 2.9 节 `CanonicalPayloadDocument` JCS bytes 的 SHA-256，document 内含 schema ID、repository-derived exact-float paths 与 payload；`artifact_id` 是去除自身 ID 后整个 canonical envelope（包含 type、schema、payload hash、parents 与 creation metadata）的 SHA-256，payload 禁止反向包含自己的 artifact ID/hash。同一 payload document 可因不同 lineage 拥有不同 artifact IDs，但共享同一 immutable blob。`parent_artifact_ids` 在计算 hash 前必须验证无重复，并按 canonical artifact-ID bytes 升序编码为 tuple；调用方提供乱序或重复 parent 时 repository 拒绝，不能静默产生另一 identity。每个 parent 必须在 ArtifactStore 中存在；EventStore 的 event ID/hash 只能进入 artifact-type-specific 的 typed event-reference field，不能进入 `parent_artifact_ids` 或在 artifact namespace 中伪装 parent。root artifact 可使用空 tuple，其他 artifact 按类型合同验证 exact direct-parent tuple。写入后不得原地改变 payload、metadata、父节点或“状态”；修订必须创建新 artifact，并用 DAG edge 指向其直接输入。
+每个 artifact 由 immutable envelope 与 immutable payload 组成。`payload_hash` 是第 2.9 节 `CanonicalPayloadDocument` JCS bytes 的 SHA-256，document 内含 schema ID、repository-derived exact-float paths 与 payload；`artifact_id` 是去除自身 ID 后整个 canonical envelope（包含 type、schema、payload hash、parents 与 creation metadata）的 SHA-256，payload 禁止反向包含自己的 artifact ID/hash。同一 payload document 可因不同 lineage 拥有不同 artifact IDs，但共享同一 immutable blob。`parent_artifact_ids` 在计算 hash 前必须验证无重复，并按 canonical artifact-ID bytes 升序编码为 tuple；调用方提供乱序或重复 parent 时 repository 拒绝，不能静默产生另一 identity。每个 parent 必须在 ArtifactStore 中存在；EventStore 的 event ID/hash 只能进入 artifact-type-specific 的 typed event-reference field，不能进入 `parent_artifact_ids` 或在 artifact namespace 中伪装 parent。写入后不得原地改变 payload、metadata、父节点或“状态”；修订必须创建新 artifact，并用 DAG edge 指向其直接输入。
+
+T02 已建立的 parent-type tuple 不被放宽为 caller-defined predicate，而是扩展为 schema registry 内唯一的 closed discriminated `ParentContract` union，以 `contract_kind` 鉴别且只允许两类：
+
+- `ExactParentContract(contract_kind="exact")`：冻结 canonical `direct_parent_artifact_types` tuple，包括 root artifact 的空 tuple。repository 从已存在 parents 重新解析实际 type multiset，必须与注册 tuple 逐项一致；不少 parent、不多 parent。该 branch 只能用于 payload 本身不携带 direct-parent identities 的固定类型合同；一旦 payload 指定 exact parent ID/hash，必须使用 `payload_bound`。
+- `PayloadBoundParentContract(contract_kind="payload_bound")`：注册一个静态、closed 且受 schema ID 约束的 `ParentBinding` tuple。每个 binding 固定 artifact-reference JSON path、与之成对的 payload-hash path、允许的 artifact type 与 `one|optional|many` cardinality；repository 只能从已 strict-validate 的 canonical payload 抽取 ID/hash pairs，解析每个 stored parent 的 type/payload hash，再将已验无重复的 ID 排序为唯一 expected tuple。envelope `parent_artifact_ids` 必须与它完全相等；ID/hash 半空、nullable branch 不同步、重复 ID、错 type/hash、未声明 payload artifact reference 或多余 envelope parent 全部拒绝。
+
+`ParentContract` 随 `(artifact_type,payload_schema_version)` 一起冻结；同一 schema key 不得以另一 contract 重注册，registry freeze 后不得修改。`PayloadBoundParentContract` 只表达 ArtifactStore DAG；其 binding 禁止指向 event ID/hash path。`TerminalResult`、`ProcessExecutionTerminalRecord` 和 `RunAuditProjection` 等 parent 集由 payload 内 closed references 决定的 artifact 必须使用 `payload_bound`；其他固定 parent-type tuple 继续使用 `exact`。两类之外的 callable、任意 predicate、“at least these parents”或仅校验 parent count 的合同均禁止。
 
 ```yaml
 artifact_id: "..."
@@ -2685,25 +2692,76 @@ source_evidence_ids:
 payload: {}
 ```
 
-批准、拒绝、锁定、supersede、运行状态和验证结果是 append-only events，不是 artifact 可变字段：
+批准、拒绝、锁定、supersede、运行状态和验证结果是 append-only events，不是 artifact 可变字段。上一版的自由 `event_type + data: {}` YAML 不是合法 ingress；规范 wire algebra 是 `extra="forbid"`、strict/frozen 的 `EventRecord`，其 `event` 字段为使用 literal `event_type` 的 Pydantic v2 discriminated `RunEvent` union：
 
-```yaml
-event_id: "uuidv7"
-run_id: "..."
-sequence_no: 42
-event_type: "SignedApprovalEvent | ArtifactSuperseded | RunSuperseded | ReplacementRunCreated | ClarificationChildRunCreated | ClarificationRequested | ClarificationEvaluationRequested | ClarificationEvaluationRecorded | GateOmittedByDesign | ExecutionTopologySubstituted | ValidationClaimed | ValidationFailed | StateTransitioned | ..."
-artifact_ids:
-  - "sha256:..."
-actor_id: "human_or_component_id"
-occurred_at: "ISO-8601 timestamp"
-reason_code: "..."
-data: {}
-previous_event_hash: "sha256:..."
+```text
+EventRecord = {
+  schema_version: Literal["automarkov.event-record.v1"],
+  event: Annotated[RunEvent, Field(discriminator="event_type")],
+  event_hash: Sha256Digest
+}
+
+RunEvent = BootstrapEvent
+         | LifecycleEvent
+         | ControlAuditEvent
+         | PostTerminalAuditEvent
+
+BootstrapEvent = RunCreated
+               | ReplacementRunCreated
+               | ClarificationChildRunCreated
+
+LifecycleEvent = SignedApprovalEvent
+               | ArtifactSuperseded | StageGatePassed
+               | ValidationClaimed | ValidationFailed
+               | ClarificationRequested | RunTerminationRequested
+               | StateTransitioned
+               | RuntimeReady | LlmRuntimeDegraded
+               | WaitingRuntime | WaitingEvidence | WaitingAsset | WaitResolved
+               | EvidenceTemporarilyUnavailable
+               | Blocked | EvidenceAuthorityRequired | BlockResolved
+               | BudgetExhausted | EvidenceBudgetExhausted
+
+ControlAuditEvent = RunSuperseded | GateOmittedByDesign
+                  | ExecutionTopologySubstituted
+                  | SpecificationConflictDetected | ArtifactAccessRevoked
+
+PostTerminalAuditEvent = ClarificationEvaluationRequested
+                       | ClarificationEvaluationRecorded
 ```
 
-`event_hash` 是 repository record metadata，不是 typed event body 字段。唯一 preimage 是 closed object `{"domain":"AutoMarkov-RunEventHash-v1","event":<完整 strict typed event>}` 的 RFC 8785 JCS bytes；`event` 包含 signature（若该 event type 有签名）及除 record-level `event_hash` 外的全部字段，不允许从 preimage 再排除任何字段。hash 编码固定为 `sha256:<64 lowercase hex>`。每个 run 的 `sequence_no` 从 0 开始，首事件的 `previous_event_hash` 必须等于 sentinel `sha256:` 加 64 个 `0`；其后必须逐字节等于前一条 persisted record 的 `event_hash`。persisted `EventRecord` 的 closed shape 是 `{"schema_version":"automarkov.event-record.v1","event":<同一 typed event>,"event_hash":<上述值>}`；adapter 必须重新验证 event schema、JCS preimage 和 chain，禁止信任 caller 提交的 hash。签名先按 event-specific contract 验证，再计算包含 signature 的 record hash，从而同时绑定来源与最终 bytes。
+除后文已给出完整 exact keyset 的 signed branches 外，v1 其余 branch-only keysets 闭合如下；表中“reference”均是 typed ID/hash pair 或 ID/sequence/hash triple，不是裸字符串：
 
-`ArtifactRepository` 必须以单写者事务或 compare-and-swap 原子追加 `(run_id, sequence_no)`，验证上述 hash chain，并拒绝重复/缺口 sequence、错误 sentinel/previous hash、缺失父节点、自环和 DAG cycle。任何 typed artifact/event 的 public Python ingress 都只接受原始 mapping/JSON tree，bytes ingress 只接受有明确 size limit 的原始 JSON bytes；两条路径在构造任何 model 前执行 duplicate/resource/scalar-type 检查。顶层或 nested `BaseModel` 无论 class、`revalidate_instances` 设置或 caller 声称的来源如何均 fail closed，因为它可能已经由 `model_construct()` 静默丢失 extra fields；repository-internal reuse 只能从此前认证的 canonical bytes/hash 重新 parse 和构建，不能 dump 未知 model 伪造 raw provenance。repository 只能持久化经 schema adapter 规范化、JCS serialize、duplicate-aware parse、再次从 raw tree strict validate 且 byte-identical round-trip 的对象。artifact DAG edge 只表达“由哪些不可变输入派生”；event stream 表达“发生了什么”。read model/projector 可计算 `draft/reviewed/approved/rejected/superseded`，但 projector 输出可重建且不是 source of truth。
+| event branch | branch-only exact fields |
+|---|---|
+| `ArtifactSuperseded` | old/new artifact references、lineage-report reference、closed supersession reason code |
+| `StageGatePassed` | exact from/to state、gate ID/version/contract hash、sorted unique subject artifact references、gate-report reference、`result="passed"`、closed reason code |
+| `ValidationClaimed` | claim/subject/report artifact references、validator ID/version、validation level/scope |
+| `ValidationFailed` | subject/report artifact references、validator ID/version、validation level/scope、closed failure code |
+| `ClarificationRequested` | task/review/result artifact references、sorted gap IDs、clarification policy reference、closed reason code |
+| `RunTerminationRequested` | `requested_terminal_state ∈ {PARTIAL,CANCELLED}`、requesting-authority ID、request-evidence reference or schema-declared null、closed reason code |
+| `StateTransitioned` | exact `from_state/to_state`、trigger event reference、sorted input artifact references、gate-report reference or schema-declared null、budget-snapshot reference |
+| `RuntimeReady` | dependency kind/identity hash、profile/process/protocol-edge identities、readiness-report reference、passed-gate ID |
+| `LlmRuntimeDegraded` | local-LLM dependency identity hash、failed-gate ID、failure-report reference、affected state |
+| `WaitingRuntime`、`WaitingEvidence`、`WaitingAsset`、`WaitResolved` | 本节 waiting reducer 段列出的 common fields 与 branch-specific dependency/lease/asset binding |
+| `EvidenceTemporarilyUnavailable` | lease-pool/snapshot/probe references、nonsecret slot-state counts、earliest availability |
+| `Blocked`、`EvidenceAuthorityRequired`、`BlockResolved` | 本节 blocked reducer 段的 authority、condition、active-block/resolution references；evidence branch 另含 nonsecret slot-state counts |
+| `BudgetExhausted`、`EvidenceBudgetExhausted` | 本节 budget reducer 段的 policy/snapshot/receipt/value fields；evidence branch 另含 sorted registered-account receipt references |
+| `SpecificationConflictDetected` | specification artifact/hash、两个 conflict-locus IDs/hashes、affected contract IDs、closed conflict code |
+| `ArtifactAccessRevoked` | subject artifact reference、governance-policy reference、revocation-authority ID、closed reason code、effective-at |
+
+`RunCreated`、`SignedApprovalEvent`、`RunSuperseded`、`ReplacementRunCreated`、`ClarificationChildRunCreated`、`GateOmittedByDesign` 与 `ExecutionTopologySubstituted` 使用本节或第 11.11 节的 signed exact keyset，不得再套通用 payload。`ClarificationEvaluationRequested`/`ClarificationEvaluationRecorded` 使用第 7.6 节的 closed audit-event keyset并绑定已签名 request/verdict，事件本身仍按未签名 branch 的 authenticated actor 合同处理。全部未签名 branch 都必须额外含 `actor_principal_id` 与 `actor_process_execution_id|None`，repository 必须将它们与 authenticated command principal、run manifest capability 及 applicable process record 匹配；不允许因 branch 无 Ed25519 signature 就接受未认证 actor。
+
+`StageGatePassed` 是 ordinary nonterminal forward edge 的唯一通用 gate cause，用于修正规范早期版本“要求 exact gate/report、却没有可承载该 cause 的 event branch”的闭合缺口。它必须与紧随其后的 `StateTransitioned` 在同一 `AppendRunEventsCommand` 中成对出现；两者的 from/to state、gate-report ID/hash、subject/input artifact ID tuple 与 trigger event ID/hash必须逐字节一致，且该 edge 必须存在于冻结状态表。它不能表达 waiting/resume、approval/revocation、artifact supersession、terminal、cross-run 或 post-terminal 语义；这些路径继续只接受各自专用 typed cause。任何 `StateTransitioned` 都不得由另一个 `StateTransitioned`、历史 root event 或无关 audit event触发。
+
+这是 v1 的 closed branch set，不存在 `UnknownEvent`、通用 `data`、arbitrary `reason` mapping 或 plugin-defined subtype。每个 member 的 event-level `schema_version`、`event_type`、branch-only fields 和允许的 reason-code literal set 都由 schema registry 冻结；本节后文已指定的 signed branch exact keyset 必须与这里的 common fields 取并集，后文不重复 common field 不表示可缺失。所有 member 共有 event-level `schema_version`、literal `event_type`、canonical lowercase-hyphenated RFC 9562 UUIDv7 `event_id`、`experiment_id|None`、`run_id`、nonnegative safe-integer `sequence_no`、`previous_event_hash` 和 UTC `issued_at`；来源 principal/actor 必须由每个 branch 的 exact authenticated field 绑定，branch 只能在自己的 strict model 中增加字段。UUIDv7 的 version/variant bits、48-bit Unix-millisecond time 与 canonical text 都必须验证，其 timestamp 必须通过 run manifest 冻结的 clock-skew window；UUID 只是 replay identity，事件顺序仍唯一由 `(run_id,sequence_no,previous_event_hash)` 决定。repository 必须对所有 branch 强制 global `UNIQUE(event_id)`，对 signed branch 另强制 nonce/key/sequence replay indexes；UUID 冲突不得依赖 sequence 或 payload 内容转为幂等。
+
+root Run 的唯一 sequence-0 branch 是 signed `RunCreated`。其 branch-only fields 恰为 `signing_domain="AutoMarkov-Run-Created-v1"`、`run_manifest_artifact_id/hash`、`initial_state="RECEIVED"`、`creation_principal_id`、`reason_code="run_created"`、128-bit random `nonce_b64url`、`signing_key_id`、`signature_algorithm="Ed25519"` 与 `signature_b64url`；manifest 必须已持久化且冻结 root ordinal/policy/principal/key bindings。`ReplacementRunCreated` 与 `ClarificationChildRunCreated` 只能由第 4.4 节各自的原子 child command 作为 child stream sequence 0 产生。三者的 `previous_event_hash` 都必须为唯一 sentinel `sha256:` 加 64 个 `0`；任何其他 branch 出现在 sequence 0、root 使用 child branch、child 使用 `RunCreated`、或已有 sequence 0 时重建 run 全部拒绝。
+
+`event_hash` 是 repository record metadata，不是 typed event body 字段。唯一 preimage 是 closed object `{"domain":"AutoMarkov-RunEventHash-v1","event":<完整 strict typed event>}` 的 RFC 8785 JCS bytes；`event` 包含 signature（若该 branch 有签名）及除 record-level `event_hash` 外的全部字段，不允许从 preimage 再排除任何字段。hash 编码固定为 `sha256:<64 lowercase hex>`。每个 run 的 `sequence_no` 从 0 开始；sequence `n>0` 的 `previous_event_hash` 必须逐字节等于同 run sequence `n-1` persisted record 的 `event_hash`。
+
+无循环的唯一验证/定址顺序是：先对 bounded raw JSON 执行 duplicate/resource/scalar checks 并 strict-validate exact event branch；再验证 UUIDv7、typed artifact/event references、principal/key/clock/replay policy 与 expected head/sequence/sentinel；若为 signed branch，对“从完整 event 仅移除 `signature_b64url`”的 event-specific domain-separated RFC 8785 JCS bytes 验证 Ed25519 signature；然后对包含已验 signature 的完整 event 计算 `event_hash`；最后才在 CAS transaction 中持久化 `EventRecord`。signature preimage 不包含 record-level `event_hash`，禁止先 hash 后签名、签名部分字段、从 event hash 再排除 signature，或用 hash chain 替代来源认证。
+
+`ArtifactRepository` 必须以单写者事务或 compare-and-swap 原子追加 `(run_id, sequence_no)`，验证上述 union 与 hash chain，并拒绝重复/缺口 sequence、错误 sentinel/previous hash、event/record schema drift、缺失父节点、自环和 DAG cycle。public mutation ingress 只接受第 4.4 节 closed `LifecycleCommand` 中的 raw event bodies，不接受 caller 计算的 `EventRecord.event_hash`；adapter 从 persistence 读取 record 时必须重新验证 event schema、JCS preimage 和 chain，不信任 stored hash。任何 typed artifact/event 的 public Python ingress 都只接受原始 mapping/JSON tree，bytes ingress 只接受有明确 size limit 的原始 JSON bytes；两条路径在构造任何 model 前执行 duplicate/resource/scalar-type 检查。顶层或 nested `BaseModel` 无论 class、`revalidate_instances` 设置或 caller 声称的来源如何均 fail closed，因为它可能已经由 `model_construct()` 静默丢失 extra fields；repository-internal reuse 只能从此前认证的 canonical bytes/hash 重新 parse 和构建，不能 dump 未知 model 伪造 raw provenance。repository 只能持久化经 schema adapter 规范化、JCS serialize、duplicate-aware parse、再次从 raw tree strict validate 且 byte-identical round-trip 的对象。artifact DAG edge 只表达“由哪些不可变输入派生”；event stream 表达“发生了什么”。read model/projector 可计算 `draft/reviewed/approved/rejected/superseded`，但 projector 输出可重建且不是 source of truth。
 
 删除、覆盖、就地修正和“更新 approved payload”均被禁止。若因隐私或法律必须撤回 payload，只追加 `ArtifactAccessRevoked` tombstone event 并移除读取能力；仍保留 hash、原因和审计记录。垃圾回收只允许删除无引用的临时 blob，且必须先生成 retention report。
 
@@ -2740,7 +2798,31 @@ COMPLETED, CLARIFICATION_REQUIRED, OOD_PACKAGED,
 PARTIAL, BUDGET_EXHAUSTED, FAILED, CANCELLED
 ```
 
-`COMPLETED`、`CLARIFICATION_REQUIRED`、`OOD_PACKAGED`、`PARTIAL`、`BUDGET_EXHAUSTED`、`FAILED`、`CANCELLED` 是 terminal states；`WAITING_RUNTIME`、`WAITING_EVIDENCE`、`WAITING_ASSET` 与 `BLOCKED` 是可恢复状态。`CLARIFICATION_REQUIRED` 终止当前 immutable run；获得答案后只能按本节 `ClarificationChildRunCreated` 原子协议创建引用原 run/result/answer bundle 的新 child run，不能原地续写。waiting event 必须携带 `resume_state`、阻塞原因与可验证的恢复条件；`BLOCKED` event 还必须声明所需的外部 authority。任一 terminal state 后只允许追加审计或访问撤回事件，不允许继续生成；child 的 sequence-0 event 写入独立 event stream，不追加到 terminal parent。`ClarificationEvaluationRequested`/`ClarificationEvaluationRecorded` 是 `AUTO/v5` 唯一新增的 sealed post-terminal non-transition audit branches，不能改变 terminal state、result或生成输入。
+`COMPLETED`、`CLARIFICATION_REQUIRED`、`OOD_PACKAGED`、`PARTIAL`、`BUDGET_EXHAUSTED`、`FAILED`、`CANCELLED` 是 terminal states；`WAITING_RUNTIME`、`WAITING_EVIDENCE`、`WAITING_ASSET` 与 `BLOCKED` 是可恢复状态。`CLARIFICATION_REQUIRED` 终止当前 immutable run；获得答案后只能按本节 `ClarificationChildRunCreated` 原子协议创建引用原 run/result/answer bundle 的新 child run，不能原地续写。waiting event 必须携带 `resume_state`、阻塞原因与可验证的恢复条件；`BLOCKED` event 还必须声明所需的外部 authority。任一 terminal state 后只允许追加 closed post-terminal audit branch 或访问撤回事件，不允许继续生成；child 的 sequence-0 event 写入独立 event stream，不追加到 terminal parent。`ClarificationEvaluationRequested`/`ClarificationEvaluationRecorded` 是 `AUTO/v5` 唯一新增的 sealed post-terminal non-transition audit branches，不能改变 terminal state、result或生成输入。
+
+状态机的唯一 mutation ingress 是 `extra="forbid"`、strict/frozen 且以 literal `command_type` 鉴别的 closed `LifecycleCommand` union，不接受“调用某 reducer method”或自由 event list 等旁路：
+
+```text
+LifecycleCommand = AppendRunEventsCommand
+                 | CommitTerminalCommand
+                 | CreateReplacementRunCommand
+                 | CreateClarificationChildRunCommand
+```
+
+四个 branch 共有 `schema_version="automarkov.lifecycle-command.v1"`、literal `command_type`、canonical UUIDv7 `command_id`、`actor_principal_id`、UTC `issued_at` 和 nonempty canonical `idempotency_key`，但 exact head 与 payload 合同不同：
+
+| command branch | exact CAS 输入 | 允许的效果 |
+|---|---|---|
+| `AppendRunEventsCommand` | `run_id`、`expected_state`、`expected_head: VerifiedEventHead or None`、nonempty typed event-body tuple | `expected_head=None` 时只能原子创建 root Run 并追加唯一 `RunCreated` sequence 0；否则只能追加普通 nonterminal lifecycle/control-audit events、或 terminal run 的允许 post-terminal events。post-terminal branch 同事务创建下一 `RunAuditProjection`；任何 branch 均不得产生 terminal transition、child stream 或新 `TerminalResult` |
+| `CommitTerminalCommand` | run 的 `expected_state/head`、terminal cause event bodies、唯一 terminal `StateTransitioned`、frozen job/process identity、payload outputs、resource usage 与 projector version/hash | 在一个 artifact/event CAS transaction 中落库 `ProcessExecutionTerminalRecord`、terminal event records、`TerminalResult` 与 root `RunAuditProjection`；不创建 child |
+| `CreateReplacementRunCommand` | parent `expected_state/head`、child-absent precondition、old/child manifests、replacement policy/cause prerequisite、cancellation-control process identity、slot decision | 仅执行本节的 cross-run cancellation transaction：parent 终止为 `CANCELLED`、创建 parent terminal provenance、child Run/manifest/`ReplacementRunCreated` 与 control attestation |
+| `CreateClarificationChildRunCommand` | terminal parent 的 `expected_parent_head`、已验 terminal-result/snapshot、child-absent precondition、signed answer bundle、continuation policy 与 child manifest | parent stream/snapshot 不变；单一 transaction 创建 child Run 并追加唯一 `ClarificationChildRunCreated` sequence 0 |
+
+`AppendRunEventsCommand.events` 的 nonterminal branch 只允许 schema registry 内另行闭合的 `OrdinaryAppendEvent` union：它排除全部 bootstrap events、`RunSuperseded`、`RunTerminationRequested`、`BudgetExhausted`、`EvidenceBudgetExhausted`、任何 terminal `StateTransitioned` 及 post-terminal-only branches。`CommitTerminalCommand.events` 只允许 `TerminalCauseEvent + StateTransitioned(to∈terminal states)`，`TerminalCauseEvent` 闭合为 verified `ClarificationRequested|ValidationClaimed|ValidationFailed|RunTerminationRequested|BudgetExhausted|EvidenceBudgetExhausted`；其中 claim/failure 必须绑定状态表对应的 exact gate/result report 与 terminal reason。`RunSuperseded` 及其 terminal transition 只能出现在 `CreateReplacementRunCommand` 的 fixed causal tuple。terminal parent 上的 `AppendRunEventsCommand.events` 只允许下文闭合的 post-terminal set。三个 event subsets 不得依赖 runtime predicate 或 caller 声明互换 member。
+
+`VerifiedEventHead` 是 closed value object `(run_id, sequence_no, event_hash)`，三者必须指向同一条已逐条验证的 persisted record。除 root creation 的 `None` 外，所有 mutation 都必须提供 head，不得用“current”、只有 sequence 或只有 hash 的模糊 CAS。`commit` 还必须接收由可信 transport/control 层签发、且不属于 command JSON wire 的 `AuthenticatedCommandContext`；repository 以对象能力验证其 principal、process identity 与可信接收时间，caller 在 raw command 中自报相同字段不能替代认证。`Compiler.dispatch(command)` 保持窄 public seam；其 adapter 必须对每次调用通过 transport-owned `command_context_provider(validated_command)` 获取新 context，禁止在构造期缓存并跨命令复用 principal/process/received-at。command handler 返回 closed `LifecycleCommitResult`：单 run branch 为 `LifecycleCommitReceipt`，cross-run branch 为 `CrossRunLifecycleCommitReceipt`；两者记录所有受影响 run 的 before/after verified heads、新 event IDs/hashes 与新 artifact IDs/hashes。相同 idempotency key 只能返回 byte-identical result，不同 payload 重用 key 必须拒绝。
+
+projection 也不得默认偷读最新 head。规范 query 是 `project(run_id, as_of: VerifiedEventHead, projector_version, projector_hash) -> RunView`：repository 从 sequence 0 到 `as_of.sequence_no` 逐条验证 strict union、连续 sequence、sentinel/hash chain 与末条 hash，再用冻结 reducer 纯函数重放。`RunView` 至少冻结 run/experiment ID、as-of sequence/head、projector version/hash、current state、nullable resume state、active waiting/block binding、budget snapshot、approval projection、nullable terminal-result reference与 post-terminal audit references。head 不存在、run/sequence/hash 不一致、前缀不完整、projector 未注册或 hash 不匹配都 fail closed。可选 `project_current` 仅能先读取并返回它使用的 exact `VerifiedEventHead`，不能替代验收、terminal result 或 audit projection 所需的 specified-head API。
 
 每个 run manifest 必须预注册唯一 `ApprovalPrincipal`。交互式产品 run 使用经认证的 `interactive_user`；confirmatory experiment run 使用 source/hash/version 均冻结的 deterministic `experiment_approval_policy`。除下一段的 no-evidence branch 外，后者只读取 generation-visible task card、Allowed Evidence、candidate artifact、critic/strict-schema/traceability/public-dev validation reports 与 canonical parent IDs；它不得读取 sealed gold/oracle、调用 LLM、提出澄清、改变 payload 或按 method/result 使用不同阈值。仅 11.11 中 exact ablation ID 的 frozen predicate projection 可以把对应被移除 component 的 predicate 标为 omitted-by-design；它不能改写任何保留 predicate 或阈值。全部适用的公开 acceptance predicates 通过时，它对 exact candidate ID 追加 `SignedApprovalEvent(decision=approved)`；未通过时以结构化且仅由该 branch 可见输入导出的 public reason 追加同类型 `decision=rejected` event，并只在既有 public-dev revision budget 内形成新 revision。已批准 exact artifact 后续被确认无效时，同一 registered principal 或 manifest 中显式登记的 revocation principal 只能追加 `decision=revoked` 的签名事件，不能删除或改写原 approval。`HITL-ORACLE` clarification broker 仍只返回当前 answer payload，永不充当 ApprovalPrincipal，也不接收/返回 candidate metadata。`AUTO/v5` 在进入 approval gate 前按 clarification contract 终止；其余实验 cell 不允许临时人类审批或未登记 oracle 介入。
 
@@ -2750,11 +2832,17 @@ approval/rejection/revocation 不能塞进通用 event 的自由 `data`。event 
 
 run manifest 冻结 principal→key ID/public key、允许的 principal kind、revocation authority、policy source/image hash 与 key validity/revocation contract。repository 必须先验证 signature、domain/schema、artifact payload hash、policy source hash、input-report allowlist、run/experiment/sequence/previous hash、clock window、superseded approval identity 与 key status，再以 compare-and-swap 原子追加；projector 只接受这一 verified event 驱动 confirmation/revocation projection。`event_id`、`nonce`、`(signing_key_id, run_id, sequence_no)` 在 repository 全局 replay index 中唯一；跨 run copy、旧 sequence、nonce/event reuse、unknown/revoked key、重复/串联撤销、signature malleability、artifact/hash/policy/report substitution 全部 fail closed。revocation 只令该 exact approval 自撤销 sequence 起失效，不删除历史。candidate freeze 前，仍依赖该 approval 的 nonterminal run 必须在同一 repository transaction 追加 `StateTransitioned`，文字审批回到 `TEXT_DRAFTED`、形式审批回到 `FORMAL_DRAFTED`，并以 supersede events 失效化依赖工件；candidate freeze 后的 nonterminal run 转 `CANCELLED`，并且只有按冻结 replacement policy 创建的新 child Run 才能继续。terminal run 不回写状态；immutable `TerminalResult` 只绑定产生终态的 typed event reference、该原子提交完成时的 `terminal_snapshot_event_head_hash`、terminal-time approval event references/validity、payload output artifact IDs/hashes，以及启动前冻结的 fixed-commit job manifest、产生终态的 exact process terminal record 与 process execution identity；它不引用尚未生成的 `ExecutionAttestation`，不声称绑定后来追加的“最终”event head，也永不覆盖。每个 bounded `ProcessExecution` 都先生成自己的 immutable `ProcessExecutionTerminalRecord`；runner 在该 execution 的 payload outputs 和 terminal record 完成并定址后才签发 `ExecutionAttestation`。只有恰好产生 Run terminal CAS 的 execution 才让 attestation 额外引用该 Run 的 `TerminalResult`，形成 job manifest→process terminal record→optional run terminal result→attestation 的单向依赖；非终态 training/e2e/analysis execution 不得伪造或提前创建 `TerminalResult`。后续审批撤销或审计事件只生成带自身 `as_of_event_head_hash` 的新 immutable `RunAuditProjection` 版本；当前视图可由 event stream 重建，旧 terminal snapshot 保持可寻址。撤销后的 projection 将被撤销的 exact payload/result 排除出直接质量解释，同时保留原 intention slot、method/pair/seed denominator 和 signed deviation。对 E2E/policy outcome mask 内的 slot 固定映射 `E2EValid=0`、`GoldPolicyEvaluationValid=0`、`Q_gate=0`；不得改标 `N/A`、删除 observation、替换 seed/method 或因结果创建 confirmatory retry。hash chain负责顺序与完整性，Ed25519负责来源认证，两者不能互相替代。
 
-`TerminalResult` 是 terminal CAS 同事务创建的 content-addressed strict/frozen artifact，closed fields 固定为 schema/domain、artifact/run/experiment ID、`fixed_commit_job_manifest_artifact_id/hash`、`process_execution_terminal_record_artifact_id/hash`、`process_execution_id`、terminal event ID/hash、`terminal_snapshot_sequence_no`、`terminal_snapshot_event_head_hash`、terminal state/reason、按 artifact ID 排序且明确排除 `TerminalResult`/future attestation 的 payload output artifact ID/hash tuple、按 approval event ID 排序的 terminal-time approval event ID/hash/validity tuple、projector version/hash 和 created-at；snapshot sequence/head 必须恰等于该 transaction 新 head，terminal record 的 process/job/run identity、status、payload outputs 与该 terminal transaction 必须精确一致。artifact envelope 的 `parent_artifact_ids` 只能精确包含 job manifest、process terminal record与所列 payload output artifacts；terminal/approval event ID/hash 只进入 `event_references` typed field，不进入 artifact parent DAG。`RunAuditProjection` 也是 content-addressed strict/frozen artifact，closed fields固定为 schema/domain、projection/run/experiment ID、projector version/hash、`as_of_sequence_no`、`as_of_event_head_hash`、previous projection ID/hash或 root null、terminal-result ID/hash、当前 approval event ID/hash/validity tuple、signed deviation artifact IDs/hashes 与 derived outcome mask；其 artifact parents 只含 previous projection、terminal result与 deviation artifacts，event ID/hash仍只进入 typed event references。projection ID 由其除 ID 外的 RFC 8785 JCS preimage 域分离确定。repository 只允许从 caller 指定且已验证的 event head 确定性重放生成，以 `(run_id,as_of_sequence_no,projector_hash)` UNIQUE CAS 落库；重复请求只能返回相同 bytes/hash，head/sequence/previous projection mismatch 或覆盖旧 projection 一律拒绝。
+`ProcessExecutionTerminalRecord` 是每个 fixed-commit job 恰好一个、与 Run 是否终止无关的 content-addressed strict/frozen artifact。closed payload fields 固定为 schema/domain、experiment/run/job/process-execution/profile/principal identity、job-manifest ID/hash、`status ∈ {success,terminal_failure}`、exit/reason code、started/finished-at、stdout/stderr hash、按 artifact ID 排序的 payload-output `ArtifactReference` tuple、resource-usage `ArtifactReference`、network/mount/capability-decision/egress-log hashes 与 terminal-record created-at。其 `PayloadBoundParentContract` 恰好抽取 job manifest、payload outputs 和 resource-usage artifact；它明确排除 future `TerminalResult`、`RunAuditProjection` 与 `ExecutionAttestation`，任何反向引用或多余 envelope parent 均在定址前拒绝。
 
-`ProcessExecutionTerminalRecord` 是每个 fixed-commit job 恰好一个、与 Run 是否终止无关的 content-addressed strict/frozen artifact。closed fields 固定为 schema/domain、experiment/run/job/process-execution/profile/principal identity、job-manifest ID/hash、`status ∈ {success,terminal_failure}`、exit/reason code、started/finished-at、stdout/stderr hash、按 artifact ID 排序的 payload output ID/hash tuple、resource-usage artifact ID/hash、network/mount/capability-decision/egress-log hashes 与 terminal-record created-at；其 envelope parents 精确为 job manifest、payload outputs 和 resource-usage artifact。若该 execution 原子产生 Run terminal CAS，`TerminalResult` 必须以本 record ID/hash 为 closed typed field/direct parent并重验 exact identity/status/output binding；`ExecutionAttestation` 随后引用并重验同一 record。`terminal_result_artifact_id/hash` 是 attestation 的 closed nullable pair，只有本 execution 原子产生 Run terminal CAS 时才同时非空并匹配 `TerminalResult.process_execution_id` 与 process-terminal-record binding，其余 execution 必须同时为 null。一个 execution/job 的 terminal record 与 attestation 各恰好一个，retry 必须创建新预登记 execution identity。
+`TerminalResult` 是 terminal CAS 同事务创建的 content-addressed strict/frozen artifact。closed payload fields 恰为 schema/domain、run/experiment ID、job-manifest `ArtifactReference`、process-terminal-record `ArtifactReference`、`process_execution_id`、terminal `EventReference(event_id,sequence_no,event_hash)`、`terminal_snapshot_event_head: VerifiedEventHead`、terminal state/reason、与 process record byte-identical 的 sorted payload-output references、按 approval event ID 排序的 terminal-time approval event ID/hash/validity tuple、projector version/hash 和 created-at。payload exact keyset 明确排除自身 artifact ID/hash、future attestation 和 future audit projection；envelope identity 只在 payload/envelope bytes 定址后由 repository 赋予。其 `PayloadBoundParentContract` 恰好抽取 job manifest、process terminal record 与所列 payload outputs；terminal/approval event ID/hash 只进入 typed event-reference fields，不进入 artifact parent DAG。terminal snapshot sequence/head 必须恰等于本 transaction 的新 head，process record 的 run/job/process identity、status 和 output tuple 必须与 terminal command 逐字节一致。
 
-上文 `TerminalResult` 的“artifact ID”只指 envelope 计算后赋予的外部 identity，不是 payload field；TerminalResult payload 的 exact keyset 明确排除自身 artifact ID/hash，任何反向自引用均在计算 payload hash 前拒绝。
+`RunAuditProjection` 也是 content-addressed strict/frozen artifact。closed payload fields 恰为 schema/domain、projection/run/experiment ID、projector version/hash、`as_of_event_head: VerifiedEventHead`、previous-projection `ArtifactReference|None`、terminal-result `ArtifactReference`、当前 approval event references/validity tuple、post-terminal audit event-reference tuple、signed-deviation artifact references 与 derived outcome mask；root projection 的 previous pair 同时为 null，后续版本必须引用前一 projection。其 `PayloadBoundParentContract` 恰好抽取 nullable previous projection、terminal result 与 deviation artifacts，event references 仍排除在 DAG 外。projection ID 由除自身 ID 外的 RFC 8785 JCS preimage 域分离确定。repository 只允许从 caller 指定且已验证的 event head 确定性重放生成，以 `(run_id,as_of_sequence_no,projector_hash)` UNIQUE CAS 落库；重复请求只能返回相同 bytes/hash，head/sequence/previous projection mismatch 或覆盖旧 projection 一律拒绝。
+
+`CommitTerminalCommand` 的原子 provenance 顺序固定为：锁定 expected head 并用 reducer 验证 exact terminal transition；验证/定址 payload outputs 与 resource usage；构造完整 terminal cause/`StateTransitioned` event bodies 并预计算它们的 record hashes；定址不反向引用 terminal artifacts 的 `ProcessExecutionTerminalRecord`；定址绑定 exact process record 与新 event head 的 `TerminalResult`；从同一新 head 重放并定址 root `RunAuditProjection`；最后在单一 transaction 中同时插入这三个 provenance artifacts、已定址的 payload outputs 及 event records，并更新 head。任一 schema/signature/hash/parent/reducer/uniqueness/write 失败都整笔回滚，不能留下 terminal event 却无 process record/result/root projection，也不能留下不可达的 terminal artifact。若 terminal-derived outcome 必须引用本 terminal event hash，repository 在事务内使用已完整确定但尚未可见的 event bytes/hash 定址 outcome，再将 outcome 列入 process/result 的同一 output tuple；任何可改变 event bytes 的后续步骤都拒绝。
+
+runner 只在上述 terminal transaction 成功后签发 `ExecutionAttestation`，并重验同一 process record。attestation 的 `terminal_result_artifact_id/hash` 是 closed nullable pair，只有本 execution 原子产生 Run terminal CAS 时才同时非空并匹配 `TerminalResult.process_execution_id` 与 process-record binding，其余 execution 必须同时为 null。一个 execution/job 的 terminal record 与 attestation 各恰好一个，retry 必须创建新预登记 execution identity。第 4.4 节 cross-run cancellation 是更严格的特例：依 ADR0001，其 control attestation 与 parent terminal provenance/child sequence 0 必须在同一 cross-run transaction 可见或整体回滚。
+
+terminal head 后可追加的 branch 闭合为 `SignedApprovalEvent(decision=revoked)`、`ArtifactAccessRevoked`、`ClarificationEvaluationRequested`、`ClarificationEvaluationRecorded` 和 `SpecificationConflictDetected`；其余 approval decision、bootstrap/lifecycle/control event、任何 `StateTransitioned` 或 generation input 都拒绝。每次允许的 post-terminal append 都必须在同一 `AppendRunEventsCommand` transaction 中，从新 specified head 生成一个以旧 projection 为 direct parent 的新 `RunAuditProjection`；原 `TerminalResult`、root projection 和 terminal snapshot 不变。event 已追加但 projection 缺失、projection 未绑定新 head、跳过 previous projection 或就地覆盖均必须整笔回滚。
 
 | 当前状态 | 事件与 gate | 下一状态 | 失败/回边 |
 |---|---|---|---|
@@ -2787,6 +2875,13 @@ run manifest 冻结 principal→key ID/public key、允许的 principal kind、r
 | `WAITING_ASSET` | 用户完成 EULA/login/asset provisioning，且 license/hash gate 重新通过 | event 中的 `resume_state` | 用户拒绝或资产不可合法获得→`PARTIAL` |
 | `BLOCKED` | `BlockResolved` 且原 gate 重新验证 | event 中的 `resume_state` | 用户取消→`CANCELLED`；确认不再继续→`PARTIAL` |
 
+可恢复与预算路径是 reducer 的一等闭合规则，不是调用阶段自行解释的 error mapping：
+
+- `WaitingRuntime`、`WaitingEvidence` 与 `WaitingAsset` 共有 exact `resume_state`、closed `wait_reason_code`、`trigger_event_id/hash`、`failure_report_artifact_id/hash`、`recovery_gate_id`、`recovery_condition_hash` 与 `entered_at`。`resume_state` 必须逐字节等于进入等待前的 current nonterminal state；`WaitingRuntime` 另含下文 exact dependency binding，`WaitingEvidence` 另含 lease-pool/snapshot ID/hash 与 earliest availability，`WaitingAsset` 另含 asset/license/provisioning-authority identity。cause event→matching waiting event→`StateTransitioned(from=resume_state,to=WAITING_*)` 必须在同一 command 中相邻追加；三者不得交叉使用 reason 或恢复 gate。
+- 等待中除 matching `WaitResolved`、用户取消/接受 partial、已验预算耗尽，以及 `WAITING_RUNTIME` 的预注册 replacement 外，reducer 拒绝任何普通 stage event。`WaitResolved` 的 exact fields 为 `wait_kind`、waiting-event ID/hash、`resume_state`、原 recovery-gate ID、新 recovery-report ID/hash、dependency/lease/asset identity hash 和 resolved-at；它必须与 active waiting binding 全部一致，并与 `StateTransitioned(from=WAITING_*,to=resume_state)` 在同一 command 中相邻追加。probe 仍失败只能保持原 view，不追加伪恢复 event。
+- `Blocked` 的 exact fields 为 `resume_state`、closed `block_reason_code`、`external_authority_kind`、`external_authority_principal_id`、`resolution_condition_hash`、failure-report ID/hash、recheck-gate ID 与 entered-at；`EvidenceAuthorityRequired` 是它的 evidence-specific typed trigger，不能用自由 reason 代替。trigger→`Blocked`→`StateTransitioned(...,BLOCKED)` 必须同 command 相邻追加。`BlockResolved` 必须绑定 active blocked-event ID/hash、registered authority、resolution-evidence artifact ID/hash 与重验报告，然后与返回 exact `resume_state` 的 transition 同 command 提交；临时 runtime/evidence/asset 不可用、已证预算耗尽或内部 bug 均不是 `BLOCKED`。
+- `BudgetExhausted` 是 terminal cause event，exact fields 为 `budget_kind ∈ {revision,token,tool_call,provider_credit,wall_time,global_cost}`、budget-policy artifact ID/hash、budget-snapshot artifact ID/hash、canonical unit、nonnegative limit/consumed/reserved values、cause receipt/report ID/hash、`phase`、reason code 和 exhausted-at；`consumed+reserved >= limit` 必须由冻结 policy 与 receipt 可重算。evidence quota 还必须由 `EvidenceBudgetExhausted` 的全 registered-account provider receipts 闭合；存在可修复 invalid credential 时只能 `BLOCKED`。cause→`StateTransitioned(...,BUDGET_EXHAUSTED)` 只能由 `CommitTerminalCommand` 原子提交；policy training 已启动时同一 transaction 还必须产生第 11.7 节 closed `post_training_terminal` outcome。不允许转 `PARTIAL`、恢复、扩预算或新 run 覆盖原 terminal denominator。
+
 所有转换必须追加 `StateTransitioned` event，包含 from/to、触发 event、input artifact IDs、gate report ID 和预算快照。非法转换、跳级和仅凭 LLM 自评分放行必须由 reducer 拒绝。每条回边都有 `max_revisions_per_stage` 和全局成本上限，不得无限循环或暗中扩预算。
 
 第 11.10 节的 suite→variant→pair→seed 嵌套统计属于实验级 `experiment analyze` job；它只在对应 intention-to-run matrix 的 run terminal records 齐全后执行，不是任一单个 `Run` 的 `FINAL_EVALUATING→PACKAGING` 门禁，也不得被写回单 run state projection。
@@ -2799,7 +2894,7 @@ run manifest 冻结 principal→key ID/public key、允许的 principal kind、r
 
 replacement child 的 sequence-0 event 只能是独立 strict/frozen signed branch `ReplacementRunCreated`，字段固定为：`schema_version="automarkov.replacement-run-created.v1"`、`signing_domain="AutoMarkov-Replacement-Run-Created-v1"`、canonical `event_id`、`experiment_id|None`、`run_id=child_run_id`、`sequence_no=0`、全零 sentinel `previous_event_hash`、`run_manifest_artifact_id=child_run_manifest_artifact_id`、`run_manifest_payload_hash=child_run_manifest_payload_hash`、`parent_run_id`、`parent_run_superseded_event_id`、同一 `supersession_cause`、同一 `replacement_ordinal`、replacement policy artifact ID/hash、replacement authority principal ID、issued-at、独立 128-bit random nonce、同一 authority signing key ID 与 signature。signature/replay 规则与 `RunSuperseded` 相同。
 
-每次 replacement 由 parent manifest 预登记的 fixed-commit cancellation-control `ProcessExecution` 执行；其 job manifest 精确绑定 old/child manifest、replacement policy、cause prerequisite、expected event IDs 和 slot decision。在锁定 old/child heads 后，repository 以一个跨 run/artifact/event 的数据库 transaction 原子完成：验证 old event head、job/process identity、signed replacement policy、cause-specific prerequisite、`child ordinal=parent ordinal+1` 与 slot rule→写入该 control execution 的 immutable success `ProcessExecutionTerminalRecord`→追加 `RunSuperseded`→追加以该 event 为 trigger 的 `StateTransitioned(<current nonterminal state>→CANCELLED)`→以该 transition 作为 terminal event 为 old run 创建 `TerminalResult(terminal_state=CANCELLED, reason=run_superseded)`→创建唯一 child Run/manifest→追加精确绑定 parent event 的 `ReplacementRunCreated`→签发并持久化引用 exact process terminal record 与 old-run `TerminalResult` 的 `ExecutionAttestation`。`TerminalResult` 不反向引用 attestation；process record、terminal result 与 attestation 的父节点/typed event references 仍严格遵守上文单向合同。runtime branch 的 current state 必须为 `WAITING_RUNTIME` 且 prerequisite 是 exact waiting/readiness event；approval branch 的 prerequisite 是 candidate freeze 后 exact verified revocation event。任一签名、hash、写入或 CAS 失败均整笔回滚，不能留下已取消 parent、无 terminal provenance 的 intention slot，或孤立 child。repository 强制 `UNIQUE(parent_run_id)` replacement edge、`UNIQUE(child_run_id)`、runtime branch 的 `UNIQUE(failed_waiting_event_id)`、approval branch 的 `UNIQUE(revocation_event_id)`、control execution terminal record/attestation uniqueness、confirmatory-slot uniqueness及两 event 共享字段逐字节一致；ordinal 不能被 caller 选择来绕过单 child 约束。
+每次 replacement 由 parent manifest 预登记的 fixed-commit cancellation-control `ProcessExecution` 执行；其 job manifest 精确绑定 old/child manifest、replacement policy、cause prerequisite、expected event IDs 和 slot decision。在锁定 old/child heads 后，repository 以一个跨 run/artifact/event 的数据库 transaction 原子完成：验证 old event head、job/process identity、signed replacement policy、cause-specific prerequisite、`child ordinal=parent ordinal+1` 与 slot rule→写入该 control execution 的 immutable success `ProcessExecutionTerminalRecord`→追加 `RunSuperseded`→追加以该 event 为 trigger 的 `StateTransitioned(<current nonterminal state>→CANCELLED)`→以该 transition 作为 terminal event 为 old run 创建 `TerminalResult(terminal_state=CANCELLED, reason=run_superseded)` 及 root `RunAuditProjection`→创建唯一 child Run/manifest→追加精确绑定 parent event 的 `ReplacementRunCreated`→签发并持久化引用 exact process terminal record 与 old-run `TerminalResult` 的 `ExecutionAttestation`。`TerminalResult` 不反向引用 attestation；process record、terminal result、root projection 与 attestation 的父节点/typed event references 仍严格遵守上文单向合同。runtime branch 的 current state 必须为 `WAITING_RUNTIME` 且 prerequisite 是 exact waiting/readiness event；approval branch 的 prerequisite 是 candidate freeze 后 exact verified revocation event。任一签名、hash、写入或 CAS 失败均整笔回滚，不能留下已取消 parent、无 terminal provenance 的 intention slot，或孤立 child。repository 强制 `UNIQUE(parent_run_id)` replacement edge、`UNIQUE(child_run_id)`、runtime branch 的 `UNIQUE(failed_waiting_event_id)`、approval branch 的 `UNIQUE(revocation_event_id)`、control execution terminal record/attestation uniqueness、confirmatory-slot uniqueness及两 event 共享字段逐字节一致；ordinal 不能被 caller 选择来绕过单 child 约束。
 
 clarification continuation 使用独立的 `ClarificationContinuationPolicy`，不伪装成 replacement。root `RunManifest.clarification_continuation_ordinal=0`，policy 冻结 authority principal/key/status、允许的 answer artifact kind、`child_ordinal=parent+1`、每 parent 最多一个 child、budget/runtime reset rule、experiment eligibility、issued-at/nonce/signature；child manifest 冻结 parent run、parent `ClarificationRequiredResult`、parent `TerminalResult`/snapshot head、signed answer bundle、policy ID/hash和递增 ordinal，并从这些 immutable inputs 重新开始，不继承 parent outputs、approval、readiness、terminal result、audit projection或 sealed verdict。
 
@@ -2815,14 +2910,16 @@ clarification child 的唯一 sequence-0 branch 是 `ClarificationChildRunCreate
 
 | 接缝 | 最小 public contract | 内部拥有的复杂度 | 失败语义 |
 |---|---|---|---|
-| `Compiler` | `start(request) -> RunId`；`dispatch(event) -> RunView`；`resume(run_id)`；`package(run_id)` | 状态机、agent routing、预算、最近致因回退、gate 顺序 | typed domain error；不吞异常，不改 approved payload |
-| `ArtifactRepository` | `put(envelope)`；`get(id)`；`append(event)`；`lineage(id)`；`project(run_id)` | canonical serialization、content address、DAG、event hash chain、retention/ACL | conflict/cycle/hash mismatch fail closed |
+| `Compiler` | `start(request) -> RunId`；`dispatch(command: LifecycleCommand) -> LifecycleCommitResult`；`resume(run_id, head)`；`package(run_id, head)` | 单一 lifecycle reducer、agent routing、预算、最近致因回退、gate 顺序 | typed domain error；不吞异常，不改 approved payload |
+| `ArtifactRepository` | `put(envelope)`；`get(id)`；`commit(command: LifecycleCommand, context: AuthenticatedCommandContext) -> LifecycleCommitResult`；`lineage(id)`；`project(run_id, as_of: VerifiedEventHead, projector_version, projector_hash)` | canonical serialization、closed parent contracts、content address、DAG、strict EventRecord/hash chain、cross-run CAS、specified-head projection、retention/ACL | schema/parent/conflict/cycle/signature/hash/head/reducer mismatch fail closed |
 | `LocalLlmRuntime` | `start(manifest)`；`probe()`；`complete(request)`；`close()` | Qwen3.6 vLLM lifecycle、backpressure、canary、model identity、trace | degraded/unavailable；绝无 hosted fallback |
 | `EvidenceGateway` | `search(query)`；`extract(urls)`；`crawl(root)`；`resolve(claim)` | 29-key lease、endpoint allowlist、ranking、cache、robots/license/ACL、provenance | insufficient/rate-limited/quarantined 显式返回 |
 | `ExecutionSandbox` | `run(bundle, limits)`；`test(bundle, plan)`；`run_at_commit(job)` | namespace/container、CPU/GPU/network/file limits、fixed-commit runner、attestation | timeout/resource/security/commit mismatch 分型 |
 | `EnvironmentBinding` / `TrainingRunner` | `bind(profile, env_ref) -> RemoteEnv`；`reset/step/spaces/close`；`train(frozen_plan)`；`evaluate(policy_evaluation_request)` | dependency profiles、wire protocol、RLlib new stack、trainer-local checkpoint/export、metrics、CTDE 边界 | protocol/profile/training/evaluation error 分型 |
 
 第六条是同一“环境执行”接缝的两个窄视图：`EnvironmentBinding` 管理环境语义和 `RemoteEnv` lifecycle，`TrainingRunner` 管理 RLlib 训练与评估；二者通过 frozen `EnvironmentHandle` 连接，不能共享可变 Python env object。公开 evaluation view 只接受显式冻结、已签名且绑定 `PolicyExportManifest`/safetensors/十 seed terminal records 的 `PolicyEvaluationRequest`；普通 RLlib checkpoint 的读取、round-trip smoke 与导出只存在于同一 trainer profile/filesystem namespace 的私有实现中，checkpoint 或 locator 不跨 public seam/profile。
+
+EventStore、command handler、reducer、terminal coordinator 与 projector 是 `ArtifactRepository`/`Compiler` 这两个视图后同一 lifecycle deep module 的私有协作部件，不得拆成第七条 public seam。所有写路必须经同一 `LifecycleCommand` union、EventRecord schema registry、head CAS 和 reducer；CLI、agent、runner、evaluator 与 experiment code 均不能直接 insert event/artifact rows、预写 projection 或调用私有“set state”方法。
 
 接缝对象必须支持 in-memory fake 用于 CPU unit tests，同时 production adapter 必须通过相同 contract tests。任何第三方升级只允许影响 adapter/profile，并须证明 public contract 与 artifact schema 未漂移。
 
@@ -4862,14 +4959,18 @@ logging:
 任务：
 
 - 定义 `Compiler`、`ArtifactRepository`、`LocalLlmRuntime`、`EvidenceGateway`、`ExecutionSandbox`、`EnvironmentBinding`/`TrainingRunner` 六条 public protocols；
-- 实现 immutable content-addressed payload、artifact DAG、append-only hash-chained events 和 projector；
-- 实现第 4.4 节所有状态、合法转换、回边、block/resume 和 terminal semantics。
+- 实现 immutable content-addressed payload、`exact|payload_bound` closed parent contracts、artifact DAG、UUIDv7 strict-discriminated `EventRecord` union、append-only hash chain 和 specified-head projector；
+- 实现第 4.4 节 closed `LifecycleCommand` union、所有状态、合法转换、回边、WAITING/BLOCKED/BUDGET reducer、terminal/post-terminal semantics 与 replacement/clarification cross-run transaction；
+- 实现 `ProcessExecutionTerminalRecord`→`TerminalResult`→`RunAuditProjection` 的无环单向 provenance，terminal CAS 与每次 post-terminal projection 更新均满足第 4.4 节原子性。
 
 验收：
 
 - contract tests 同时通过 in-memory fake 与 production adapter；
-- mutation 后的 payload/hash、缺父节点、cycle、重复 sequence 和非法状态跳转均被拒绝；
-- approved artifact 的任何修订产生新 ID，旧 payload bytes 不变；event log 从空投影可重建同一 run view；
+- mutation 后的 payload/hash、缺父节点、cycle、exact parent-type tuple mismatch、payload-bound ID/hash/type/cardinality/envelope mismatch、重复或缺口 sequence 和非法状态跳转均被拒绝；
+- root 只能以 signed `RunCreated` sequence 0 和全零 sentinel 建立；错 UUID version/variant/text/time window、非闭合 event/command branch、extra field、错 signature/hash 顺序、错 previous hash 与 replay 全部 fail closed；
+- approved artifact 的任何修订产生新 ID，旧 payload bytes 不变；event log 从 sequence 0 到 caller 指定 verified head 可重建 byte-identical `RunView`，且 stale/mismatched head 不得退化为 current projection；
+- WAITING 只能经 matching identity/gate 恢复，BLOCKED 只能经 registered external authority 解除，BUDGET 只能在可重算耗尽证明下 terminal；terminal 后的非允许 event、任何 transition 与 in-place continuation 均被拒绝；
+- fault-injection 在 terminal artifact/event/head/root-projection 任意写点及 cross-run/clarification transaction 任意写点失败时不留部分 provenance、orphan child 或被取消但无 `TerminalResult` 的 parent；
 - core 不直接 import vLLM、Tavily、Ray 或 suite-specific package。
 
 ## GA：参考项目与数据固定
@@ -5269,6 +5370,8 @@ $$
 - [vLLM documentation](https://docs.vllm.ai/)
 - [PyTorch documentation](https://pytorch.org/docs/stable/)
 - [Pydantic discriminated unions](https://docs.pydantic.dev/latest/concepts/unions/#discriminated-unions)
+- [RFC 9562: Universally Unique IDentifiers (UUIDs)](https://www.rfc-editor.org/rfc/rfc9562.html)
+- [RFC 8785: JSON Canonicalization Scheme (JCS)](https://www.rfc-editor.org/rfc/rfc8785.html)
 - [RLlib documentation](https://docs.ray.io/en/latest/rllib/)
 - [RLlib key concepts: EnvRunner, RLModule and Learner](https://docs.ray.io/en/latest/rllib/key-concepts.html)
 - [RLlib ConnectorV2 pipelines](https://docs.ray.io/en/latest/rllib/connector-v2.html)

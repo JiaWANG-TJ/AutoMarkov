@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, get_type_hints
 
 import pytest
 from pydantic import ValidationError
 
 import automarkov.adapters as adapter_module
+import automarkov.domain as domain_module
 from automarkov.adapters import (
     InMemoryArtifactRepository,
     InMemoryCompiler,
@@ -17,8 +18,9 @@ from automarkov.adapters import (
     ScriptedTrainingRunner,
 )
 from automarkov.canonical import MAX_CANONICAL_DOCUMENT_BYTES
-from automarkov.domain import ArtifactId, Sha256Digest
+from automarkov.domain import ArtifactId, RunId, Sha256Digest, VerifiedEventHead
 from automarkov.errors import ArtifactSchemaError
+from automarkov.lifecycle import LifecycleCommitResult, RunProjection
 from automarkov.public import (
     ArtifactBytesResult,
     ArtifactPutRequest,
@@ -113,6 +115,37 @@ def test_public_protocols_accept_their_structural_adapters(
     assert not isinstance(object(), protocol_type)
 
 
+def test_compiler_protocol_uses_lifecycle_commands_and_verified_heads() -> None:
+    assert Compiler.dispatch.__annotations__ == {
+        "request": "LifecycleCommandInput",
+        "return": "LifecycleCommitResult",
+    }
+    assert Compiler.resume.__annotations__ == {
+        "run_id": "RunId",
+        "head": "VerifiedEventHead",
+        "return": "RunProjection",
+    }
+    assert Compiler.package.__annotations__ == {
+        "run_id": "RunId",
+        "head": "VerifiedEventHead",
+        "return": "PackageResult",
+    }
+    assert not hasattr(domain_module, "CompilerDispatchRequest")
+    assert not hasattr(domain_module, "RunView")
+
+
+def test_public_lifecycle_protocol_types_are_runtime_resolvable() -> None:
+    compiler_dispatch = get_type_hints(Compiler.dispatch, include_extras=True)
+    compiler_resume = get_type_hints(Compiler.resume, include_extras=True)
+    repository_commit = get_type_hints(ArtifactRepository.commit, include_extras=True)
+    repository_project = get_type_hints(ArtifactRepository.project, include_extras=True)
+
+    assert compiler_dispatch["return"] == LifecycleCommitResult
+    assert repository_commit["return"] == LifecycleCommitResult
+    assert compiler_resume["return"] is RunProjection
+    assert repository_project["return"] is RunProjection
+
+
 @pytest.mark.parametrize(
     ("model_type", "valid_data", "coerced_data", "mutable_field", "replacement"),
     [
@@ -144,9 +177,21 @@ def test_public_protocols_accept_their_structural_adapters(
             Sha256Digest(root="sha256:" + "1" * 64),
             id="result",
         ),
+        pytest.param(
+            VerifiedEventHead,
+            {
+                "run_id": RunId(root="run_public_verified_head"),
+                "sequence_no": 0,
+                "event_hash": Sha256Digest(root="sha256:" + "0" * 64),
+            },
+            {"sequence_no": "0"},
+            "event_hash",
+            Sha256Digest(root="sha256:" + "1" * 64),
+            id="verified-event-head",
+        ),
     ],
 )
-def test_public_request_and_result_models_are_strict_frozen_and_closed(
+def test_public_contract_models_are_strict_frozen_and_closed(
     model_type: type[Any],
     valid_data: dict[str, object],
     coerced_data: dict[str, object],

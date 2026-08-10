@@ -1,9 +1,17 @@
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Annotated, Literal, Protocol, cast, runtime_checkable
+from typing import (
+    Annotated,
+    Literal,
+    Protocol,
+    TypeAlias,
+    cast,
+    runtime_checkable,
+)
 
-from pydantic import AfterValidator, Field, ValidationInfo, field_validator
+from pydantic import AfterValidator, Field, TypeAdapter, ValidationInfo, field_validator
 
 from automarkov.canonical import (
     MAX_CANONICAL_DOCUMENT_BYTES,
@@ -16,14 +24,16 @@ from automarkov.canonical import (
 )
 from automarkov.domain import (
     ArtifactId,
-    CompilerDispatchRequest,
     RunId,
-    RunView,
     Sha256Digest,
     StrictFrozenModel,
     TaskRequest,
+    VerifiedEventHead,
     validate_task_request_payload,
 )
+from automarkov.lifecycle import LifecycleCommitResult, RunProjection
+
+LifecycleCommandInput: TypeAlias = dict[str, CanonicalJsonValue]
 
 NonEmptyText = Annotated[str, Field(strict=True, min_length=1, max_length=100_000)]
 RuntimeId = Annotated[
@@ -89,6 +99,13 @@ CanonicalUtcTimestamp = Annotated[
     ),
     AfterValidator(_require_utc_timestamp),
 ]
+AuthorityId = Annotated[
+    str,
+    Field(
+        strict=True,
+        pattern=r"^authority_[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+    ),
+]
 EvidenceId = Annotated[
     str,
     Field(
@@ -96,6 +113,97 @@ EvidenceId = Annotated[
         pattern=r"^E-[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
     ),
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class CommandPrincipalBinding:
+    principal_id: str
+    process_execution_id: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class AuthenticatedCommandContext:
+    principal_id: str
+    process_execution_id: str | None
+    received_at: str
+    authority_id: str
+    _issuer: object = field(repr=False, compare=False)
+
+
+class CommandAuthority:
+    """由可信 transport/control 层持有的 lifecycle command capability。"""
+
+    def __init__(
+        self,
+        authority_id: str,
+        bindings: tuple[CommandPrincipalBinding, ...],
+    ) -> None:
+        self.authority_id = TypeAdapter(AuthorityId).validate_python(
+            authority_id,
+            strict=True,
+        )
+        if type(bindings) is not tuple or not bindings:
+            raise ValueError("command authority requires frozen principal bindings")
+        normalized: set[tuple[str, str | None]] = set()
+        for binding in bindings:
+            if type(binding) is not CommandPrincipalBinding:
+                raise TypeError("command principal binding must be exact")
+            principal_id = TypeAdapter(PrincipalId).validate_python(
+                binding.principal_id,
+                strict=True,
+            )
+            process_id = binding.process_execution_id
+            if process_id is not None and (
+                type(process_id) is not str or not process_id
+            ):
+                raise ValueError("command process execution ID is invalid")
+            normalized.add((principal_id, process_id))
+        expected = tuple(
+            sorted(
+                normalized,
+                key=lambda item: (
+                    item[0].encode("utf-8"),
+                    (item[1] or "").encode("utf-8"),
+                ),
+            )
+        )
+        if len(expected) != len(bindings):
+            raise ValueError("command principal bindings must be unique")
+        self._bindings = frozenset(expected)
+
+    def issue(
+        self,
+        principal_id: str,
+        process_execution_id: str | None,
+        received_at: str,
+    ) -> AuthenticatedCommandContext:
+        principal = TypeAdapter(PrincipalId).validate_python(
+            principal_id,
+            strict=True,
+        )
+        timestamp = TypeAdapter(CanonicalUtcTimestamp).validate_python(
+            received_at,
+            strict=True,
+        )
+        if (principal, process_execution_id) not in self._bindings:
+            raise ValueError("principal is outside the command authority")
+        return AuthenticatedCommandContext(
+            principal_id=principal,
+            process_execution_id=process_execution_id,
+            received_at=timestamp,
+            authority_id=self.authority_id,
+            _issuer=self,
+        )
+
+    def verifies(self, context: AuthenticatedCommandContext) -> bool:
+        return (
+            type(context) is AuthenticatedCommandContext
+            and context._issuer is self
+            and context.authority_id == self.authority_id
+            and (context.principal_id, context.process_execution_id) in self._bindings
+        )
+
+
 CanonicalEvidenceIds = Annotated[
     tuple[EvidenceId, ...],
     AfterValidator(_require_sorted_unique_evidence_ids),
@@ -231,12 +339,6 @@ class ArtifactPutResult(StrictFrozenModel):
         if type(value) is not Sha256Digest:
             raise ValueError("payload_hash must be a Sha256Digest")
         return value
-
-
-class ArtifactAppendRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.artifact-append-request.v1"]
-    run_id: RunId
-    event_bytes: bytes = Field(strict=True, max_length=8 * 1024 * 1024)
 
 
 class CanonicalPayloadDocument(StrictFrozenModel):
@@ -398,18 +500,30 @@ class PolicyEvaluationResult(StrictFrozenModel):
 @runtime_checkable
 class Compiler(Protocol):
     def start(self, request: TaskRequest) -> RunId: ...
-    def dispatch(self, request: CompilerDispatchRequest) -> RunView: ...
-    def resume(self, run_id: RunId) -> RunView: ...
-    def package(self, run_id: RunId) -> PackageResult: ...
+    def dispatch(self, request: LifecycleCommandInput) -> LifecycleCommitResult: ...
+    def resume(self, run_id: RunId, head: VerifiedEventHead) -> RunProjection: ...
+    def package(self, run_id: RunId, head: VerifiedEventHead) -> PackageResult: ...
 
 
 @runtime_checkable
 class ArtifactRepository(Protocol):
     def put(self, request: ArtifactPutInput) -> ArtifactPutResult: ...
     def get(self, artifact_id: ArtifactId) -> ArtifactBytesResult: ...
-    def append(self, request: ArtifactAppendRequest) -> RunView: ...
+    def commit(
+        self,
+        request: LifecycleCommandInput,
+        *,
+        context: AuthenticatedCommandContext,
+    ) -> LifecycleCommitResult: ...
     def lineage(self, artifact_id: ArtifactId) -> ArtifactLineageResult: ...
-    def project(self, run_id: RunId) -> RunView: ...
+    def project(
+        self,
+        run_id: RunId,
+        as_of: VerifiedEventHead,
+        *,
+        projector_version: str,
+        projector_hash: Sha256Digest,
+    ) -> RunProjection: ...
 
 
 @runtime_checkable

@@ -291,20 +291,10 @@ class RunState(str, Enum):
     CANCELLED = "CANCELLED"
 
 
-class RunView(StrictFrozenModel):
-    schema_version: Literal["automarkov.run-view.v1"]
+class VerifiedEventHead(StrictFrozenModel):
     run_id: RunId
-    task_request_id: RequestId
-    state: RunState
-
-
-class CompilerDispatchRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.compiler-dispatch-request.v1"]
-    run_id: RunId
-    event_id: Annotated[
-        str,
-        Field(
-            strict=True,
-            pattern=r"^event_[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
-        ),
+    sequence_no: Annotated[
+        int,
+        Field(strict=True, ge=0, le=9_007_199_254_740_991),
     ]
+    event_hash: Sha256Digest

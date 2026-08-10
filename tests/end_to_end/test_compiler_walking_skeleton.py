@@ -12,17 +12,18 @@ from pydantic import TypeAdapter, ValidationError
 from automarkov.adapters import InMemoryCompiler
 from automarkov.api import compile_task
 from automarkov.domain import (
-    CompilerDispatchRequest,
     RequestBudget,
     RunId,
-    RunState,
-    RunView,
+    Sha256Digest,
     TaskRequest,
+    VerifiedEventHead,
     validate_task_request_payload,
 )
 from automarkov.errors import (
     CapabilityDeferredError,
+    EventSchemaError,
     RunIdCollisionError,
+    RunProjectionHeadError,
     UnknownRunError,
 )
 
@@ -56,7 +57,45 @@ def fixed_run_id_factory(value: str) -> Callable[[], RunId]:
     return lambda: run_id
 
 
-def test_python_api_and_cli_return_the_same_canonical_received_view() -> None:
+def unpersisted_head(run_id: RunId) -> VerifiedEventHead:
+    return VerifiedEventHead(
+        run_id=run_id,
+        sequence_no=0,
+        event_hash=Sha256Digest(root="sha256:" + "0" * 64),
+    )
+
+
+def test_compiler_requires_a_verified_head_and_rejects_an_invalid_command() -> None:
+    run_id = RunId(root="run_verified_head_contract")
+    compiler = InMemoryCompiler(run_id_factory=fixed_run_id_factory(run_id.root))
+    compiler.start(make_request("request_verified_head_contract"))
+    head = unpersisted_head(run_id)
+
+    with pytest.raises(RunProjectionHeadError):
+        compiler.resume(run_id, head)
+    with pytest.raises(EventSchemaError):
+        compiler.dispatch({"command_type": "append_run_events"})
+    with pytest.raises(CapabilityDeferredError) as package_error:
+        compiler.package(run_id, head)
+
+    assert package_error.value.capability == "compiler.package"
+    assert package_error.value.owner_ticket == "T24"
+
+
+def test_compiler_dispatch_rejects_non_exact_or_non_json_commands() -> None:
+    class DictSubclass(dict[str, object]):
+        pass
+
+    compiler = InMemoryCompiler()
+    for forbidden in (
+        DictSubclass(command_type="append_run_events"),
+        {"command_type": object()},
+    ):
+        with pytest.raises(ValueError):
+            compiler.dispatch(cast(Any, forbidden))
+
+
+def test_python_api_and_cli_return_the_same_canonical_run_id() -> None:
     request = make_request()
     expected_run_id = RunId(root="run_walking_skeleton")
     compiler = InMemoryCompiler(
@@ -64,26 +103,16 @@ def test_python_api_and_cli_return_the_same_canonical_received_view() -> None:
     )
 
     run_id = compiler.start(request)
-    started_view = compiler.resume(run_id)
-    resumed_view = compiler.resume(run_id)
-    api_view = compile_task(
+    api_run_id = compile_task(
         request,
         compiler=InMemoryCompiler(
             run_id_factory=fixed_run_id_factory(expected_run_id.root)
         ),
     )
 
-    assert run_id == expected_run_id
-    assert isinstance(started_view, RunView)
-    assert started_view == resumed_view == api_view
-    assert started_view == RunView(
-        schema_version="automarkov.run-view.v1",
-        run_id=expected_run_id,
-        task_request_id=request.request_id,
-        state=RunState.RECEIVED,
-    )
+    assert run_id == api_run_id == expected_run_id
     with pytest.raises(ValidationError, match="frozen"):
-        started_view.state = RunState.RESEARCHING
+        run_id.root = "run_mutated"
 
     completed = subprocess.run(
         [
@@ -102,19 +131,17 @@ def test_python_api_and_cli_return_the_same_canonical_received_view() -> None:
     )
 
     assert completed.returncode == 0, completed.stderr
-    cli_view = RunView.model_validate_json(completed.stdout)
-    assert completed.stdout == f"{cli_view.model_dump_json()}\n"
-    assert cli_view.schema_version == api_view.schema_version
-    assert cli_view.task_request_id == api_view.task_request_id
-    assert cli_view.state is api_view.state is RunState.RECEIVED
-    assert cli_view.run_id.root.startswith("run_")
+    cli_run_id = RunId.model_validate_json(completed.stdout)
+    assert completed.stdout == f"{cli_run_id.model_dump_json()}\n"
+    assert cli_run_id.root.startswith("run_")
 
 
 def test_resume_rejects_an_unknown_run_id_with_a_typed_error() -> None:
     compiler = InMemoryCompiler()
+    run_id = RunId(root="run_unknown")
 
     with pytest.raises(UnknownRunError) as raised:
-        compiler.resume(RunId(root="run_unknown"))
+        compiler.resume(run_id, unpersisted_head(run_id))
 
     assert raised.value.code == "unknown_run"
 
@@ -196,6 +223,7 @@ def test_compiler_rejects_mutation_after_validated_ingress(
     elif mutated_field == "nested-extra":
         cast(dict[str, Any], request.budget.__dict__)["forged_extra"] = "hidden"
     else:
+
         class IntSubclass(int):
             pass
 
@@ -214,14 +242,13 @@ def test_compiler_rejects_a_shallow_copy_of_validated_ingress() -> None:
         InMemoryCompiler().start(copied)
 
 
-def test_run_view_rejects_an_artifact_id_in_the_task_request_namespace() -> None:
+def test_verified_event_head_rejects_cross_namespace_ids() -> None:
     with pytest.raises(ValidationError):
-        RunView.model_validate(
+        VerifiedEventHead.model_validate(
             {
-                "schema_version": "automarkov.run-view.v1",
-                "run_id": RunId(root="run_namespace_check"),
-                "task_request_id": "artifact_wrong_namespace",
-                "state": RunState.RECEIVED,
+                "run_id": "artifact_wrong_namespace",
+                "sequence_no": 0,
+                "event_hash": "sha256:" + "0" * 64,
             }
         )
 
@@ -239,43 +266,18 @@ def test_start_rejects_a_run_id_collision_without_overwriting_the_first_run() ->
         compiler.start(second_request)
 
     assert raised.value.code == "run_id_collision"
-    assert compiler.resume(colliding_run_id).task_request_id == first_request.request_id
+    with pytest.raises(RunProjectionHeadError):
+        compiler.resume(colliding_run_id, unpersisted_head(colliding_run_id))
 
 
-@pytest.mark.parametrize(
-    ("operation", "expected_capability", "expected_owner_ticket"),
-    [
-        (
-            lambda compiler, run_id: compiler.dispatch(
-                CompilerDispatchRequest(
-                    schema_version="automarkov.compiler-dispatch-request.v1",
-                    run_id=run_id,
-                    event_id="event_walking_skeleton",
-                )
-            ),
-            "compiler.dispatch",
-            "T03",
-        ),
-        (
-            lambda compiler, run_id: compiler.package(run_id),
-            "compiler.package",
-            "T24",
-        ),
-    ],
-    ids=["dispatch", "package"],
-)
-def test_deferred_compiler_capabilities_fail_with_ticket_ownership(
-    operation: Callable[[InMemoryCompiler, RunId], object],
-    expected_capability: str,
-    expected_owner_ticket: str,
-) -> None:
+def test_deferred_package_capability_fails_with_ticket_ownership() -> None:
     run_id = RunId(root="run_deferred_capability")
     compiler = InMemoryCompiler(run_id_factory=fixed_run_id_factory(run_id.root))
     compiler.start(make_request("request_deferred_capability"))
 
     with pytest.raises(CapabilityDeferredError) as raised:
-        operation(compiler, run_id)
+        compiler.package(run_id, unpersisted_head(run_id))
 
     assert raised.value.code == "capability_deferred"
-    assert raised.value.capability == expected_capability
-    assert raised.value.owner_ticket == expected_owner_ticket
+    assert raised.value.capability == "compiler.package"
+    assert raised.value.owner_ticket == "T24"

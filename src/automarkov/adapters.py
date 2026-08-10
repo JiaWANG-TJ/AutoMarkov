@@ -4,21 +4,33 @@ from collections.abc import Callable
 from typing import Never
 from uuid import uuid4
 
+from automarkov.canonical import validate_and_measure_raw_json_tree
 from automarkov.domain import (
-    CompilerDispatchRequest,
     RequestBudget,
     RequestPermissions,
     RunId,
-    RunState,
-    RunView,
+    Sha256Digest,
     TaskRequest,
+    VerifiedEventHead,
 )
 from automarkov.errors import (
     CapabilityDeferredError,
     RunIdCollisionError,
+    RunProjectionHeadError,
     UnknownRunError,
 )
+from automarkov.lifecycle import (
+    RUN_PROJECTOR_HASH,
+    RUN_PROJECTOR_VERSION,
+    AppendRunEventsCommand,
+    LifecycleCommand,
+    LifecycleCommitResult,
+    RunProjection,
+    validate_lifecycle_command,
+)
 from automarkov.public import (
+    ArtifactRepository,
+    AuthenticatedCommandContext,
     CloseResult,
     EnvironmentRef,
     EvidenceCrawlRequest,
@@ -28,6 +40,7 @@ from automarkov.public import (
     EvidenceUrlsRequest,
     ExecutionResult,
     FixedCommitJobRequest,
+    LifecycleCommandInput,
     LlmCompletionRequest,
     LlmCompletionResult,
     LlmProbeResult,
@@ -65,11 +78,20 @@ def _deferred(capability: str, owner_ticket: str) -> Never:
 
 
 class InMemoryCompiler:
-    def __init__(self, run_id_factory: Callable[[], RunId] | None = None) -> None:
+    def __init__(
+        self,
+        run_id_factory: Callable[[], RunId] | None = None,
+        repository: ArtifactRepository | None = None,
+        command_context_provider: (
+            Callable[[LifecycleCommand], AuthenticatedCommandContext] | None
+        ) = None,
+    ) -> None:
         self._run_id_factory = run_id_factory or (
             lambda: RunId(root=f"run_{uuid4().hex}")
         )
-        self._runs: dict[str, RunView] = {}
+        self._repository = repository or InMemoryArtifactRepository()
+        self._command_context_provider = command_context_provider
+        self._runs: dict[str, str] = {}
 
     def start(self, request: TaskRequest) -> RunId:
         if type(request) is not TaskRequest or not request.has_validated_provenance():
@@ -90,24 +112,53 @@ class InMemoryCompiler:
         run_id = self._run_id_factory()
         if run_id.root in self._runs:
             raise RunIdCollisionError(run_id.root)
-        self._runs[run_id.root] = RunView(
-            schema_version="automarkov.run-view.v1",
-            run_id=run_id,
-            task_request_id=validated_request.request_id,
-            state=RunState.RECEIVED,
-        )
+        self._runs[run_id.root] = validated_request.request_id
         return run_id
 
-    def dispatch(self, request: CompilerDispatchRequest) -> RunView:
-        _deferred("compiler.dispatch", "T03")
+    def dispatch(self, request: LifecycleCommandInput) -> LifecycleCommitResult:
+        if type(request) is not dict:
+            raise ValueError("compiler dispatch requires an exact raw command object")
+        validate_and_measure_raw_json_tree(request)
+        command = validate_lifecycle_command(request)
+        if (
+            isinstance(command, AppendRunEventsCommand)
+            and command.expected_head is None
+            and command.run_id not in self._runs
+        ):
+            raise UnknownRunError(command.run_id)
+        if self._command_context_provider is None:
+            raise ValueError("compiler dispatch requires a command context provider")
+        context = self._command_context_provider(command)
+        if type(context) is not AuthenticatedCommandContext:
+            raise ValueError("command context provider returned an invalid context")
+        return self._repository.commit(request, context=context)
 
-    def resume(self, run_id: RunId) -> RunView:
+    def resume(self, run_id: RunId, head: VerifiedEventHead) -> RunProjection:
+        if type(run_id) is not RunId or type(head) is not VerifiedEventHead:
+            raise ValueError("compiler resume requires exact run and verified head IDs")
+        if head.run_id != run_id:
+            raise RunProjectionHeadError(run_id.root)
         try:
-            return self._runs[run_id.root]
-        except KeyError as error:
-            raise UnknownRunError(run_id.root) from error
+            return self._repository.project(
+                run_id,
+                head,
+                projector_version=RUN_PROJECTOR_VERSION,
+                projector_hash=Sha256Digest(root=RUN_PROJECTOR_HASH),
+            )
+        except UnknownRunError as error:
+            if run_id.root not in self._runs:
+                raise
+            raise RunProjectionHeadError(run_id.root) from error
 
-    def package(self, run_id: RunId) -> PackageResult:
+    def package(self, run_id: RunId, head: VerifiedEventHead) -> PackageResult:
+        if type(run_id) is not RunId or type(head) is not VerifiedEventHead:
+            raise ValueError(
+                "compiler package requires exact run and verified head IDs"
+            )
+        if run_id.root not in self._runs:
+            raise UnknownRunError(run_id.root)
+        if head.run_id != run_id:
+            raise RunProjectionHeadError(run_id.root)
         _deferred("compiler.package", "T24")
 
 

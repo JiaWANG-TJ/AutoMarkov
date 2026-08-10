@@ -14,6 +14,7 @@ _ALLOWED_INTERNAL_PREFIXES = (
     "automarkov.canonical",
     "automarkov.public",
 )
+_TYPE_ONLY_INTERNAL_PREFIXES = ("automarkov.lifecycle",)
 _ALLOWED_EXTERNAL_ROOTS = {
     "__future__",
     "pydantic",
@@ -114,7 +115,7 @@ def test_domain_and_public_static_import_closure_is_infrastructure_free() -> Non
             if imported_module.startswith("automarkov."):
                 allowed = _matches_prefix(
                     imported_module,
-                    _ALLOWED_INTERNAL_PREFIXES,
+                    _ALLOWED_INTERNAL_PREFIXES + _TYPE_ONLY_INTERNAL_PREFIXES,
                 )
             else:
                 root = imported_module.partition(".")[0]

@@ -24,14 +24,12 @@ from automarkov.canonical import (
 )
 from automarkov.domain import (
     ArtifactId,
-    RunId,
     Sha256Digest,
     StrictFrozenModel,
     TaskRequest,
 )
-from automarkov.errors import AutoMarkovError, CapabilityDeferredError
+from automarkov.errors import AutoMarkovError
 from automarkov.public import (
-    ArtifactAppendRequest,
     ArtifactPutRequest,
     ArtifactPutResult,
     validate_artifact_put_request,
@@ -1145,34 +1143,3 @@ def test_repository_preflights_command_resources_before_model_construction(
     excessive_metadata["parent_artifact_ids"] = ["invalid-a", "invalid-b"]
     with pytest.raises(ValueError, match="metadata exceeds resource limits"):
         artifact_repository.put(excessive_metadata)
-
-
-@pytest.mark.parametrize(
-    ("operation", "capability"),
-    [
-        (
-            lambda repository: repository.append(
-                ArtifactAppendRequest(
-                    schema_version="automarkov.artifact-append-request.v1",
-                    run_id=RunId(root="run_t03_deferred"),
-                    event_bytes=b"{}",
-                )
-            ),
-            "artifact.append",
-        ),
-        (
-            lambda repository: repository.project(RunId(root="run_t03_deferred")),
-            "artifact.project",
-        ),
-    ],
-    ids=["append", "project"],
-)
-def test_event_append_and_projection_remain_deferred_to_t03(
-    operation: Callable[[InMemoryArtifactRepository], object],
-    capability: str,
-) -> None:
-    with pytest.raises(CapabilityDeferredError) as raised:
-        operation(InMemoryArtifactRepository())
-
-    assert raised.value.capability == capability
-    assert raised.value.owner_ticket == "T03"

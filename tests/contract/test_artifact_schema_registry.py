@@ -4,6 +4,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import date
 from enum import StrEnum
+from pathlib import Path
 from typing import Annotated, Any, Literal, cast
 from uuid import UUID
 
@@ -23,6 +24,7 @@ from pydantic.annotated_handlers import GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
 from typing_extensions import TypedDict
 
+from automarkov.adapters import InMemoryArtifactRepository, SqliteArtifactRepository
 from automarkov.canonical import (
     CanonicalJsonValue,
     FrozenSequence,
@@ -30,10 +32,13 @@ from automarkov.canonical import (
     SafeCanonicalInt,
     StrictCanonicalFloat,
     StrictTrue,
+    canonical_json_bytes,
     parse_canonical_document,
 )
 from automarkov.domain import StrictFrozenModel
-from automarkov.repository import ArtifactSchemaRegistry
+from automarkov.errors import ArtifactIntegrityError, ArtifactParentContractError
+from automarkov.lifecycle import ArtifactIdValue, Sha256Value
+from automarkov.repository import ArtifactSchemaRegistry, ParentBinding
 
 
 class _PlainFloatArtifact(StrictFrozenModel):
@@ -68,6 +73,24 @@ class _UnionFloatArtifact(StrictFrozenModel):
 class _StrictFloatArtifact(StrictFrozenModel):
     schema_version: Literal["automarkov.test-strict-float.v1"]
     value: StrictCanonicalFloat
+
+
+class _PayloadParentArtifact(StrictFrozenModel):
+    schema_version: Literal["automarkov.test-payload-parent.v1"]
+    value: str
+
+
+class _NullableArtifactReference(StrictFrozenModel):
+    artifact_id: ArtifactIdValue | None
+    payload_hash: Sha256Value | None
+
+
+class _PayloadBoundChildArtifact(StrictFrozenModel):
+    schema_version: Literal["automarkov.test-payload-bound-child.v1"]
+    parent: _NullableArtifactReference
+    many_parents: FrozenSequence[_NullableArtifactReference]
+    optional_parent: _NullableArtifactReference | None
+    undeclared_parent: _NullableArtifactReference | None
 
 
 class _NestedStrictFloatValue(StrictFrozenModel):
@@ -998,11 +1021,7 @@ def test_codec_rejects_after_validator_that_revokes_deep_freeze() -> None:
     )
     codec = registry.resolve(
         "test_after_validator_unfreezes_mapping",
-        {
-            "schema_version": (
-                "automarkov.test-after-validator-unfreezes-mapping.v1"
-            )
-        },
+        {"schema_version": ("automarkov.test-after-validator-unfreezes-mapping.v1")},
     ).codec
 
     with pytest.raises(ValueError, match="deeply immutable"):
@@ -1421,6 +1440,358 @@ def test_identical_reregistration_preserves_the_original_snapshot() -> None:
         )
         is original
     )
+
+
+def test_same_schema_key_freezes_the_complete_payload_parent_binding() -> None:
+    registry = ArtifactSchemaRegistry()
+    binding = ParentBinding(
+        artifact_id_path="parent.artifact_id",
+        payload_hash_path="parent.payload_hash",
+        allowed_artifact_types=("parent_alpha",),
+        cardinality="one",
+    )
+    registry.register(
+        "test_strict_float",
+        "automarkov.test-strict-float.v1",
+        _StrictFloatArtifact,
+        payload_parent_bindings=(binding,),
+    )
+
+    with pytest.raises(ValueError, match="already registered differently"):
+        registry.register(
+            "test_strict_float",
+            "automarkov.test-strict-float.v1",
+            _StrictFloatArtifact,
+            payload_parent_bindings=(
+                binding.model_copy(update={"allowed_artifact_types": ("parent_beta",)}),
+            ),
+        )
+
+
+@pytest.mark.parametrize("adapter", ["memory", "sqlite"])
+def test_public_put_checks_the_payload_bound_parent_hash(
+    adapter: str,
+    tmp_path: Path,
+) -> None:
+    registry = ArtifactSchemaRegistry()
+    registry.register(
+        "parent_alpha",
+        "automarkov.test-payload-parent.v1",
+        _PayloadParentArtifact,
+        direct_parent_artifact_types=(),
+    )
+    registry.register(
+        "parent_beta",
+        "automarkov.test-payload-parent.v1",
+        _PayloadParentArtifact,
+        direct_parent_artifact_types=(),
+    )
+    registry.register(
+        "payload_bound_child",
+        "automarkov.test-payload-bound-child.v1",
+        _PayloadBoundChildArtifact,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="many_parents.*.artifact_id",
+                payload_hash_path="many_parents.*.payload_hash",
+                allowed_artifact_types=("parent_alpha", "parent_beta"),
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="optional_parent.artifact_id",
+                payload_hash_path="optional_parent.payload_hash",
+                allowed_artifact_types=("parent_alpha",),
+                cardinality="optional",
+            ),
+            ParentBinding(
+                artifact_id_path="parent.artifact_id",
+                payload_hash_path="parent.payload_hash",
+                allowed_artifact_types=("parent_alpha",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.freeze()
+    repository = (
+        InMemoryArtifactRepository(registry)
+        if adapter == "memory"
+        else SqliteArtifactRepository(tmp_path / "payload-binding.sqlite", registry)
+    )
+    parent = repository.put(
+        {
+            "schema_version": "automarkov.artifact-put-request.v2",
+            "artifact_type": "parent_alpha",
+            "payload_bytes": canonical_json_bytes(
+                {
+                    "schema_version": "automarkov.test-payload-parent.v1",
+                    "value": "parent",
+                }
+            ),
+            "parent_artifact_ids": [],
+            "created_by": "principal_payload_binding_test",
+            "created_at": "2026-08-10T09:00:00Z",
+            "source_evidence_ids": [],
+        }
+    )
+    child_request = {
+        "schema_version": "automarkov.artifact-put-request.v2",
+        "artifact_type": "payload_bound_child",
+        "payload_bytes": canonical_json_bytes(
+            {
+                "schema_version": "automarkov.test-payload-bound-child.v1",
+                "parent": {
+                    "artifact_id": parent.artifact_id.root,
+                    "payload_hash": "sha256:" + "0" * 64,
+                },
+                "many_parents": [],
+                "optional_parent": None,
+                "undeclared_parent": None,
+            }
+        ),
+        "parent_artifact_ids": [parent.artifact_id.root],
+        "created_by": "principal_payload_binding_test",
+        "created_at": "2026-08-10T09:00:00Z",
+        "source_evidence_ids": [],
+    }
+    try:
+        with pytest.raises(ArtifactParentContractError):
+            repository.put(child_request)
+    finally:
+        if isinstance(repository, SqliteArtifactRepository):
+            repository.close()
+
+
+@pytest.mark.parametrize("adapter", ["memory", "sqlite"])
+def test_public_put_enforces_closed_payload_parent_bindings(
+    adapter: str,
+    tmp_path: Path,
+) -> None:
+    registry = ArtifactSchemaRegistry()
+    for artifact_type in ("parent_alpha", "parent_beta"):
+        registry.register(
+            artifact_type,
+            "automarkov.test-payload-parent.v1",
+            _PayloadParentArtifact,
+            direct_parent_artifact_types=(),
+        )
+    registry.register(
+        "payload_bound_child",
+        "automarkov.test-payload-bound-child.v1",
+        _PayloadBoundChildArtifact,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="many_parents.*.artifact_id",
+                payload_hash_path="many_parents.*.payload_hash",
+                allowed_artifact_types=("parent_alpha", "parent_beta"),
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="optional_parent.artifact_id",
+                payload_hash_path="optional_parent.payload_hash",
+                allowed_artifact_types=("parent_alpha",),
+                cardinality="optional",
+            ),
+            ParentBinding(
+                artifact_id_path="parent.artifact_id",
+                payload_hash_path="parent.payload_hash",
+                allowed_artifact_types=("parent_alpha",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.freeze()
+    repository = (
+        InMemoryArtifactRepository(registry)
+        if adapter == "memory"
+        else SqliteArtifactRepository(
+            tmp_path / "closed-payload-binding.sqlite", registry
+        )
+    )
+
+    def put_parent(artifact_type: str, value: str) -> object:
+        return repository.put(
+            {
+                "schema_version": "automarkov.artifact-put-request.v2",
+                "artifact_type": artifact_type,
+                "payload_bytes": canonical_json_bytes(
+                    {
+                        "schema_version": "automarkov.test-payload-parent.v1",
+                        "value": value,
+                    }
+                ),
+                "parent_artifact_ids": [],
+                "created_by": "principal_payload_binding_test",
+                "created_at": "2026-08-10T09:00:00Z",
+                "source_evidence_ids": [],
+            }
+        )
+
+    alpha = cast(Any, put_parent("parent_alpha", "alpha"))
+    beta = cast(Any, put_parent("parent_beta", "beta"))
+    alpha_ref = {
+        "artifact_id": alpha.artifact_id.root,
+        "payload_hash": alpha.payload_hash.root,
+    }
+    beta_ref = {
+        "artifact_id": beta.artifact_id.root,
+        "payload_hash": beta.payload_hash.root,
+    }
+
+    def child_request(
+        *,
+        parent: dict[str, object],
+        many_parents: list[dict[str, object]] | None = None,
+        optional_parent: dict[str, object] | None = None,
+        undeclared_parent: dict[str, object] | None = None,
+        envelope_parents: list[str] | None = None,
+    ) -> dict[str, object]:
+        parent_ids = envelope_parents
+        if parent_ids is None:
+            parent_ids = [cast(str, parent["artifact_id"])] + [
+                cast(str, item["artifact_id"]) for item in many_parents or []
+            ]
+            if optional_parent is not None:
+                parent_ids.append(cast(str, optional_parent["artifact_id"]))
+        return {
+            "schema_version": "automarkov.artifact-put-request.v2",
+            "artifact_type": "payload_bound_child",
+            "payload_bytes": canonical_json_bytes(
+                {
+                    "schema_version": "automarkov.test-payload-bound-child.v1",
+                    "parent": parent,
+                    "many_parents": many_parents or [],
+                    "optional_parent": optional_parent,
+                    "undeclared_parent": undeclared_parent,
+                }
+            ),
+            "parent_artifact_ids": sorted(
+                set(parent_ids), key=lambda item: item.encode("utf-8")
+            ),
+            "created_by": "principal_payload_binding_test",
+            "created_at": "2026-08-10T09:00:00Z",
+            "source_evidence_ids": [],
+        }
+
+    valid_request = child_request(parent=alpha_ref, many_parents=[beta_ref])
+    try:
+        result = repository.put(valid_request)
+        assert repository.put(valid_request) == result
+        assert repository.get(result.artifact_id).envelope.parent_artifact_ids == tuple(
+            sorted((alpha.artifact_id, beta.artifact_id), key=lambda item: item.root)
+        )
+
+        invalid_requests = (
+            child_request(
+                parent={"artifact_id": alpha.artifact_id.root, "payload_hash": None}
+            ),
+            child_request(
+                parent={"artifact_id": None, "payload_hash": None},
+                envelope_parents=[],
+            ),
+            child_request(
+                parent=alpha_ref,
+                many_parents=[{"artifact_id": None, "payload_hash": None}],
+                envelope_parents=[alpha.artifact_id.root],
+            ),
+            child_request(parent=alpha_ref, many_parents=[alpha_ref]),
+            child_request(parent=beta_ref),
+            child_request(parent=alpha_ref, envelope_parents=[]),
+            child_request(
+                parent=alpha_ref,
+                envelope_parents=[alpha.artifact_id.root, beta.artifact_id.root],
+            ),
+            child_request(parent=alpha_ref, undeclared_parent=beta_ref),
+        )
+        for invalid_request in invalid_requests:
+            with pytest.raises(ArtifactParentContractError):
+                repository.put(invalid_request)
+        if isinstance(repository, SqliteArtifactRepository):
+            stored_contract = repository._connection.execute(
+                "SELECT direct_parent_artifact_types "
+                "FROM artifact_schema_contracts "
+                "WHERE artifact_type = ? AND schema_version = ?",
+                (
+                    "payload_bound_child",
+                    "automarkov.test-payload-bound-child.v1",
+                ),
+            ).fetchone()
+            assert stored_contract == (
+                canonical_json_bytes(
+                    {
+                        "contract_kind": "payload_bound",
+                        "bindings": [
+                            {
+                                "artifact_id_path": "many_parents.*.artifact_id",
+                                "payload_hash_path": "many_parents.*.payload_hash",
+                                "allowed_artifact_types": [
+                                    "parent_alpha",
+                                    "parent_beta",
+                                ],
+                                "cardinality": "many",
+                            },
+                            {
+                                "artifact_id_path": "optional_parent.artifact_id",
+                                "payload_hash_path": "optional_parent.payload_hash",
+                                "allowed_artifact_types": ["parent_alpha"],
+                                "cardinality": "optional",
+                            },
+                            {
+                                "artifact_id_path": "parent.artifact_id",
+                                "payload_hash_path": "parent.payload_hash",
+                                "allowed_artifact_types": ["parent_alpha"],
+                                "cardinality": "one",
+                            },
+                        ],
+                    }
+                ),
+            )
+
+            drift_registry = ArtifactSchemaRegistry()
+            for artifact_type in ("parent_alpha", "parent_beta"):
+                drift_registry.register(
+                    artifact_type,
+                    "automarkov.test-payload-parent.v1",
+                    _PayloadParentArtifact,
+                    direct_parent_artifact_types=(),
+                )
+            drift_registry.register(
+                "payload_bound_child",
+                "automarkov.test-payload-bound-child.v1",
+                _PayloadBoundChildArtifact,
+                payload_parent_bindings=(
+                    ParentBinding(
+                        artifact_id_path="many_parents.*.artifact_id",
+                        payload_hash_path="many_parents.*.payload_hash",
+                        allowed_artifact_types=("parent_alpha", "parent_beta"),
+                        cardinality="many",
+                    ),
+                    ParentBinding(
+                        artifact_id_path="optional_parent.artifact_id",
+                        payload_hash_path="optional_parent.payload_hash",
+                        allowed_artifact_types=("parent_alpha",),
+                        cardinality="optional",
+                    ),
+                    ParentBinding(
+                        artifact_id_path="parent.artifact_id",
+                        payload_hash_path="parent.payload_hash",
+                        allowed_artifact_types=("parent_beta",),
+                        cardinality="one",
+                    ),
+                ),
+            )
+            drift_registry.freeze()
+            drift_repository = SqliteArtifactRepository(
+                tmp_path / "closed-payload-binding.sqlite",
+                drift_registry,
+            )
+            try:
+                with pytest.raises(ArtifactIntegrityError):
+                    drift_repository.get(result.artifact_id)
+            finally:
+                drift_repository.close()
+    finally:
+        if isinstance(repository, SqliteArtifactRepository):
+            repository.close()
 
 
 @pytest.mark.parametrize(
