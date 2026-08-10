@@ -1,0 +1,52 @@
+# 密钥与凭据
+.env
+.env.*
+!.env.example
+secrets/
+*.key
+*.pem
+
+# Python 本地环境与缓存
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.venv/
+venv/
+dist/
+build/
+
+# 运行时与实验工件
+artifacts/**
+!artifacts/.gitignore
+checkpoints/
+private/
+.cache/
+.swanlab/
+swanlog/
+wandb/
+
+# 外部或受限资源
+external/**
+!external/.gitignore
+references/checkouts/
+benchmarks/**/gold/
+benchmarks/**/sealed/
+
+# Worktree 与本地工具状态
+.worktrees/
+.scratch/
+.idea/
+.vscode/
+.DS_Store
+
+# 本地数据库与日志
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.log
