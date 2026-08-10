@@ -1,0 +1,172 @@
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Never
+from uuid import uuid4
+
+from automarkov.domain import (
+    CompilerDispatchRequest,
+    RunId,
+    RunState,
+    RunView,
+    TaskRequest,
+)
+from automarkov.errors import (
+    CapabilityDeferredError,
+    RunIdCollisionError,
+    UnknownRunError,
+)
+from automarkov.public import (
+    ArtifactAppendRequest,
+    ArtifactBytesResult,
+    ArtifactId,
+    ArtifactLineageResult,
+    ArtifactPutRequest,
+    ArtifactPutResult,
+    CloseResult,
+    EnvironmentRef,
+    EvidenceCrawlRequest,
+    EvidenceResolveRequest,
+    EvidenceResult,
+    EvidenceSearchRequest,
+    EvidenceUrlsRequest,
+    ExecutionResult,
+    FixedCommitJobRequest,
+    LlmCompletionRequest,
+    LlmCompletionResult,
+    LlmProbeResult,
+    LlmStartRequest,
+    PackageResult,
+    PolicyEvaluationRequest,
+    PolicyEvaluationResult,
+    RemoteEnvResetRequest,
+    RemoteEnvResult,
+    RemoteEnvSpacesResult,
+    RemoteEnvStepRequest,
+    RuntimeProfileRef,
+    SandboxRunRequest,
+    SandboxTestRequest,
+    TrainingRequest,
+    TrainingResult,
+)
+
+
+def _deferred(capability: str, owner_ticket: str) -> Never:
+    raise CapabilityDeferredError(capability, owner_ticket)
+
+
+class InMemoryCompiler:
+    def __init__(self, run_id_factory: Callable[[], RunId] | None = None) -> None:
+        self._run_id_factory = run_id_factory or (
+            lambda: RunId(root=f"run_{uuid4().hex}")
+        )
+        self._runs: dict[str, RunView] = {}
+
+    def start(self, request: TaskRequest) -> RunId:
+        run_id = self._run_id_factory()
+        if run_id.root in self._runs:
+            raise RunIdCollisionError(run_id.root)
+        self._runs[run_id.root] = RunView(
+            schema_version="automarkov.run-view.v1",
+            run_id=run_id,
+            task_request_id=request.request_id,
+            state=RunState.RECEIVED,
+        )
+        return run_id
+
+    def dispatch(self, request: CompilerDispatchRequest) -> RunView:
+        _deferred("compiler.dispatch", "T03")
+
+    def resume(self, run_id: RunId) -> RunView:
+        try:
+            return self._runs[run_id.root]
+        except KeyError as error:
+            raise UnknownRunError(run_id.root) from error
+
+    def package(self, run_id: RunId) -> PackageResult:
+        _deferred("compiler.package", "T24")
+
+
+class InMemoryArtifactRepository:
+    def put(self, request: ArtifactPutRequest) -> ArtifactPutResult:
+        _deferred("artifact.put", "T02")
+
+    def get(self, artifact_id: ArtifactId) -> ArtifactBytesResult:
+        _deferred("artifact.get", "T02")
+
+    def append(self, request: ArtifactAppendRequest) -> RunView:
+        _deferred("artifact.append", "T03")
+
+    def lineage(self, artifact_id: ArtifactId) -> ArtifactLineageResult:
+        _deferred("artifact.lineage", "T02")
+
+    def project(self, run_id: RunId) -> RunView:
+        _deferred("artifact.project", "T03")
+
+
+class ScriptedLocalLlmRuntime:
+    def start(self, request: LlmStartRequest) -> LlmProbeResult:
+        _deferred("llm.start", "T05")
+
+    def probe(self) -> LlmProbeResult:
+        _deferred("llm.probe", "T05")
+
+    def complete(self, request: LlmCompletionRequest) -> LlmCompletionResult:
+        _deferred("llm.complete", "T05")
+
+    def close(self) -> CloseResult:
+        _deferred("llm.close", "T05")
+
+
+class ScriptedEvidenceGateway:
+    def search(self, request: EvidenceSearchRequest) -> EvidenceResult:
+        _deferred("evidence.search", "T10")
+
+    def extract(self, request: EvidenceUrlsRequest) -> EvidenceResult:
+        _deferred("evidence.extract", "T10")
+
+    def crawl(self, request: EvidenceCrawlRequest) -> EvidenceResult:
+        _deferred("evidence.crawl", "T10")
+
+    def resolve(self, request: EvidenceResolveRequest) -> EvidenceResult:
+        _deferred("evidence.resolve", "T10")
+
+
+class ScriptedExecutionSandbox:
+    def run(self, request: SandboxRunRequest) -> ExecutionResult:
+        _deferred("sandbox.run", "T11")
+
+    def test(self, request: SandboxTestRequest) -> ExecutionResult:
+        _deferred("sandbox.test", "T15")
+
+    def run_at_commit(self, request: FixedCommitJobRequest) -> ExecutionResult:
+        _deferred("sandbox.run_at_commit", "T17")
+
+
+class ScriptedRemoteEnv:
+    def reset(self, request: RemoteEnvResetRequest) -> RemoteEnvResult:
+        _deferred("remote_env.reset", "T12")
+
+    def step(self, request: RemoteEnvStepRequest) -> RemoteEnvResult:
+        _deferred("remote_env.step", "T12")
+
+    def spaces(self) -> RemoteEnvSpacesResult:
+        _deferred("remote_env.spaces", "T12")
+
+    def close(self) -> CloseResult:
+        _deferred("remote_env.close", "T12")
+
+
+class InMemoryEnvironmentBinding:
+    def bind(
+        self, profile: RuntimeProfileRef, env_ref: EnvironmentRef
+    ) -> ScriptedRemoteEnv:
+        _deferred("environment.bind", "T11")
+
+
+class ScriptedTrainingRunner:
+    def train(self, request: TrainingRequest) -> TrainingResult:
+        _deferred("training.train", "T18")
+
+    def evaluate(self, request: PolicyEvaluationRequest) -> PolicyEvaluationResult:
+        _deferred("training.evaluate", "T19")

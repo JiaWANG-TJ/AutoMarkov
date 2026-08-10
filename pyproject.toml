@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "automarkov"
+version = "0.1.0"
+description = "A provenance-first compiler for sequential decision processes"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Jia Wang", email = "jiawang@tongji.edu.cn" }]
+dependencies = [
+  "cryptography==49.0.0",
+  "pydantic==2.12.0",
+  "rfc8785==0.1.4",
+]
+
+[project.scripts]
+automarkov = "automarkov.cli:main"
+
+[dependency-groups]
+dev = [
+    "pyright==1.1.411",
+    "pytest==8.4.2",
+    "ruff==0.16.2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/automarkov"]
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+testpaths = ["tests"]

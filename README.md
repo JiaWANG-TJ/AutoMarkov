@@ -14,12 +14,30 @@ content addressed; approvals and run transitions are append-only events.
 
 ## Status
 
-AutoMarkov is under active development. The current bootstrap milestone specifies
-the domain contract, provenance rules, isolated runtime profiles, and executable
-interface contracts; it does not claim that the Python package, CLI, or benchmark
-matrix is implemented. The bootstrap tree intentionally has no installable Python
-project. `pyproject.toml`, locked profiles, and package metadata are added with the
-first source-bearing tracer bullet.
+AutoMarkov is under active development. The first G0 tracer bullet provides an
+installable core package, strict intake types, eight public protocol views, and a
+`TaskRequest -> RunView(RECEIVED)` in-memory compiler path through both Python and
+the CLI. Artifact persistence, the event reducer, runtime integrations, suite
+adapters, training, and the benchmark matrix remain tracked follow-up work.
+
+## Development
+
+Create the locked environment and run the focused G0 checks:
+
+```bash
+uv sync --locked
+uv run pytest -q tests/contract/test_public_seams.py \
+  tests/contract/test_import_boundaries.py \
+  tests/end_to_end/test_compiler_walking_skeleton.py
+```
+
+The current CLI walking skeleton accepts one request and returns a typed JSON view:
+
+```bash
+uv run automarkov compile \
+  --request-id request_demo \
+  --task-text "Model a finite-horizon inventory decision process."
+```
 
 ## Runtime policy
 
