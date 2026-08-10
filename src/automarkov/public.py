@@ -1,9 +1,19 @@
 from __future__ import annotations
 
-from typing import Annotated, Literal, Protocol, runtime_checkable
+from datetime import datetime
+from typing import Annotated, Literal, Protocol, cast, runtime_checkable
 
-from pydantic import Field, ValidationInfo, field_validator
+from pydantic import AfterValidator, Field, ValidationInfo, field_validator
 
+from automarkov.canonical import (
+    MAX_CANONICAL_DOCUMENT_BYTES,
+    MAX_JSON_NODES,
+    MAX_JSON_PAYLOAD_BYTES,
+    CanonicalJsonValue,
+    StrictTrue,
+    parse_json_payload,
+    validate_and_measure_raw_json_tree,
+)
 from automarkov.domain import (
     ArtifactId,
     CompilerDispatchRequest,
@@ -12,6 +22,7 @@ from automarkov.domain import (
     Sha256Digest,
     StrictFrozenModel,
     TaskRequest,
+    validate_task_request_payload,
 )
 
 NonEmptyText = Annotated[str, Field(strict=True, min_length=1, max_length=100_000)]
@@ -38,13 +49,164 @@ EnvironmentHandleId = Annotated[
 ]
 
 
+def _require_utc_timestamp(value: str) -> str:
+    if not value.endswith("Z") or "+" in value or value.count("Z") != 1:
+        raise ValueError("created_at must be a canonical UTC-Z timestamp")
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError as error:
+        raise ValueError("created_at must be a valid UTC timestamp") from error
+    canonical = parsed.isoformat(timespec="microseconds").replace(".000000+00:00", "Z")
+    if canonical.endswith("+00:00"):
+        canonical = canonical.removesuffix("+00:00").rstrip("0").rstrip(".") + "Z"
+    if value != canonical:
+        raise ValueError("created_at must use the canonical UTC-Z representation")
+    return value
+
+
+def _require_sorted_unique_evidence_ids(value: tuple[str, ...]) -> tuple[str, ...]:
+    expected = tuple(sorted(set(value), key=lambda item: item.encode("utf-8")))
+    if value != expected:
+        raise ValueError("source_evidence_ids must be sorted and unique")
+    return value
+
+
+PrincipalId = Annotated[
+    str,
+    Field(
+        strict=True,
+        pattern=r"^principal_[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+    ),
+]
+CanonicalUtcTimestamp = Annotated[
+    str,
+    Field(
+        strict=True,
+        pattern=(
+            r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:"
+            r"[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?Z$"
+        ),
+    ),
+    AfterValidator(_require_utc_timestamp),
+]
+EvidenceId = Annotated[
+    str,
+    Field(
+        strict=True,
+        pattern=r"^E-[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+    ),
+]
+CanonicalEvidenceIds = Annotated[
+    tuple[EvidenceId, ...],
+    AfterValidator(_require_sorted_unique_evidence_ids),
+]
+ArtifactType = Annotated[
+    str, Field(strict=True, min_length=1, pattern=r"^[a-z][a-z0-9_]{0,63}$")
+]
+PayloadSchemaVersion = Annotated[
+    str,
+    Field(
+        strict=True,
+        pattern=r"^automarkov\.[a-z0-9-]+\.v[1-9][0-9]*$",
+    ),
+]
+
+
+def validate_task_request_json(raw: bytes) -> TaskRequest:
+    """从 duplicate-aware 的原始 JSON bytes 构建任务请求。"""
+
+    payload = parse_json_payload(raw)
+    if type(payload) is not dict:
+        raise ValueError("TaskRequest JSON root must be an object")
+    return validate_task_request_payload(payload)
+
+
 class ArtifactPutRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.artifact-put-request.v1"]
-    artifact_type: Annotated[
-        str, Field(strict=True, min_length=1, pattern=r"^[a-z][a-z0-9_]{0,63}$")
-    ]
+    schema_version: Literal["automarkov.artifact-put-request.v2"]
+    artifact_type: ArtifactType
     payload_bytes: bytes = Field(strict=True, max_length=8 * 1024 * 1024)
     parent_artifact_ids: tuple[ArtifactId, ...]
+    created_by: PrincipalId
+    created_at: CanonicalUtcTimestamp
+    source_evidence_ids: CanonicalEvidenceIds
+
+    @field_validator("parent_artifact_ids")
+    @classmethod
+    def require_canonical_parents(
+        cls, value: tuple[ArtifactId, ...]
+    ) -> tuple[ArtifactId, ...]:
+        expected = tuple(sorted(set(value), key=lambda item: item.root.encode("utf-8")))
+        if value != expected:
+            raise ValueError("parent_artifact_ids must be sorted and unique")
+        return value
+
+
+ArtifactPutInput = dict[str, object]
+_ARTIFACT_PUT_KEYS = {
+    "schema_version",
+    "artifact_type",
+    "payload_bytes",
+    "parent_artifact_ids",
+    "created_by",
+    "created_at",
+    "source_evidence_ids",
+}
+
+
+def validate_artifact_put_request(value: object) -> ArtifactPutRequest:
+    """从未经构造的 exact-dict 命令建立可信写入请求。"""
+
+    if type(value) is not dict:
+        raise ValueError("ArtifactPutRequest ingress requires an exact dict")
+    raw = cast(dict[object, object], value)
+    if any(type(key) is not str for key in raw) or set(raw) != _ARTIFACT_PUT_KEYS:
+        raise ValueError("ArtifactPutRequest ingress has an invalid keyset")
+    payload_bytes = raw["payload_bytes"]
+    if type(payload_bytes) is not bytes:
+        raise ValueError("payload_bytes must be exact bytes")
+    if len(payload_bytes) > MAX_JSON_PAYLOAD_BYTES:
+        raise ValueError("payload_bytes exceeds byte limit")
+    parent_ids = raw["parent_artifact_ids"]
+    evidence_ids = raw["source_evidence_ids"]
+    if type(parent_ids) is not list:
+        raise ValueError("parent_artifact_ids must be a raw string list")
+    if type(evidence_ids) is not list:
+        raise ValueError("source_evidence_ids must be a raw string list")
+    if len(parent_ids) + len(evidence_ids) + 13 > MAX_JSON_NODES:
+        raise ValueError("ArtifactPutRequest metadata exceeds resource limits")
+    metadata = {
+        cast(str, key): item for key, item in raw.items() if key != "payload_bytes"
+    }
+    validate_and_measure_raw_json_tree(metadata)
+
+    normalized = cast(dict[str, object], dict(raw))
+    normalized["parent_artifact_ids"] = tuple(
+        ArtifactId(root=cast(str, item)) for item in cast(list[object], parent_ids)
+    )
+    normalized["source_evidence_ids"] = tuple(cast(list[str], evidence_ids))
+    return ArtifactPutRequest.model_validate(normalized, strict=True)
+
+
+class ArtifactEnvelope(StrictFrozenModel):
+    artifact_type: ArtifactType
+    schema_version: PayloadSchemaVersion
+    schema_id: Annotated[str, Field(strict=True, pattern=r"^sha256:[0-9a-f]{64}$")]
+    payload_media_type: Literal["application/vnd.automarkov.canonical-payload+json"]
+    payload_hash: Annotated[str, Field(strict=True, pattern=r"^sha256:[0-9a-f]{64}$")]
+    parent_artifact_ids: tuple[ArtifactId, ...]
+    created_by: PrincipalId
+    created_at: CanonicalUtcTimestamp
+    source_evidence_ids: CanonicalEvidenceIds
+
+    @field_validator("parent_artifact_ids")
+    @classmethod
+    def require_canonical_parents(
+        cls, value: tuple[ArtifactId, ...]
+    ) -> tuple[ArtifactId, ...]:
+        expected = tuple(sorted(set(value), key=lambda item: item.root.encode("utf-8")))
+        if value != expected:
+            raise ValueError("parent_artifact_ids must be sorted and unique")
+        return value
 
 
 class ArtifactPutResult(StrictFrozenModel):
@@ -77,10 +239,21 @@ class ArtifactAppendRequest(StrictFrozenModel):
     event_bytes: bytes = Field(strict=True, max_length=8 * 1024 * 1024)
 
 
+class CanonicalPayloadDocument(StrictFrozenModel):
+    schema_id: Annotated[str, Field(strict=True, pattern=r"^sha256:[0-9a-f]{64}$")]
+    exact_float_paths: tuple[str, ...]
+    payload: CanonicalJsonValue
+
+
 class ArtifactBytesResult(StrictFrozenModel):
-    schema_version: Literal["automarkov.artifact-bytes-result.v1"]
+    schema_version: Literal["automarkov.artifact-bytes-result.v2"]
     artifact_id: ArtifactId
-    payload_bytes: bytes = Field(strict=True, max_length=8 * 1024 * 1024)
+    envelope: ArtifactEnvelope
+    payload_bytes: bytes = Field(
+        strict=True,
+        max_length=MAX_CANONICAL_DOCUMENT_BYTES,
+    )
+    payload_document: CanonicalPayloadDocument
 
 
 class ArtifactLineageResult(StrictFrozenModel):
@@ -199,14 +372,7 @@ class RemoteEnvSpacesResult(StrictFrozenModel):
 
 class CloseResult(StrictFrozenModel):
     schema_version: Literal["automarkov.close-result.v1"]
-    closed: Literal[True]
-
-    @field_validator("closed", mode="before")
-    @classmethod
-    def require_exact_true(cls, value: object) -> object:
-        if type(value) is not bool or value is not True:
-            raise ValueError("closed must be the boolean true")
-        return value
+    closed: StrictTrue
 
 
 class TrainingRequest(StrictFrozenModel):
@@ -239,7 +405,7 @@ class Compiler(Protocol):
 
 @runtime_checkable
 class ArtifactRepository(Protocol):
-    def put(self, request: ArtifactPutRequest) -> ArtifactPutResult: ...
+    def put(self, request: ArtifactPutInput) -> ArtifactPutResult: ...
     def get(self, artifact_id: ArtifactId) -> ArtifactBytesResult: ...
     def append(self, request: ArtifactAppendRequest) -> RunView: ...
     def lineage(self, artifact_id: ArtifactId) -> ArtifactLineageResult: ...

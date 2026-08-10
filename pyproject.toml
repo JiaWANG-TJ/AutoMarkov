@@ -13,8 +13,10 @@ license-files = ["LICENSE"]
 authors = [{ name = "Jia Wang", email = "jiawang@tongji.edu.cn" }]
 dependencies = [
   "cryptography==49.0.0",
+  "jsonschema==4.26.0",
   "pydantic==2.12.0",
   "rfc8785==0.1.4",
+  "typing-extensions==4.16.0",
 ]
 
 [project.scripts]

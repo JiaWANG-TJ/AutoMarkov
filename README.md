@@ -14,21 +14,22 @@ content addressed; approvals and run transitions are append-only events.
 
 ## Status
 
-AutoMarkov is under active development. The first G0 tracer bullet provides an
-installable core package, strict intake types, eight public protocol views, and a
-`TaskRequest -> RunView(RECEIVED)` in-memory compiler path through both Python and
-the CLI. Artifact persistence, the event reducer, runtime integrations, suite
-adapters, training, and the benchmark matrix remain tracked follow-up work.
+AutoMarkov is under active development. The G0 core currently provides an
+installable package, strict intake types, eight public protocol views, bounded
+canonical JSON codecs, and immutable content-addressed artifact repositories
+backed by either memory or transactional SQLite. The append-only event reducer,
+runtime integrations, suite adapters, training, and benchmark matrix remain
+tracked follow-up work.
 
 ## Development
 
-Create the locked environment and run the focused G0 checks:
+Create the locked environment and run the focused trust-substrate checks:
 
 ```bash
 uv sync --locked
-uv run pytest -q tests/contract/test_public_seams.py \
-  tests/contract/test_import_boundaries.py \
-  tests/end_to_end/test_compiler_walking_skeleton.py
+uv run pytest -q tests/unit/test_canonical_json.py \
+  tests/contract/test_artifact_repository.py \
+  tests/contract/test_artifact_schema_registry.py
 ```
 
 The current CLI walking skeleton accepts one request and returns a typed JSON view:

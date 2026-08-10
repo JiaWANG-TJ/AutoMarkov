@@ -1,22 +1,24 @@
 from __future__ import annotations
 
+import copy
 import subprocess
 import sys
 from collections.abc import Callable
+from typing import Any, cast
 
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 from automarkov.adapters import InMemoryCompiler
 from automarkov.api import compile_task
 from automarkov.domain import (
     CompilerDispatchRequest,
     RequestBudget,
-    RequestPermissions,
     RunId,
     RunState,
     RunView,
     TaskRequest,
+    validate_task_request_payload,
 )
 from automarkov.errors import (
     CapabilityDeferredError,
@@ -26,22 +28,26 @@ from automarkov.errors import (
 
 
 def make_request(request_id: str = "request_walking_skeleton") -> TaskRequest:
-    return TaskRequest(
-        schema_version="automarkov.task-request.v1",
-        request_id=request_id,
-        task_text="Model a finite-horizon inventory replenishment decision process.",
-        budget=RequestBudget(
-            schema_version="automarkov.request-budget.v1",
-            wall_time_seconds=60,
-            llm_token_limit=0,
-            tool_call_limit=0,
-        ),
-        permissions=RequestPermissions(
-            schema_version="automarkov.request-permissions.v1",
-            allow_retrieval=False,
-            allow_clarification=False,
-            allow_code_execution=False,
-        ),
+    return validate_task_request_payload(
+        {
+            "schema_version": "automarkov.task-request.v1",
+            "request_id": request_id,
+            "task_text": (
+                "Model a finite-horizon inventory replenishment decision process."
+            ),
+            "budget": {
+                "schema_version": "automarkov.request-budget.v1",
+                "wall_time_seconds": 60,
+                "llm_token_limit": 0,
+                "tool_call_limit": 0,
+            },
+            "permissions": {
+                "schema_version": "automarkov.request-permissions.v1",
+                "allow_retrieval": False,
+                "allow_clarification": False,
+                "allow_code_execution": False,
+            },
+        },
     )
 
 
@@ -129,6 +135,83 @@ def test_task_request_is_strict_frozen_and_closed() -> None:
         )
     with pytest.raises(ValidationError, match="frozen"):
         request.task_text = "mutated"
+
+
+def test_compiler_start_revalidates_a_forged_task_request() -> None:
+    valid = make_request("request_forged_valid")
+    constructed = TaskRequest.model_construct(
+        schema_version="automarkov.task-request.v1",
+        request_id=valid.request_id,
+        task_text=valid.task_text,
+        budget=valid.budget,
+        permissions=valid.permissions,
+    )
+
+    for forged in (constructed, valid.model_copy()):
+        with pytest.raises(ValueError, match="validated exact TaskRequest"):
+            InMemoryCompiler().start(forged)
+
+
+def test_compiler_rejects_task_requests_from_unapproved_pydantic_ingress() -> None:
+    payload = make_request("request_unapproved_ingress").model_dump(mode="python")
+    coerced = TaskRequest.model_validate(
+        payload
+        | {
+            "budget": payload["budget"] | {"wall_time_seconds": "60"},
+        },
+        strict=False,
+    )
+    duplicate_json = (
+        TaskRequest.model_validate(payload)
+        .model_dump_json()
+        .replace(
+            '"request_id":"request_unapproved_ingress"',
+            '"request_id":"request_first","request_id":"request_second"',
+        )
+    )
+    duplicate_accepted_by_pydantic = TypeAdapter(TaskRequest).validate_json(
+        duplicate_json,
+        strict=True,
+    )
+
+    for unapproved in (coerced, duplicate_accepted_by_pydantic):
+        with pytest.raises(ValueError, match="validated exact TaskRequest"):
+            InMemoryCompiler().start(unapproved)
+
+
+@pytest.mark.parametrize(
+    "mutated_field",
+    ["request", "budget", "nested-extra", "scalar-subclass"],
+)
+def test_compiler_rejects_mutation_after_validated_ingress(
+    mutated_field: str,
+) -> None:
+    request = make_request(f"request_mutated_{mutated_field}")
+    if mutated_field == "request":
+        cast(dict[str, Any], request.__dict__)["request_id"] = (
+            "request_forged_after_validation"
+        )
+    elif mutated_field == "budget":
+        cast(dict[str, Any], request.budget.__dict__)["wall_time_seconds"] = 61
+    elif mutated_field == "nested-extra":
+        cast(dict[str, Any], request.budget.__dict__)["forged_extra"] = "hidden"
+    else:
+        class IntSubclass(int):
+            pass
+
+        cast(dict[str, Any], request.budget.__dict__)["wall_time_seconds"] = (
+            IntSubclass(60)
+        )
+
+    with pytest.raises(ValueError, match="validated exact TaskRequest"):
+        InMemoryCompiler().start(request)
+
+
+def test_compiler_rejects_a_shallow_copy_of_validated_ingress() -> None:
+    copied = copy.copy(make_request("request_shallow_copy"))
+
+    with pytest.raises(ValueError, match="validated exact TaskRequest"):
+        InMemoryCompiler().start(copied)
 
 
 def test_run_view_rejects_an_artifact_id_in_the_task_request_namespace() -> None:

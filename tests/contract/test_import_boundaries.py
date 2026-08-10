@@ -11,9 +11,16 @@ _SEAM_ROOTS = ("automarkov.domain", "automarkov.public")
 _ALLOWED_INTERNAL_PREFIXES = (
     "automarkov.domain",
     "automarkov.errors",
+    "automarkov.canonical",
     "automarkov.public",
 )
-_ALLOWED_EXTERNAL_ROOTS = {"__future__", "pydantic"}
+_ALLOWED_EXTERNAL_ROOTS = {
+    "__future__",
+    "pydantic",
+    "jsonschema",
+    "rfc8785",
+    "typing_extensions",
+}
 _FORBIDDEN_RUNTIME_ROOTS = {
     "camel",
     "gymnasium",

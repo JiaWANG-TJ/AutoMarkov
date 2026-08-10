@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
+import automarkov.adapters as adapter_module
 from automarkov.adapters import (
     InMemoryArtifactRepository,
     InMemoryCompiler,
@@ -15,9 +16,11 @@ from automarkov.adapters import (
     ScriptedRemoteEnv,
     ScriptedTrainingRunner,
 )
+from automarkov.canonical import MAX_CANONICAL_DOCUMENT_BYTES
 from automarkov.domain import ArtifactId, Sha256Digest
-from automarkov.errors import CapabilityDeferredError
+from automarkov.errors import ArtifactSchemaError
 from automarkov.public import (
+    ArtifactBytesResult,
     ArtifactPutRequest,
     ArtifactPutResult,
     ArtifactRepository,
@@ -34,13 +37,35 @@ from automarkov.public import (
 )
 
 
-def _artifact_put_request() -> ArtifactPutRequest:
-    return ArtifactPutRequest(
-        schema_version="automarkov.artifact-put-request.v1",
-        artifact_type="task_request",
-        payload_bytes=b'{"request_id":"request_demo"}',
-        parent_artifact_ids=(ArtifactId(root="artifact_parent"),),
-    )
+def _artifact_put_request() -> dict[str, object]:
+    return {
+        "schema_version": "automarkov.artifact-put-request.v2",
+        "artifact_type": "task_request",
+        "payload_bytes": b'{"request_id":"request_demo"}',
+        "parent_artifact_ids": ["artifact_" + "a" * 64],
+        "created_by": "principal_public_seam",
+        "created_at": "2026-08-10T09:00:00Z",
+        "source_evidence_ids": [],
+    }
+
+
+def test_adapter_exports_preserve_t01_and_add_the_sqlite_repository() -> None:
+    expected = {
+        "InMemoryArtifactRepository",
+        "InMemoryCompiler",
+        "InMemoryEnvironmentBinding",
+        "ScriptedEvidenceGateway",
+        "ScriptedExecutionSandbox",
+        "ScriptedLocalLlmRuntime",
+        "ScriptedRemoteEnv",
+        "ScriptedTrainingRunner",
+        "SqliteArtifactRepository",
+    }
+
+    assert set(adapter_module.__all__) == expected
+    assert {
+        name for name in adapter_module.__all__ if hasattr(adapter_module, name)
+    } == (expected)
 
 
 @pytest.mark.parametrize(
@@ -94,10 +119,13 @@ def test_public_protocols_accept_their_structural_adapters(
         pytest.param(
             ArtifactPutRequest,
             {
-                "schema_version": "automarkov.artifact-put-request.v1",
+                "schema_version": "automarkov.artifact-put-request.v2",
                 "artifact_type": "task_request",
                 "payload_bytes": b"{}",
-                "parent_artifact_ids": (ArtifactId(root="artifact_parent"),),
+                "parent_artifact_ids": (ArtifactId(root="artifact_" + "a" * 64),),
+                "created_by": "principal_public_seam",
+                "created_at": "2026-08-10T09:00:00Z",
+                "source_evidence_ids": (),
             },
             {"payload_bytes": "{}"},
             "artifact_type",
@@ -108,7 +136,7 @@ def test_public_protocols_accept_their_structural_adapters(
             ArtifactPutResult,
             {
                 "schema_version": "automarkov.artifact-put-result.v1",
-                "artifact_id": ArtifactId(root="artifact_demo"),
+                "artifact_id": ArtifactId(root="artifact_" + "b" * 64),
                 "payload_hash": Sha256Digest(root="sha256:" + "0" * 64),
             },
             {"artifact_id": "artifact_demo"},
@@ -137,24 +165,34 @@ def test_public_request_and_result_models_are_strict_frozen_and_closed(
         setattr(model, mutable_field, replacement)
 
 
-def test_deferred_artifact_put_fails_with_typed_capability_owner() -> None:
+def test_artifact_put_fails_closed_for_an_unregistered_payload_schema() -> None:
     repository = InMemoryArtifactRepository()
 
-    with pytest.raises(CapabilityDeferredError) as raised:
+    with pytest.raises(ArtifactSchemaError) as raised:
         repository.put(_artifact_put_request())
 
-    assert raised.value.capability == "artifact.put"
-    assert raised.value.owner_ticket == "T02"
+    assert raised.value.artifact_type == "task_request"
 
 
 def test_artifact_put_result_round_trips_through_its_public_json_schema() -> None:
     result = ArtifactPutResult(
         schema_version="automarkov.artifact-put-result.v1",
-        artifact_id=ArtifactId(root="artifact_roundtrip"),
+        artifact_id=ArtifactId(root="artifact_" + "c" * 64),
         payload_hash=Sha256Digest(root="sha256:" + "0" * 64),
     )
 
     assert ArtifactPutResult.model_validate_json(result.model_dump_json()) == result
+
+
+def test_artifact_bytes_result_v2_declares_the_canonical_document_cap() -> None:
+    schema = ArtifactBytesResult.model_json_schema()
+
+    assert schema["properties"]["schema_version"]["const"] == (
+        "automarkov.artifact-bytes-result.v2"
+    )
+    assert schema["properties"]["payload_bytes"]["maxLength"] == (
+        MAX_CANONICAL_DOCUMENT_BYTES
+    )
 
 
 @pytest.mark.parametrize(

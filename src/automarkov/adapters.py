@@ -6,6 +6,8 @@ from uuid import uuid4
 
 from automarkov.domain import (
     CompilerDispatchRequest,
+    RequestBudget,
+    RequestPermissions,
     RunId,
     RunState,
     RunView,
@@ -17,12 +19,6 @@ from automarkov.errors import (
     UnknownRunError,
 )
 from automarkov.public import (
-    ArtifactAppendRequest,
-    ArtifactBytesResult,
-    ArtifactId,
-    ArtifactLineageResult,
-    ArtifactPutRequest,
-    ArtifactPutResult,
     CloseResult,
     EnvironmentRef,
     EvidenceCrawlRequest,
@@ -49,6 +45,19 @@ from automarkov.public import (
     TrainingRequest,
     TrainingResult,
 )
+from automarkov.repository import InMemoryArtifactRepository, SqliteArtifactRepository
+
+__all__ = [
+    "InMemoryArtifactRepository",
+    "InMemoryCompiler",
+    "InMemoryEnvironmentBinding",
+    "ScriptedEvidenceGateway",
+    "ScriptedExecutionSandbox",
+    "ScriptedLocalLlmRuntime",
+    "ScriptedRemoteEnv",
+    "ScriptedTrainingRunner",
+    "SqliteArtifactRepository",
+]
 
 
 def _deferred(capability: str, owner_ticket: str) -> Never:
@@ -63,13 +72,28 @@ class InMemoryCompiler:
         self._runs: dict[str, RunView] = {}
 
     def start(self, request: TaskRequest) -> RunId:
+        if type(request) is not TaskRequest or not request.has_validated_provenance():
+            raise ValueError("compiler start requires a validated exact TaskRequest")
+        raw_request = dict(request.__dict__)
+        for field_name, model_type in (
+            ("budget", RequestBudget),
+            ("permissions", RequestPermissions),
+        ):
+            nested = raw_request.get(field_name)
+            if type(nested) is not model_type or not nested.has_validated_provenance():
+                raise ValueError(f"TaskRequest.{field_name} has invalid provenance")
+            raw_request[field_name] = nested.model_dump(mode="python", warnings="error")
+        validated_request = TaskRequest.model_validate(
+            raw_request,
+            strict=True,
+        )
         run_id = self._run_id_factory()
         if run_id.root in self._runs:
             raise RunIdCollisionError(run_id.root)
         self._runs[run_id.root] = RunView(
             schema_version="automarkov.run-view.v1",
             run_id=run_id,
-            task_request_id=request.request_id,
+            task_request_id=validated_request.request_id,
             state=RunState.RECEIVED,
         )
         return run_id
@@ -85,23 +109,6 @@ class InMemoryCompiler:
 
     def package(self, run_id: RunId) -> PackageResult:
         _deferred("compiler.package", "T24")
-
-
-class InMemoryArtifactRepository:
-    def put(self, request: ArtifactPutRequest) -> ArtifactPutResult:
-        _deferred("artifact.put", "T02")
-
-    def get(self, artifact_id: ArtifactId) -> ArtifactBytesResult:
-        _deferred("artifact.get", "T02")
-
-    def append(self, request: ArtifactAppendRequest) -> RunView:
-        _deferred("artifact.append", "T03")
-
-    def lineage(self, artifact_id: ArtifactId) -> ArtifactLineageResult:
-        _deferred("artifact.lineage", "T02")
-
-    def project(self, run_id: RunId) -> RunView:
-        _deferred("artifact.project", "T03")
 
 
 class ScriptedLocalLlmRuntime:
