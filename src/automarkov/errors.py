@@ -266,3 +266,31 @@ class RunProjectorIdentityError(AutoMarkovError):
         super().__init__(
             f"requested run projector identity is unavailable: {projector_version}"
         )
+
+
+class LocalLlmRuntimeStateError(AutoMarkovError):
+    code = "local_llm_runtime_state_error"
+
+    def __init__(self, state: str) -> None:
+        self.state = state
+        super().__init__(f"local LLM runtime is not ready: {state}")
+
+
+class LocalLlmRuntimeCapacityError(AutoMarkovError):
+    code = "local_llm_runtime_capacity_error"
+
+    def __init__(self, runtime_id: str) -> None:
+        self.runtime_id = runtime_id
+        super().__init__(f"local LLM runtime capacity is exhausted: {runtime_id}")
+
+
+class EvidenceCapabilityDeniedError(AutoMarkovError):
+    code = "evidence_capability_denied"
+
+    def __init__(self, principal_id: str, store_id: str) -> None:
+        self.principal_id = principal_id
+        self.store_id = store_id
+        super().__init__(
+            "evidence capability does not authorize the requested store: "
+            f"{principal_id}/{store_id}"
+        )

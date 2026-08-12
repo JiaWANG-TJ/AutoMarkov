@@ -445,6 +445,8 @@ def _normalize_canonical_json(value: object) -> object:
 
 
 def _canonical_json_input(value: object) -> object:
+    if type(value) is tuple or type(value) is MappingProxyType:
+        value = _thaw_json(value)
     validate_and_measure_raw_json_tree(value)
     return _normalize_canonical_json(value)
 
@@ -1205,7 +1207,8 @@ def require_registered_model_number_contract(model_type: type[BaseModel]) -> Non
             continue
         visited.add(visit_key)
 
-        node_type = node.get("type")
+        raw_node_type = node.get("type")
+        node_type = raw_node_type if type(raw_node_type) is str else None
         serialization = node.get("serialization")
         if serialization is not None:
             validator_spec = node.get("function")

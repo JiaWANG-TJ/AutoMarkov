@@ -12,6 +12,7 @@ _ALLOWED_INTERNAL_PREFIXES = (
     "automarkov.domain",
     "automarkov.errors",
     "automarkov.canonical",
+    "automarkov.llm_contracts",
     "automarkov.public",
 )
 _TYPE_ONLY_INTERNAL_PREFIXES = ("automarkov.lifecycle",)

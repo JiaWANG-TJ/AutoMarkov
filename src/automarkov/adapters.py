@@ -28,6 +28,10 @@ from automarkov.lifecycle import (
     RunProjection,
     validate_lifecycle_command,
 )
+from automarkov.local_llm_runtime import (
+    AttachedLocalLlmRuntime,
+    PrivilegedUnixRuntimeConnectionProvider,
+)
 from automarkov.public import (
     ArtifactRepository,
     AuthenticatedCommandContext,
@@ -61,9 +65,11 @@ from automarkov.public import (
 from automarkov.repository import InMemoryArtifactRepository, SqliteArtifactRepository
 
 __all__ = [
+    "AttachedLocalLlmRuntime",
     "InMemoryArtifactRepository",
     "InMemoryCompiler",
     "InMemoryEnvironmentBinding",
+    "PrivilegedUnixRuntimeConnectionProvider",
     "ScriptedEvidenceGateway",
     "ScriptedExecutionSandbox",
     "ScriptedLocalLlmRuntime",

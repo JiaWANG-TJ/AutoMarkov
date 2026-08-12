@@ -32,17 +32,16 @@ from automarkov.domain import (
     validate_task_request_payload,
 )
 from automarkov.lifecycle import LifecycleCommitResult, RunProjection
+from automarkov.llm_contracts import (
+    LlmCompletionRequest,
+    LlmCompletionResult,
+    LlmProbeResult,
+    LlmStartRequest,
+)
 
 LifecycleCommandInput: TypeAlias = dict[str, CanonicalJsonValue]
 
 NonEmptyText = Annotated[str, Field(strict=True, min_length=1, max_length=100_000)]
-RuntimeId = Annotated[
-    str,
-    Field(
-        strict=True,
-        pattern=r"^runtime_[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
-    ),
-]
 ProfileId = Annotated[
     str,
     Field(
@@ -367,27 +366,6 @@ class PackageResult(StrictFrozenModel):
     schema_version: Literal["automarkov.package-result.v1"]
     run_id: RunId
     package_artifact_id: ArtifactId
-
-
-class LlmStartRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.llm-start-request.v1"]
-    runtime_manifest_artifact_id: ArtifactId
-
-
-class LlmProbeResult(StrictFrozenModel):
-    schema_version: Literal["automarkov.llm-probe-result.v1"]
-    runtime_id: RuntimeId
-    ready: bool = Field(strict=True)
-
-
-class LlmCompletionRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.llm-completion-request.v1"]
-    prompt_artifact_id: ArtifactId
-
-
-class LlmCompletionResult(StrictFrozenModel):
-    schema_version: Literal["automarkov.llm-completion-result.v1"]
-    response_artifact_id: ArtifactId
 
 
 class EvidenceSearchRequest(StrictFrozenModel):

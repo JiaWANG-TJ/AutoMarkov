@@ -8,9 +8,11 @@ from pydantic import ValidationError
 import automarkov.adapters as adapter_module
 import automarkov.domain as domain_module
 from automarkov.adapters import (
+    AttachedLocalLlmRuntime,
     InMemoryArtifactRepository,
     InMemoryCompiler,
     InMemoryEnvironmentBinding,
+    PrivilegedUnixRuntimeConnectionProvider,
     ScriptedEvidenceGateway,
     ScriptedExecutionSandbox,
     ScriptedLocalLlmRuntime,
@@ -53,9 +55,11 @@ def _artifact_put_request() -> dict[str, object]:
 
 def test_adapter_exports_preserve_t01_and_add_the_sqlite_repository() -> None:
     expected = {
+        "AttachedLocalLlmRuntime",
         "InMemoryArtifactRepository",
         "InMemoryCompiler",
         "InMemoryEnvironmentBinding",
+        "PrivilegedUnixRuntimeConnectionProvider",
         "ScriptedEvidenceGateway",
         "ScriptedExecutionSandbox",
         "ScriptedLocalLlmRuntime",
@@ -68,6 +72,11 @@ def test_adapter_exports_preserve_t01_and_add_the_sqlite_repository() -> None:
     assert {
         name for name in adapter_module.__all__ if hasattr(adapter_module, name)
     } == (expected)
+    assert adapter_module.AttachedLocalLlmRuntime is AttachedLocalLlmRuntime
+    assert (
+        adapter_module.PrivilegedUnixRuntimeConnectionProvider
+        is PrivilegedUnixRuntimeConnectionProvider
+    )
 
 
 @pytest.mark.parametrize(
