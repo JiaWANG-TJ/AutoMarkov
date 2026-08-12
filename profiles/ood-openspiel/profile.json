@@ -1,0 +1,59 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:4d0d16ade6288a5a3a676db3e9eb99c7ac02517fb530de479e624f10561de4c7",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "game_theory.openspiel.v1"
+  ],
+  "conflict_groups": [
+    "openspiel-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:ba6acda739dfb182e139b09fee2f06350c6a5d28c3ddecfa0e4ca48bb95cd98a",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:d539a5f5b467f95b7a0344365574d35a8b42428e12fcedd4feca88eb0ccfd4e7",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "open-spiel": "2.0.1"
+  },
+  "platform": null,
+  "profile_id": "ood-openspiel",
+  "protocol_edges": [],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/artifacts/input"
+  ],
+  "repository_commits": {
+    "open-spiel": "112b77704631fc2ce7ad8e4581f6ca09798ce15a"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:5848af6a9a0bdf6a3171ecf5efe225aebf65fc00f7816aa8e0124ca99f21f3c5",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:b9f8dd1a80d1bfe2b459c1c917458256cf586dd568cf8a7bd9d004c992e837eb",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": [
+    "/mnt/automarkov/artifacts/output"
+  ]
+}

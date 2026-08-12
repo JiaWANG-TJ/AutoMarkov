@@ -1,0 +1,66 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:75e0d1f221f71706fb740c29c87218b6d736a50b0c084251b1dd677c294949e4",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "remote_env.metadrive.v1",
+    "scenario.convert.v1"
+  ],
+  "conflict_groups": [
+    "driving-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "remote-env-server.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu_or_gpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:3e5d3b3833ff5a9bab93fe86a2ba940c5ff6dbf6ed612dd87f816c94bde80aa7",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:f1823b46ae8b09819d1b54358fa40085050f8177621e77f59ec5f96c6e43d208",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "metadrive-simulator": "0.4.3",
+    "setuptools": "84.0.0"
+  },
+  "platform": null,
+  "profile_id": "env-metadrive",
+  "protocol_edges": [
+    "RemoteEnv"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/assets/metadrive"
+  ],
+  "repository_commits": {
+    "metadrive": "5bf8ea8909c4643a4099a250e6f5fb89c695d8b4",
+    "scenarionet": "d4acdb5f5a844744fc85cb2dc3880d7d4a6eb170"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:ae345eeb751cdb0b09c1a42ebe1f07cd338bc6b011b6d2e64344666efe2e07b4",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:e4fb5f8ebdee936977554b915a5b3646831a5682c1b7272b5ceb4484e8fe93a7",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": [
+    "/mnt/automarkov/artifacts/scenarios"
+  ]
+}

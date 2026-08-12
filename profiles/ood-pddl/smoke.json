@@ -1,0 +1,19 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "ood-pddl",
+  "enabled": true,
+  "imports": [
+    "unified_planning"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "ray",
+    "scenarionet",
+    "smacv2",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

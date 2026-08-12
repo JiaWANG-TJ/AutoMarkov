@@ -1,0 +1,22 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "authoring",
+  "enabled": true,
+  "imports": [
+    "camel",
+    "httpx",
+    "lancedb",
+    "pydantic",
+    "sentence_transformers"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "ray",
+    "smacv2",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

@@ -1,0 +1,648 @@
+{
+  "dependencies": [
+    {
+      "license": "MIT",
+      "name": "annotated-doc",
+      "source": "https://pypi.org/pypi/annotated-doc/0.0.5/json#info.license_expression",
+      "version": "0.0.5"
+    },
+    {
+      "license": "MIT",
+      "name": "annotated-types",
+      "source": "https://pypi.org/pypi/annotated-types/0.8.0/json#info.license_expression",
+      "version": "0.8.0"
+    },
+    {
+      "license": "MIT",
+      "name": "anyio",
+      "source": "https://pypi.org/pypi/anyio/4.14.2/json#info.license_expression",
+      "version": "4.14.2"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "astor",
+      "source": "https://pypi.org/pypi/astor/0.8.1/json#info.classifiers+info.license",
+      "version": "0.8.1"
+    },
+    {
+      "license": "MIT",
+      "name": "attrs",
+      "source": "https://pypi.org/pypi/attrs/26.1.0/json#info.license_expression",
+      "version": "26.1.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "camel-ai",
+      "source": "https://pypi.org/pypi/camel-ai/0.2.90/json#info.license_expression",
+      "version": "0.2.90"
+    },
+    {
+      "license": "MPL-2.0",
+      "name": "certifi",
+      "source": "https://pypi.org/pypi/certifi/2026.7.22/json#info.classifiers",
+      "version": "2026.7.22"
+    },
+    {
+      "license": "MIT-0",
+      "name": "cffi",
+      "source": "https://pypi.org/pypi/cffi/2.1.1/json#info.license_expression",
+      "version": "2.1.1"
+    },
+    {
+      "license": "MIT",
+      "name": "charset-normalizer",
+      "source": "https://pypi.org/pypi/charset-normalizer/3.4.9/json#info.license",
+      "version": "3.4.9"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "click",
+      "source": "https://pypi.org/pypi/click/8.4.2/json#info.license_expression",
+      "version": "8.4.2"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "colorama",
+      "source": "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz#sha256=08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44&path=colorama-0.4.6/LICENSE.txt",
+      "version": "0.4.6"
+    },
+    {
+      "license": "Apache-2.0 OR BSD-3-Clause",
+      "name": "cryptography",
+      "source": "https://pypi.org/pypi/cryptography/50.0.0/json#info.license_expression",
+      "version": "50.0.0"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-SOFTWARE-LICENSE",
+      "name": "cuda-bindings",
+      "source": "https://pypi.org/pypi/cuda-bindings/13.3.1/json#info.license_expression",
+      "version": "13.3.1"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "cuda-pathfinder",
+      "source": "https://pypi.org/pypi/cuda-pathfinder/1.6.0/json#info.license_expression",
+      "version": "1.6.0"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-CUDA-EULA",
+      "name": "cuda-toolkit",
+      "source": "https://docs.nvidia.com/cuda/archive/13.0.2/eula/index.html",
+      "version": "13.0.3.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "deprecation",
+      "source": "https://pypi.org/pypi/deprecation/2.1.0/json#info.classifiers",
+      "version": "2.1.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "distro",
+      "source": "https://pypi.org/pypi/distro/1.9.0/json#info.classifiers",
+      "version": "1.9.0"
+    },
+    {
+      "license": "MIT",
+      "name": "docstring-parser",
+      "source": "https://pypi.org/pypi/docstring-parser/0.17.0/json#info.classifiers",
+      "version": "0.17.0"
+    },
+    {
+      "license": "MIT",
+      "name": "filelock",
+      "source": "https://pypi.org/pypi/filelock/3.32.2/json#info.license_expression",
+      "version": "3.32.2"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "fsspec",
+      "source": "https://files.pythonhosted.org/packages/00/78/f34251dadb8f3921264a1d9b8946f5e542014ee2614b285261b4e40e6775/fsspec-2026.7.0.tar.gz#sha256=c803c40f4cf860b49dea58ee3e1c33cb9c790520e233537e1340049f89b82a88&path=fsspec-2026.7.0/LICENSE",
+      "version": "2026.7.0"
+    },
+    {
+      "license": "MIT",
+      "name": "google-search-results",
+      "source": "https://pypi.org/pypi/google-search-results/2.4.2/json#info.classifiers",
+      "version": "2.4.2"
+    },
+    {
+      "license": "MIT",
+      "name": "h11",
+      "source": "https://pypi.org/pypi/h11/0.16.0/json#info.classifiers",
+      "version": "0.16.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "hf-xet",
+      "source": "https://pypi.org/pypi/hf-xet/1.6.0/json#info.license_expression",
+      "version": "1.6.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "httpcore",
+      "source": "https://pypi.org/pypi/httpcore/1.0.9/json#info.license_expression",
+      "version": "1.0.9"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "httpcore2",
+      "source": "https://pypi.org/pypi/httpcore2/2.10.0/json#info.license_expression",
+      "version": "2.10.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "httpx",
+      "source": "https://pypi.org/pypi/httpx/0.28.1/json#info.classifiers+info.license",
+      "version": "0.28.1"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "httpx2",
+      "source": "https://pypi.org/pypi/httpx2/2.10.0/json#info.license_expression",
+      "version": "2.10.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "huggingface-hub",
+      "source": "https://pypi.org/pypi/huggingface-hub/1.27.0/json#info.classifiers",
+      "version": "1.27.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "idna",
+      "source": "https://pypi.org/pypi/idna/3.18/json#info.license_expression",
+      "version": "3.18"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "jinja2",
+      "source": "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz#sha256=0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d&path=jinja2-3.1.6/LICENSE.txt",
+      "version": "3.1.6"
+    },
+    {
+      "license": "MIT",
+      "name": "jiter",
+      "source": "https://pypi.org/pypi/jiter/0.16.0/json#info.license_expression",
+      "version": "0.16.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "joblib",
+      "source": "https://pypi.org/pypi/joblib/1.5.3/json#info.license_expression",
+      "version": "1.5.3"
+    },
+    {
+      "license": "MIT",
+      "name": "jsonschema",
+      "source": "https://pypi.org/pypi/jsonschema/4.26.0/json#info.license_expression",
+      "version": "4.26.0"
+    },
+    {
+      "license": "MIT",
+      "name": "jsonschema-specifications",
+      "source": "https://pypi.org/pypi/jsonschema-specifications/2025.9.1/json#info.license_expression",
+      "version": "2025.9.1"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "lance-namespace",
+      "source": "https://pypi.org/pypi/lance-namespace/0.9.0/json#info.license",
+      "version": "0.9.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "lance-namespace-urllib3-client",
+      "source": "https://pypi.org/pypi/lance-namespace-urllib3-client/0.9.0/json#info.license",
+      "version": "0.9.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "lancedb",
+      "source": "https://pypi.org/pypi/lancedb/0.36.0/json#info.classifiers",
+      "version": "0.36.0"
+    },
+    {
+      "license": "MIT",
+      "name": "markdown-it-py",
+      "source": "https://pypi.org/pypi/markdown-it-py/4.2.0/json#info.classifiers",
+      "version": "4.2.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "markupsafe",
+      "source": "https://pypi.org/pypi/markupsafe/3.0.3/json#info.license_expression",
+      "version": "3.0.3"
+    },
+    {
+      "license": "MIT",
+      "name": "mcp",
+      "source": "https://pypi.org/pypi/mcp/2.0.0/json#info.classifiers",
+      "version": "2.0.0"
+    },
+    {
+      "license": "MIT",
+      "name": "mcp-types",
+      "source": "https://pypi.org/pypi/mcp-types/2.0.0/json#info.classifiers",
+      "version": "2.0.0"
+    },
+    {
+      "license": "MIT",
+      "name": "mdurl",
+      "source": "https://pypi.org/pypi/mdurl/0.1.2/json#info.classifiers",
+      "version": "0.1.2"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "mpmath",
+      "source": "https://files.pythonhosted.org/packages/e0/47/dd32fa426cc72114383ac549964eecb20ecfd886d1e5ccf5340b55b02f57/mpmath-1.3.0.tar.gz#sha256=7a28eb2a9774d00c7bc92411c19a89209d5da7c4c9a9e227be8330a23a25b91f&path=mpmath-1.3.0/LICENSE",
+      "version": "1.3.0"
+    },
+    {
+      "license": "MIT",
+      "name": "narwhals",
+      "source": "https://pypi.org/pypi/narwhals/2.24.0/json#info.license_expression",
+      "version": "2.24.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "networkx",
+      "source": "https://pypi.org/pypi/networkx/3.6.1/json#info.license_expression",
+      "version": "3.6.1"
+    },
+    {
+      "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "name": "numpy",
+      "source": "https://pypi.org/pypi/numpy/2.4.6/json#info.license_expression",
+      "version": "2.4.6"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cublas",
+      "source": "https://pypi.org/pypi/nvidia-cublas/13.1.1.3/json#info.license_expression",
+      "version": "13.1.1.3"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cuda-cupti",
+      "source": "https://pypi.org/pypi/nvidia-cuda-cupti/13.0.85/json#info.license",
+      "version": "13.0.85"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cuda-nvrtc",
+      "source": "https://pypi.org/pypi/nvidia-cuda-nvrtc/13.0.88/json#info.license",
+      "version": "13.0.88"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-CUDA-EULA",
+      "name": "nvidia-cuda-runtime",
+      "source": "https://docs.nvidia.com/cuda/archive/13.0.2/eula/index.html",
+      "version": "13.0.96"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-cuDNN-SLA",
+      "name": "nvidia-cudnn-cu13",
+      "source": "https://docs.nvidia.com/deeplearning/cudnn/backend/v9.20.0/reference/eula.html",
+      "version": "9.20.0.48"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cufft",
+      "source": "https://pypi.org/pypi/nvidia-cufft/12.0.0.61/json#info.license",
+      "version": "12.0.0.61"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cufile",
+      "source": "https://pypi.org/pypi/nvidia-cufile/1.15.1.6/json#info.license",
+      "version": "1.15.1.6"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-curand",
+      "source": "https://pypi.org/pypi/nvidia-curand/10.4.0.35/json#info.license",
+      "version": "10.4.0.35"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cusolver",
+      "source": "https://pypi.org/pypi/nvidia-cusolver/12.0.4.66/json#info.license",
+      "version": "12.0.4.66"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cusparse",
+      "source": "https://pypi.org/pypi/nvidia-cusparse/12.6.3.3/json#info.license",
+      "version": "12.6.3.3"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cusparselt-cu13",
+      "source": "https://pypi.org/pypi/nvidia-cusparselt-cu13/0.8.1/json#info.license",
+      "version": "0.8.1"
+    },
+    {
+      "license": "Apache-2.0 AND BSD-3-Clause",
+      "name": "nvidia-nccl-cu13",
+      "source": "https://raw.githubusercontent.com/NVIDIA/nccl/b91894bd5b190c874d98a017f93f5daa515b65d0/LICENSE.txt",
+      "version": "2.29.7"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-CUDA-EULA",
+      "name": "nvidia-nvjitlink",
+      "source": "https://docs.nvidia.com/cuda/archive/13.0.2/eula/index.html",
+      "version": "13.3.33"
+    },
+    {
+      "license": "LicenseRef-NVIDIA-NVSHMEM-SDK-SLA",
+      "name": "nvidia-nvshmem-cu13",
+      "source": "https://raw.githubusercontent.com/NVIDIA/nvshmem/131da55f643ac87c810ba0bc51d359258bf433a1/License.txt",
+      "version": "3.4.5"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "nvidia-nvtx",
+      "source": "https://pypi.org/pypi/nvidia-nvtx/13.0.85/json#info.license",
+      "version": "13.0.85"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "openai",
+      "source": "https://pypi.org/pypi/openai/2.53.0/json#info.classifiers",
+      "version": "2.53.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "opentelemetry-api",
+      "source": "https://pypi.org/pypi/opentelemetry-api/1.44.0/json#info.license_expression",
+      "version": "1.44.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "overrides",
+      "source": "https://pypi.org/pypi/overrides/7.7.0/json#info.license",
+      "version": "7.7.0"
+    },
+    {
+      "license": "Apache-2.0 OR BSD-2-Clause",
+      "name": "packaging",
+      "source": "https://pypi.org/pypi/packaging/26.3/json#info.license_expression",
+      "version": "26.3"
+    },
+    {
+      "license": "MIT-CMU",
+      "name": "pillow",
+      "source": "https://pypi.org/pypi/pillow/12.3.0/json#info.license_expression",
+      "version": "12.3.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "psutil",
+      "source": "https://pypi.org/pypi/psutil/5.9.8/json#info.classifiers+info.license",
+      "version": "5.9.8"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "pyarrow",
+      "source": "https://pypi.org/pypi/pyarrow/25.0.1/json#info.license_expression",
+      "version": "25.0.1"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "pycparser",
+      "source": "https://pypi.org/pypi/pycparser/3.0/json#info.license_expression",
+      "version": "3.0"
+    },
+    {
+      "license": "MIT",
+      "name": "pydantic",
+      "source": "https://pypi.org/pypi/pydantic/2.12.0/json#info.license_expression",
+      "version": "2.12.0"
+    },
+    {
+      "license": "MIT",
+      "name": "pydantic-core",
+      "source": "https://pypi.org/pypi/pydantic-core/2.41.1/json#info.license_expression",
+      "version": "2.41.1"
+    },
+    {
+      "license": "BSD-2-Clause",
+      "name": "pygments",
+      "source": "https://pypi.org/pypi/pygments/2.20.0/json#info.license_expression",
+      "version": "2.20.0"
+    },
+    {
+      "license": "MIT",
+      "name": "pyjwt",
+      "source": "https://pypi.org/pypi/pyjwt/2.13.0/json#info.license_expression",
+      "version": "2.13.0"
+    },
+    {
+      "license": "Apache-2.0 OR BSD-3-Clause",
+      "name": "python-dateutil",
+      "source": "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz#sha256=37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3&path=python-dateutil-2.9.0.post0/LICENSE",
+      "version": "2.9.0.post0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "python-multipart",
+      "source": "https://pypi.org/pypi/python-multipart/0.0.32/json#info.license_expression",
+      "version": "0.0.32"
+    },
+    {
+      "license": "PSF-2.0",
+      "name": "pywin32",
+      "source": "https://pypi.org/pypi/pywin32/312/json#info.classifiers",
+      "version": "312"
+    },
+    {
+      "license": "MIT",
+      "name": "pyyaml",
+      "source": "https://pypi.org/pypi/pyyaml/6.0.3/json#info.classifiers",
+      "version": "6.0.3"
+    },
+    {
+      "license": "MIT",
+      "name": "referencing",
+      "source": "https://pypi.org/pypi/referencing/0.37.0/json#info.license_expression",
+      "version": "0.37.0"
+    },
+    {
+      "license": "Apache-2.0 AND CNRI-Python",
+      "name": "regex",
+      "source": "https://pypi.org/pypi/regex/2026.7.19/json#info.license_expression",
+      "version": "2026.7.19"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "requests",
+      "source": "https://pypi.org/pypi/requests/2.34.2/json#info.classifiers",
+      "version": "2.34.2"
+    },
+    {
+      "license": "MIT",
+      "name": "rich",
+      "source": "https://pypi.org/pypi/rich/15.0.0/json#info.classifiers",
+      "version": "15.0.0"
+    },
+    {
+      "license": "MIT",
+      "name": "rpds-py",
+      "source": "https://pypi.org/pypi/rpds-py/2026.6.3/json#info.license_expression",
+      "version": "2026.6.3"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "safetensors",
+      "source": "https://pypi.org/pypi/safetensors/0.8.0/json#info.classifiers",
+      "version": "0.8.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "scikit-learn",
+      "source": "https://pypi.org/pypi/scikit-learn/1.9.0/json#info.license_expression",
+      "version": "1.9.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "scipy",
+      "source": "https://pypi.org/pypi/scipy/1.17.1/json#info.classifiers+info.license",
+      "version": "1.17.1"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "sentence-transformers",
+      "source": "https://pypi.org/pypi/sentence-transformers/5.7.0/json#info.license_expression",
+      "version": "5.7.0"
+    },
+    {
+      "license": "MIT",
+      "name": "setuptools",
+      "source": "https://pypi.org/pypi/setuptools/84.0.0/json#info.license_expression",
+      "version": "84.0.0"
+    },
+    {
+      "license": "ISC",
+      "name": "shellingham",
+      "source": "https://pypi.org/pypi/shellingham/1.5.4/json#info.classifiers",
+      "version": "1.5.4"
+    },
+    {
+      "license": "MIT",
+      "name": "six",
+      "source": "https://pypi.org/pypi/six/1.17.0/json#info.classifiers",
+      "version": "1.17.0"
+    },
+    {
+      "license": "Apache-2.0 OR MIT",
+      "name": "sniffio",
+      "source": "https://files.pythonhosted.org/packages/a2/87/a6771e1546d97e7e041b6ae58d80074f81b7d5121207425c964ddf5cfdbd/sniffio-1.3.1.tar.gz#sha256=f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc&path=sniffio-1.3.1/LICENSE,LICENSE.APACHE2,LICENSE.MIT",
+      "version": "1.3.1"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "sse-starlette",
+      "source": "https://pypi.org/pypi/sse-starlette/3.4.8/json#info.license_expression",
+      "version": "3.4.8"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "starlette",
+      "source": "https://pypi.org/pypi/starlette/1.6.0/json#info.license_expression",
+      "version": "1.6.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "sympy",
+      "source": "https://files.pythonhosted.org/packages/83/d3/803453b36afefb7c2bb238361cd4ae6125a569b4db67cd9e79846ba2d68c/sympy-1.14.0.tar.gz#sha256=d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517&path=sympy-1.14.0/LICENSE",
+      "version": "1.14.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "threadpoolctl",
+      "source": "https://pypi.org/pypi/threadpoolctl/3.6.0/json#info.classifiers+info.license",
+      "version": "3.6.0"
+    },
+    {
+      "license": "MIT",
+      "name": "tiktoken",
+      "source": "https://pypi.org/pypi/tiktoken/0.12.0/json#info.license",
+      "version": "0.12.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "tokenizers",
+      "source": "https://pypi.org/pypi/tokenizers/0.22.2/json#info.classifiers",
+      "version": "0.22.2"
+    },
+    {
+      "license": "Apache-2.0 AND Apache-2.0 WITH LLVM-exception AND BSD-2-Clause AND BSD-3-Clause AND BSL-1.0 AND MIT",
+      "name": "torch",
+      "source": "https://pypi.org/pypi/torch/2.13.0/json#info.license_expression",
+      "version": "2.13.0"
+    },
+    {
+      "license": "MPL-2.0 AND MIT",
+      "name": "tqdm",
+      "source": "https://pypi.org/pypi/tqdm/4.70.0/json#info.license",
+      "version": "4.70.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "transformers",
+      "source": "https://pypi.org/pypi/transformers/5.15.0/json#info.license",
+      "version": "5.15.0"
+    },
+    {
+      "license": "MIT",
+      "name": "triton",
+      "source": "https://pypi.org/pypi/triton/3.7.1/json#info.classifiers",
+      "version": "3.7.1"
+    },
+    {
+      "license": "MIT",
+      "name": "truststore",
+      "source": "https://pypi.org/pypi/truststore/0.10.4/json#info.license_expression",
+      "version": "0.10.4"
+    },
+    {
+      "license": "MIT",
+      "name": "typer",
+      "source": "https://pypi.org/pypi/typer/0.27.1/json#info.license_expression",
+      "version": "0.27.1"
+    },
+    {
+      "license": "PSF-2.0",
+      "name": "typing-extensions",
+      "source": "https://pypi.org/pypi/typing-extensions/4.16.0/json#info.license_expression",
+      "version": "4.16.0"
+    },
+    {
+      "license": "MIT",
+      "name": "typing-inspection",
+      "source": "https://pypi.org/pypi/typing-inspection/0.4.3/json#info.license_expression",
+      "version": "0.4.3"
+    },
+    {
+      "license": "MIT",
+      "name": "urllib3",
+      "source": "https://pypi.org/pypi/urllib3/2.7.0/json#info.license_expression",
+      "version": "2.7.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "uvicorn",
+      "source": "https://pypi.org/pypi/uvicorn/0.52.1/json#info.license_expression",
+      "version": "0.52.1"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "websockets",
+      "source": "https://pypi.org/pypi/websockets/15.0.1/json#info.classifiers+info.license",
+      "version": "15.0.1"
+    }
+  ],
+  "profile_id": "authoring",
+  "schema_version": "automarkov.profile-licenses.v1"
+}

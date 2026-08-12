@@ -1,0 +1,16 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "llm-qwen36-vllm",
+  "enabled": false,
+  "imports": [],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "ray",
+    "scenarionet",
+    "smacv2",
+    "tavily"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

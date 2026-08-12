@@ -1,0 +1,6 @@
+# profile.json 的 build_context_files 与域分离哈希冻结全部构建输入；实际 OCI digest 仅在镜像构建并验证后登记。
+FROM --platform=linux/amd64 python:3.10.18-slim-bookworm@sha256:b4d66d07136c546f1765eae2bfcce9a64fa95f37c717c02bedd06d0476d1dbbd
+COPY --from=ghcr.io/astral-sh/uv:0.11.16@sha256:440fd6477af86a2f1b38080c539f1672cd22acb1b1a47e321dba5158ab08864d /uv /uvx /bin/
+WORKDIR /opt/automarkov-profile
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project

@@ -1,0 +1,71 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "taxi_deny.py",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:33281b28c7dcc1de3c2b87d7813c36d6aff11cb143aefe17a40583d1cc1eaeba",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "training.rllib.taxi_synthesis.v1"
+  ],
+  "conflict_groups": [
+    "rllib-modern-runtime",
+    "taxi-source-deny-layer"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "remote-env-client.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:18995e74d7b62aabc458bf80e607f269ef0e34a29faba4fff6bd31a01a88a4ae",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:9e62ccf2a7c768b05aae4e078f97459f51aeb04c5d2bdf5ab682ca4061d34f6a",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "gymnasium": "1.2.2",
+    "minigrid": "3.1.0",
+    "mpe2": "1.1.0",
+    "pettingzoo": "1.26.1",
+    "ray": "2.56.1",
+    "safetensors": "0.8.0",
+    "torch": "2.13.0"
+  },
+  "platform": null,
+  "profile_id": "rllib-taxi-synthesis",
+  "protocol_edges": [
+    "RemoteEnv"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/artifacts/training"
+  ],
+  "repository_commits": {
+    "ray": "936f0d7d49d9da8ac1a9f04cc8a89faf2cb3c42a"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:c0feb4a703d2c28e36296011eca0abdc2519b1f9853214d14bbcced7662c8d9f",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:319b7f15af848001abc9299fb6e827327cef18b6ba88f80677c893651235259e",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": [
+    "/mnt/automarkov/checkpoints"
+  ]
+}

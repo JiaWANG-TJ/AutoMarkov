@@ -1,0 +1,233 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2026-08-10T00:00:00Z",
+    "creators": [
+      "Tool: uv-0.11.16",
+      "Organization: AutoMarkov"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "hasExtractedLicensingInfos": [],
+  "documentNamespace": "https://automarkov.local/spdx/profiles/runner-control/fe88479e48ecead54b8069202654fd7a4b068b5225027571b52331610b928322",
+  "name": "automarkov-profile-runner-control",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-annotated-types-1",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "annotated-types",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.8.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-automarkov-profile-runner-control-2",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "automarkov-profile-runner-control",
+      "sourceInfo": "{\"virtual\":\".\"}",
+      "versionInfo": "0.1.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cffi-3",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/f7/a4/4399daaf8f7dfee9d7c3327fdb0426ee041cc63edc358b93911ceb2bfc7a/cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT-0",
+      "licenseDeclared": "MIT-0",
+      "name": "cffi",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.1.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "34e261f78cb6ceaaa36f42f2613f4380d94d9c759a9c73c769ee6e0247364632"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cryptography-4",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/a9/3c/f3ad17eecc1a57b0ba236dc01f90e783c51f4a2f35f64777cc4f47a184b2/cryptography-49.0.0-cp311-abi3-manylinux_2_34_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 OR BSD-3-Clause",
+      "licenseDeclared": "Apache-2.0 OR BSD-3-Clause",
+      "name": "cryptography",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "49.0.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cbc77da8c523d5abd028635ba850a6966fcee2c82e2bf65a41d1d8afe0f98be9"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pycparser-5",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/0c/c3/44f3fbbfa403ea2a7c779186dc20772604442dde72947e7d01069cbe98e3/pycparser-3.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "pycparser",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pydantic-6",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/f4/9d/d5c855424e2e5b6b626fbc6ec514d8e655a600377ce283008b115abb7445/pydantic-2.12.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pydantic",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.12.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f6a1da352d42790537e95e83a8bdfb91c7efbae63ffd0b86fa823899e807116f"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pydantic-core-7",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/e5/4f/3aaa3bd1ea420a15acc42d7d3ccb3b0bbc5444ae2f9dbc1959f8173e16b8/pydantic_core-2.41.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pydantic-core",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.41.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f4a9543ca355e6df8fbe9c83e9faab707701e9103ae857ecb40f1c0cf8b0e94d"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-rfc8785-8",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/4d/78/119878110660b2ad709888c8a1614fce7e2fab39080ab960656dc8605bf6/rfc8785-0.1.4-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "rfc8785",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.1.4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "520d690b448ecf0703691c76e1a34a24ddcd4fc5bc41d589cb7c58ec651bcd48"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-typing-extensions-9",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "PSF-2.0",
+      "licenseDeclared": "PSF-2.0",
+      "name": "typing-extensions",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "4.16.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-typing-inspection-10",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/42/f7/7a3935abdebd5cf18705a5f0335dd6a3a18bef3baa7cb9edc3b6b9922cc8/typing_inspection-0.4.3-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "typing-inspection",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.4.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5f42b23858a91e0b4ef521f5418f03a0da3c9216fd2995ef5e73463100e676cd"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "relatedSpdxElement": "SPDXRef-Package-annotated-types-1",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-automarkov-profile-runner-control-2",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cffi-3",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cryptography-4",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pycparser-5",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pydantic-6",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pydantic-core-7",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rfc8785-8",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-typing-extensions-9",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-typing-inspection-10",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.3"
+}

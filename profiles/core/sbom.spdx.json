@@ -1,0 +1,365 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2026-08-10T00:00:00Z",
+    "creators": [
+      "Tool: uv-0.11.16",
+      "Organization: AutoMarkov"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "hasExtractedLicensingInfos": [],
+  "documentNamespace": "https://automarkov.local/spdx/profiles/core/69c83826aa007fce14e1a707451dea1242bf7a0adaf9f717e3538803920f75e9",
+  "name": "automarkov-profile-core",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-annotated-types-1",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "annotated-types",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.8.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-attrs-2",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "attrs",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "26.1.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-automarkov-profile-core-3",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "automarkov-profile-core",
+      "sourceInfo": "{\"virtual\":\".\"}",
+      "versionInfo": "0.1.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cffi-4",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/b1/db/dceb9dd5b231e1da801793f8acc9f3c52a7e1afe40bb1aae37e02b0faad5/cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT-0",
+      "licenseDeclared": "MIT-0",
+      "name": "cffi",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.1.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cryptography-5",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/a9/3c/f3ad17eecc1a57b0ba236dc01f90e783c51f4a2f35f64777cc4f47a184b2/cryptography-49.0.0-cp311-abi3-manylinux_2_34_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 OR BSD-3-Clause",
+      "licenseDeclared": "Apache-2.0 OR BSD-3-Clause",
+      "name": "cryptography",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "49.0.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cbc77da8c523d5abd028635ba850a6966fcee2c82e2bf65a41d1d8afe0f98be9"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-jsonschema-6",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/69/90/f63fb5873511e014207a475e2bb4e8b2e570d655b00ac19a9a0ca0a385ee/jsonschema-4.26.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "jsonschema",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "4.26.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-jsonschema-specifications-7",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "jsonschema-specifications",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2025.9.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-packaging-8",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 OR BSD-2-Clause",
+      "licenseDeclared": "Apache-2.0 OR BSD-2-Clause",
+      "name": "packaging",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "26.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pycparser-9",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/0c/c3/44f3fbbfa403ea2a7c779186dc20772604442dde72947e7d01069cbe98e3/pycparser-3.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "pycparser",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pydantic-10",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/f4/9d/d5c855424e2e5b6b626fbc6ec514d8e655a600377ce283008b115abb7445/pydantic-2.12.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pydantic",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.12.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f6a1da352d42790537e95e83a8bdfb91c7efbae63ffd0b86fa823899e807116f"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pydantic-core-11",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/b5/a7/975585147457c2e9fb951c7c8dab56deeb6aa313f3aa72c2fc0df3f74a49/pydantic_core-2.41.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pydantic-core",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.41.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "365109d1165d78d98e33c5bfd815a9b5d7d070f578caefaabcc5771825b4ecb5"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-referencing-12",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "referencing",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.37.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-rfc8785-13",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/4d/78/119878110660b2ad709888c8a1614fce7e2fab39080ab960656dc8605bf6/rfc8785-0.1.4-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "rfc8785",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.1.4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "520d690b448ecf0703691c76e1a34a24ddcd4fc5bc41d589cb7c58ec651bcd48"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-rpds-py-14",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/04/8f/d2f3f532616be4d06c316ef119683e832bd3d41e112bf3a88f4151c95b17/rpds_py-2026.6.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "rpds-py",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2026.6.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ecabd69db66de867690f9797f2f8fa27ba501bbc24540cbdbdc649cd15888ba6"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-typing-extensions-15",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "PSF-2.0",
+      "licenseDeclared": "PSF-2.0",
+      "name": "typing-extensions",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "4.16.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-typing-inspection-16",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/42/f7/7a3935abdebd5cf18705a5f0335dd6a3a18bef3baa7cb9edc3b6b9922cc8/typing_inspection-0.4.3-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "typing-inspection",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.4.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5f42b23858a91e0b4ef521f5418f03a0da3c9216fd2995ef5e73463100e676cd"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "relatedSpdxElement": "SPDXRef-Package-annotated-types-1",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-attrs-2",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-automarkov-profile-core-3",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cffi-4",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cryptography-5",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-jsonschema-6",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-jsonschema-specifications-7",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-packaging-8",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pycparser-9",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pydantic-10",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pydantic-core-11",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-referencing-12",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rfc8785-13",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rpds-py-14",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-typing-extensions-15",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-typing-inspection-16",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.3"
+}

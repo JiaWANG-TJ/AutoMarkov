@@ -1,0 +1,25 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "rllib-core",
+  "enabled": true,
+  "imports": [
+    "gymnasium",
+    "minigrid",
+    "mpe2",
+    "pettingzoo",
+    "ray",
+    "safetensors",
+    "torch"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "open_spiel",
+    "scenarionet",
+    "smacv2",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

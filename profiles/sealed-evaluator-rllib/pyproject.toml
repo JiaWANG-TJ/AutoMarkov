@@ -1,0 +1,17 @@
+[project]
+name = "automarkov-profile-sealed-evaluator-rllib"
+version = "0.1.0"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "cryptography==49.0.0",
+  "gymnasium==1.2.2",
+  "pettingzoo==1.26.1",
+  "pydantic==2.12.0",
+  "ray[rllib]==2.56.1",
+  "rfc8785==0.1.4",
+  "safetensors==0.8.0",
+  "torch==2.13.0",
+]
+
+[tool.uv]
+required-version = "==0.11.16"

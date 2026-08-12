@@ -1,0 +1,20 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "ood-openspiel",
+  "enabled": true,
+  "imports": [
+    "open_spiel",
+    "pyspiel"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "ray",
+    "scenarionet",
+    "smacv2",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

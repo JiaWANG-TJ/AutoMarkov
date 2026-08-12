@@ -1,0 +1,60 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:9339d06d1e425e61612a24cc35444ddeddd3b9d854a785a6b7069478b3f43b07",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "remote_env.minigrid.v1"
+  ],
+  "conflict_groups": [
+    "farama-rllib-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "remote-env-server.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:bb22481dd6c8e352dcb868e2d9dd5f502a8694e31eb69710bc9b887cd78901c1",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:c244f701592003ab1cb75a074d366192b4722b22f666b0b0e8a46ef322df03ff",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "gymnasium": "1.2.2",
+    "minigrid": "3.1.0"
+  },
+  "platform": null,
+  "profile_id": "env-minigrid",
+  "protocol_edges": [
+    "RemoteEnv"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [],
+  "repository_commits": {
+    "minigrid": "90928729376741a41222a257911343b97103b548"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:7a0e7d49f9b9222419af52bf51c0fb829743bb68f0032f9ba00c77a4a7fc97c1",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:bfe0cf4c817620cb3fea9066e55c3b53ad91c8ac824d59fd08e16cef0b80f03b",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": []
+}

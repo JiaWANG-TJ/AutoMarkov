@@ -1,0 +1,70 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:8a4b7fe5c8e468927ca2bd03357acc2fbc8fcfab46c3a276e9cff613ae2cccea",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "authoring.compiler.v1"
+  ],
+  "conflict_groups": [
+    "authoring-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "evidence-gateway-client.v1",
+    "local-llm-client.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:0395b7a86dad7e34f3f909ebad921b379ac0311991b3e3b334e9d6cfc619a1a0",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:8c0024817ae171a3f7221f5a12b599a3a824bc1425a17792c456f11c1f0089ae",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "camel-ai": "0.2.90",
+    "httpx": "0.28.1",
+    "lancedb": "0.36.0",
+    "pydantic": "2.12.0",
+    "sentence-transformers": "5.7.0",
+    "setuptools": "84.0.0"
+  },
+  "platform": null,
+  "profile_id": "authoring",
+  "protocol_edges": [
+    "EvidenceGateway",
+    "LocalLlmRuntime"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/artifacts/allowed"
+  ],
+  "repository_commits": {
+    "camel-ai": "deb286f36702ab15a2cb890c6e223a79e4ce4284"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:9a536eba78ebe9dca180455fa645f2ae8bb997595d9d6a9ae0047120609e74c8",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:922f4143ea3e3f2421d06c3e4f745b9b5bb6b84422ed54b403954409147ff7bf",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": [
+    "/mnt/automarkov/artifacts/run"
+  ]
+}

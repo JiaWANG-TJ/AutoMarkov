@@ -1,0 +1,321 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2026-08-10T00:00:00Z",
+    "creators": [
+      "Tool: uv-0.11.16",
+      "Organization: AutoMarkov"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "hasExtractedLicensingInfos": [],
+  "documentNamespace": "https://automarkov.local/spdx/profiles/retrieval-tavily/dcce8eb342f6d32585736a91689858cb2e499a1c3db944686e1f2189e091115d",
+  "name": "automarkov-profile-retrieval-tavily",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-anyio-1",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/da/35/f2287558c17e29fafc8ef3daf819bb9834061cfa43bff8014f7df7f63bdc/anyio-4.14.2-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "anyio",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "4.14.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-automarkov-profile-retrieval-tavily-2",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "automarkov-profile-retrieval-tavily",
+      "sourceInfo": "{\"virtual\":\".\"}",
+      "versionInfo": "0.1.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-certifi-3",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/0b/a7/71ac2cff56fec219ed242bb11b8efb69fcc4bec75db06fb7bfe35de520e6/certifi-2026.7.22-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "name": "certifi",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2026.7.22",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-charset-normalizer-4",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/a5/34/49b9060e8418b14fb5cba9cf6bfb383111e2538a03a1fb18e66a95aeb3d5/charset_normalizer-3.4.9-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "charset-normalizer",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.4.9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "04ce310cb89c15df659582aee80a0603788732a5e017d5bd5c81158106ce249c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-h11-5",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "h11",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.16.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-httpcore-6",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "httpcore",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.0.9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-httpx-7",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "httpx",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.28.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-idna-8",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "idna",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.18",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-regex-9",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/45/6c/e7098d8b846ccdbf431d8c081b61e496526a27a28094ed09e0dce21b3f54/regex-2026.7.19-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 AND CNRI-Python",
+      "licenseDeclared": "Apache-2.0 AND CNRI-Python",
+      "name": "regex",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2026.7.19",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "09f3e5287f94f17b709dc9a9e70865855feee835c861613be144218ce4ca82cc"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-requests-10",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/a0/f4/c67b0b3f1b9245e8d266f0f112c500d50e5b4e83cb6f3b71b6528104182a/requests-2.34.2-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "requests",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.34.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-tavily-python-11",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/67/dd/cf4b6668ef06670a27ed4012f2bd3663602ad5f0e1ac9b0c23e8d45d01eb/tavily_python-0.7.27-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "tavily-python",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.7.27",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e5cb40cc852d108ced8a313379b7098108642eedfbd97f821296a5e1a483e9b9"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-tiktoken-12",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/f9/39/fe42ad00de01a8c4a49ad8649a2c8a316835a9cad5961b11d21eac0020a5/tiktoken-0.13.0-cp311-cp311-manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "tiktoken",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.13.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "36217497eaffc158607a3b26f065300db2aefd43b115263f3b9688ce38146173"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-typing-extensions-13",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "PSF-2.0",
+      "licenseDeclared": "PSF-2.0",
+      "name": "typing-extensions",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "4.16.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-urllib3-14",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "urllib3",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.7.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "relatedSpdxElement": "SPDXRef-Package-anyio-1",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-automarkov-profile-retrieval-tavily-2",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-certifi-3",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-charset-normalizer-4",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-h11-5",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-httpcore-6",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-httpx-7",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-idna-8",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-regex-9",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-requests-10",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-tavily-python-11",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-tiktoken-12",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-typing-extensions-13",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-urllib3-14",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.3"
+}

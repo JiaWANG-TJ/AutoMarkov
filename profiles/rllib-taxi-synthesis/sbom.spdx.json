@@ -1,0 +1,1639 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2026-08-10T00:00:00Z",
+    "creators": [
+      "Tool: uv-0.11.16",
+      "Organization: AutoMarkov"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "hasExtractedLicensingInfos": [
+    {
+      "extractedText": "1. License Agreement for NVIDIA Software Development Kits\nImportant Notice—Read before downloading, installing, copying or using the licensed software:\nThis license agreement, including exhibits attached (“Agreement”) is a legal agreement between you and NVIDIA Corporation (“NVIDIA”) and governs your use of a NVIDIA software development kit (“SDK”).\nEach SDK has its own set of software and materials, but here is a description of the types of items that may be included in a SDK: source code, header files, APIs, data sets and assets (examples include images, textures, models, scenes, videos, native API input/output files), binary software, sample code, libraries, utility programs, programming code and documentation.\nThis Agreement can be accepted only by an adult of legal age of majority in the country in which the SDK is used.\nIf you are entering into this Agreement on behalf of a company or other legal entity, you represent that you have the legal authority to bind the entity to this Agreement, in which case “you” will mean the entity you represent.\nIf you don’t have the required age or authority to accept this Agreement, or if you don’t accept all the terms and conditions of this Agreement, do not download, install or use the SDK.\nYou agree to use the SDK only for purposes that are permitted by (a) this Agreement, and (b) any applicable law, regulation or generally accepted practices or guidelines in the relevant jurisdictions.\n1.1. License\n1.1.1. License Grant\nSubject to the terms of this Agreement, NVIDIA hereby grants you a non-exclusive, non-transferable license, without the right to sublicense (except as expressly provided in this Agreement) to:\nInstall and use the SDK,\nModify and create derivative works of sample source code delivered in the SDK, and\nDistribute those portions of the SDK that are identified in this Agreement as distributable, as incorporated in object code format into a software application that meets the distribution requirements indicated in this Agreement.\n1.1.2. Distribution Requirements\nThese are the distribution requirements for you to exercise the distribution grant:\nYour application must have material additional functionality, beyond the included portions of the SDK.\nThe distributable portions of the SDK shall only be accessed by your application.\nThe following notice shall be included in modifications and derivative works of sample source code distributed: “This software contains source code provided by NVIDIA Corporation.”\nUnless a developer tool is identified in this Agreement as distributable, it is delivered for your internal use only.\nThe terms under which you distribute your application must be consistent with the terms of this Agreement, including (without limitation) terms relating to the license grant and license restrictions and protection of NVIDIA’s intellectual property rights. Additionally, you agree that you will protect the privacy, security and legal rights of your application users.\nYou agree to notify NVIDIA in writing of any known or suspected distribution or use of the SDK not in compliance with the requirements of this Agreement, and to enforce the terms of your agreements with respect to distributed SDK.\n1.1.3. Authorized Users\nYou may allow employees and contractors of your entity or of your subsidiary(ies) to access and use the SDK from your secure network to perform work on your behalf.\nIf you are an academic institution you may allow users enrolled or employed by the academic institution to access and use the SDK from your secure network.\nYou are responsible for the compliance with the terms of this Agreement by your authorized users. If you become aware that your authorized users didn’t follow the terms of this Agreement, you agree to take reasonable steps to resolve the non-compliance and prevent new occurrences.\n1.1.4. Pre-Release SDK\nThe SDK versions identified as alpha, beta, preview or otherwise as pre-release, may not be fully functional, may contain errors or design flaws, and may have reduced or different security, privacy, accessibility, availability, and reliability standards relative to commercial versions of NVIDIA software and materials. Use of a pre-release SDK may result in unexpected results, loss of data, project delays or other unpredictable damage or loss.\nYou may use a pre-release SDK at your own risk, understanding that pre-release SDKs are not intended for use in production or business-critical systems.\nNVIDIA may choose not to make available a commercial version of any pre-release SDK. NVIDIA may also choose to abandon development and terminate the availability of a pre-release SDK at any time without liability.\n1.1.5. Updates\nNVIDIA may, at its option, make available patches, workarounds or other updates to this SDK. Unless the updates are provided with their separate governing terms, they are deemed part of the SDK licensed to you as provided in this Agreement. You agree that the form and content of the SDK that NVIDIA provides may change without prior notice to you. While NVIDIA generally maintains compatibility between versions, NVIDIA may in some cases make changes that introduce incompatibilities in future versions of the SDK.\n1.1.6. Components Under Other Licenses\nThe SDK may come bundled with, or otherwise include or be distributed with, NVIDIA or third-party components with separate legal notices or terms as may be described in proprietary notices accompanying the SDK. If and to the extent there is a conflict between the terms in this Agreement and the license terms associated with the component, the license terms associated with the components control only to the extent necessary to resolve the conflict.\nSubject to the other terms of this Agreement, you may use the SDK to develop and test applications released under Open Source Initiative (OSI) approved open source software licenses.\n1.1.7. Reservation of Rights\nNVIDIA reserves all rights, title, and interest in and to the SDK, not expressly granted to you under this Agreement.\n1.2. Limitations\nThe following license limitations apply to your use of the SDK:\nYou may not reverse engineer, decompile or disassemble, or remove copyright or other proprietary notices from any portion of the SDK or copies of the SDK.\nExcept as expressly provided in this Agreement, you may not copy, sell, rent, sublicense, transfer, distribute, modify, or create derivative works of any portion of the SDK. For clarity, you may not distribute or sublicense the SDK as a stand-alone product.\nUnless you have an agreement with NVIDIA for this purpose, you may not indicate that an application created with the SDK is sponsored or endorsed by NVIDIA.\nYou may not bypass, disable, or circumvent any encryption, security, digital rights management or authentication mechanism in the SDK.\nYou may not use the SDK in any manner that would cause it to become subject to an open source software license. As examples, licenses that require as a condition of use, modification, and/or distribution that the SDK be:\nDisclosed or distributed in source code form;\nLicensed for the purpose of making derivative works; or\nRedistributable at no charge.\nYou acknowledge that the SDK as delivered is not tested or certified by NVIDIA for use in connection with the design, construction, maintenance, and/or operation of any system where the use or failure of such system could result in a situation that threatens the safety of human life or results in catastrophic damages (each, a “Critical Application”). Examples of Critical Applications include use in avionics, navigation, autonomous vehicle applications, ai solutions for automotive products, military, medical, life support or other life critical applications. NVIDIA shall not be liable to you or any third party, in whole or in part, for any claims or damages arising from such uses. You are solely responsible for ensuring that any product or service developed with the SDK as a whole includes sufficient features to comply with all applicable legal and regulatory standards and requirements.\nYou agree to defend, indemnify and hold harmless NVIDIA and its affiliates, and their respective employees, contractors, agents, officers and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, fines, restitutions and expenses (including but not limited to attorney’s fees and costs incident to establishing the right of indemnification) arising out of or related to products or services that use the SDK in or for Critical Applications, and for use of the SDK outside of the scope of this Agreement or not in compliance with its terms.\nYou may not reverse engineer, decompile or disassemble any portion of the output generated using SDK elements for the purpose of translating such output artifacts to target a non-NVIDIA platform.\n1.3. Ownership\nNVIDIA or its licensors hold all rights, title and interest in and to the SDK and its modifications and derivative works, including their respective intellectual property rights, subject to your rights under Section 1.3.2. This SDK may include software and materials from NVIDIA’s licensors, and these licensors are intended third party beneficiaries that may enforce this Agreement with respect to their intellectual property rights.\nYou hold all rights, title and interest in and to your applications and your derivative works of the sample source code delivered in the SDK, including their respective intellectual property rights, subject to NVIDIA’s rights under Section 1.3.1.\nYou may, but don’t have to, provide to NVIDIA suggestions, feature requests or other feedback regarding the SDK, including possible enhancements or modifications to the SDK. For any feedback that you voluntarily provide, you hereby grant NVIDIA and its affiliates a perpetual, non-exclusive, worldwide, irrevocable license to use, reproduce, modify, license, sublicense (through multiple tiers of sublicensees), and distribute (through multiple tiers of distributors) it without the payment of any royalties or fees to you. NVIDIA will use feedback at its choice. NVIDIA is constantly looking for ways to improve its products, so you may send feedback to NVIDIA through the developer portal at https://developer.nvidia.com.\n1.4. No Warranties\nTHE SDK IS PROVIDED BY NVIDIA “AS IS” AND “WITH ALL FAULTS.” TO THE MAXIMUM EXTENT PERMITTED BY LAW, NVIDIA AND ITS AFFILIATES EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND OR NATURE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, OR THE ABSENCE OF ANY DEFECTS THEREIN, WHETHER LATENT OR PATENT. NO WARRANTY IS MADE ON THE BASIS OF TRADE USAGE, COURSE OF DEALING OR COURSE OF TRADE.\n1.5. Limitation of Liability\nTO THE MAXIMUM EXTENT PERMITTED BY LAW, NVIDIA AND ITS AFFILIATES SHALL NOT BE LIABLE FOR ANY (I) SPECIAL, INCIDENTAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, OR (II) DAMAGES FOR (A) ANY LOST PROFITS, LOSS OF USE, LOSS OF DATA OR LOSS OF GOODWILL, OR (B) THE COSTS OF PROCURING SUBSTITUTE PRODUCTS, ARISING OUT OF OR IN CONNECTION WITH THIS AGREEMENT OR THE USE OR PERFORMANCE OF THE SDK, WHETHER SUCH LIABILITY ARISES FROM ANY CLAIM BASED UPON BREACH OF CONTRACT, BREACH OF WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCT LIABILITY OR ANY OTHER CAUSE OF ACTION OR THEORY OF LIABILITY. IN NO EVENT WILL NVIDIA’S AND ITS AFFILIATES TOTAL CUMULATIVE LIABILITY UNDER OR ARISING OUT OF THIS AGREEMENT EXCEED US$10.00. THE NATURE OF THE LIABILITY OR THE NUMBER OF CLAIMS OR SUITS SHALL NOT ENLARGE OR EXTEND THIS LIMIT.\nThese exclusions and limitations of liability shall apply regardless if NVIDIA or its affiliates have been advised of the possibility of such damages, and regardless of whether a remedy fails its essential purpose. These exclusions and limitations of liability form an essential basis of the bargain between the parties, and, absent any of these exclusions or limitations of liability, the provisions of this Agreement, including, without limitation, the economic terms, would be substantially different.\n1.6. Termination\nThis Agreement will continue to apply until terminated by either you or NVIDIA as described below.\nIf you want to terminate this Agreement, you may do so by stopping to use the SDK.\nNVIDIA may, at any time, terminate this Agreement if:\n(i) you fail to comply with any term of this Agreement and the non-compliance is not fixed within thirty (30) days following notice from NVIDIA (or immediately if you violate NVIDIA’s intellectual property rights);\n(ii) you commence or participate in any legal proceeding against NVIDIA with respect to the SDK; or\n(iii) NVIDIA decides to no longer provide the SDK in a country or, in NVIDIA’s sole discretion, the continued use of it is no longer commercially viable.\nUpon any termination of this Agreement, you agree to promptly discontinue use of the SDK and destroy all copies in your possession or control. Your prior distributions in accordance with this Agreement are not affected by the termination of this Agreement. Upon written request, you will certify in writing that you have complied with your commitments under this section. Upon any termination of this Agreement all provisions survive except for the license grant provisions.\n1.7. General\nIf you wish to assign this Agreement or your rights and obligations, including by merger, consolidation, dissolution or operation of law, contact NVIDIA to ask for permission. Any attempted assignment not approved by NVIDIA in writing shall be void and of no effect. NVIDIA may assign, delegate or transfer this Agreement and its rights and obligations, and if to a non-affiliate you will be notified.\nYou agree to cooperate with NVIDIA and provide reasonably requested information to verify your compliance with this Agreement.\nThis Agreement will be governed in all respects by the laws of the United States and of the State of Delaware, without regard to the conflicts of laws principles. The United Nations Convention on Contracts for the International Sale of Goods is specifically disclaimed. You agree to all terms of this Agreement in the English language.\nThe state or federal courts residing in Santa Clara County, California shall have exclusive jurisdiction over any dispute or claim arising out of this Agreement. Notwithstanding this, you agree that NVIDIA shall still be allowed to apply for injunctive remedies or an equivalent type of urgent legal relief in any jurisdiction.\nIf any court of competent jurisdiction determines that any provision of this Agreement is illegal, invalid or unenforceable, such provision will be construed as limited to the extent necessary to be consistent with and fully enforceable under the law and the remaining provisions will remain in full force and effect. Unless otherwise specified, remedies are cumulative.\nEach party acknowledges and agrees that the other is an independent contractor in the performance of this Agreement.\nThe SDK has been developed entirely at private expense and is “commercial items” consisting of “commercial computer software” and “commercial computer software documentation” provided with RESTRICTED RIGHTS. Use, duplication or disclosure by the U.S. Government or a U.S. Government subcontractor is subject to the restrictions in this Agreement pursuant to DFARS 227.7202-3(a) or as set forth in subparagraphs (c)(1) and (2) of the Commercial Computer Software - Restricted Rights clause at FAR 52.227-19, as applicable. Contractor/manufacturer is NVIDIA, 2788 San Tomas Expressway, Santa Clara, CA 95051.\nThe SDK is subject to United States export laws and regulations. You agree that you will not ship, transfer or export the SDK into any country, or use the SDK in any manner, prohibited by the United States Bureau of Industry and Security or economic sanctions regulations administered by the U.S. Department of Treasury’s Office of Foreign Assets Control (OFAC), or any applicable export laws, restrictions or regulations. These laws include restrictions on destinations, end users and end use. By accepting this Agreement, you confirm that you are not located in a country currently embargoed by the U.S. or otherwise prohibited from receiving the SDK under U.S. law.\nAny notice delivered by NVIDIA to you under this Agreement will be delivered via mail, email or fax. You agree that any notices that NVIDIA sends you electronically will satisfy any legal communication requirements. Please direct your legal notices or other correspondence to NVIDIA Corporation, 2788 San Tomas Expressway, Santa Clara, California 95051, United States of America, Attention: Legal Department.\nThis Agreement and any exhibits incorporated into this Agreement constitute the entire agreement of the parties with respect to the subject matter of this Agreement and supersede all prior negotiations or documentation exchanged between the parties relating to this SDK license. Any additional and/or conflicting terms on documents issued by you are null, void, and invalid. Any amendment or waiver under this Agreement shall be in writing and signed by representatives of both parties.\n\n2. CUDA Toolkit Supplement to Software License Agreement for NVIDIA Software Development Kits\nThe terms in this supplement govern your use of the NVIDIA CUDA Toolkit SDK under the terms of your license agreement (“Agreement”) as modified by this supplement. Capitalized terms used but not defined below have the meaning assigned to them in the Agreement.\nThis supplement is an exhibit to the Agreement and is incorporated as an integral part of the Agreement. In the event of conflict between the terms in this supplement and the terms in the Agreement, the terms in this supplement govern.\n2.1. License Scope\nThe SDK is licensed for you to develop applications only for use in systems with NVIDIA GPUs.\n2.2. Distribution\nThe portions of the SDK that are distributable under the Agreement are listed in Attachment A.\n2.3. Operating Systems\nThose portions of the SDK designed exclusively for use on the Linux or FreeBSD operating systems, or other operating systems derived from the source code to these operating systems, may be copied and redistributed for use in accordance with this Agreement, provided that the object code files are not modified in any way (except for unzipping of compressed files).\n2.4. Audio and Video Encoders and Decoders\nYou acknowledge and agree that it is your sole responsibility to obtain any additional third-party licenses required to make, have made, use, have used, sell, import, and offer for sale your products or services that include or incorporate any third-party software and content relating to audio and/or video encoders and decoders from, including but not limited to, Microsoft, Thomson, Fraunhofer IIS, Sisvel S.p.A., MPEG-LA, and Coding Technologies. NVIDIA does not grant to you under this Agreement any necessary patent or other rights with respect to any audio and/or video encoders and decoders.\n2.5. Licensing\nIf the distribution terms in this Agreement are not suitable for your organization, or for any questions regarding this Agreement, please contact NVIDIA at nvidia-compute-license-questions@nvidia.com.\n2.6. Attachment A\nThe following CUDA Toolkit files may be distributed with applications developed by you, including certain variations of these files that have version number or architecture specific information embedded in the file name - as an example only, for release version 9.0 of the 64-bit Windows software, the file cudart64_90.dll is redistributable.\nComponent\nCUDA Runtime\nWindows\ncudart.dll, cudart_static.lib, cudadevrt.lib\nMac OSX\nlibcudart.dylib, libcudart_static.a, libcudadevrt.a\nLinux\nlibcudart.so, libcudart_static.a, libcudadevrt.a\nAndroid\nlibcudart.so, libcudart_static.a, libcudadevrt.a\nComponent\nCUDA FFT Library\nWindows\ncufft.dll, cufftw.dll, cufft.lib, cufftw.lib\nMac OSX\nlibcufft.dylib, libcufft_static.a, libcufftw.dylib, libcufftw_static.a\nLinux\nlibcufft.so, libcufft_static.a, libcufftw.so, libcufftw_static.a\nAndroid\nlibcufft.so, libcufft_static.a, libcufftw.so, libcufftw_static.a\nComponent\nCUDA BLAS Library\nWindows\ncublas.dll, cublasLt.dll\nMac OSX\nlibcublas.dylib, libcublasLt.dylib, libcublas_static.a, libcublasLt_static.a\nLinux\nlibcublas.so, libcublasLt.so, libcublas_static.a, libcublasLt_static.a\nAndroid\nlibcublas.so, libcublasLt.so, libcublas_static.a, libcublasLt_static.a\nComponent\nNVIDIA “Drop-in” BLAS Library\nWindows\nnvblas.dll\nMac OSX\nlibnvblas.dylib\nLinux\nlibnvblas.so\nComponent\nCUDA Sparse Matrix Library\nWindows\ncusparse.dll, cusparse.lib\nMac OSX\nlibcusparse.dylib, libcusparse_static.a\nLinux\nlibcusparse.so, libcusparse_static.a\nAndroid\nlibcusparse.so, libcusparse_static.a\nComponent\nCUDA Linear Solver Library\nWindows\ncusolver.dll, cusolver.lib\nMac OSX\nlibcusolver.dylib, libcusolver_static.a\nLinux\nlibcusolver.so, libcusolver_static.a\nAndroid\nlibcusolver.so, libcusolver_static.a\nComponent\nCUDA Random Number Generation Library\nWindows\ncurand.dll, curand.lib\nMac OSX\nlibcurand.dylib, libcurand_static.a\nLinux\nlibcurand.so, libcurand_static.a\nAndroid\nlibcurand.so, libcurand_static.a\nComponent\nNVIDIA Performance Primitives Library\nWindows\nnppc.dll, nppc.lib, nppial.dll, nppial.lib, nppicc.dll, nppicc.lib, nppicom.dll, nppicom.lib, nppidei.dll, nppidei.lib, nppif.dll, nppif.lib, nppig.dll, nppig.lib, nppim.dll, nppim.lib, nppist.dll, nppist.lib, nppisu.dll, nppisu.lib, nppitc.dll, nppitc.lib, npps.dll, npps.lib\nMac OSX\nlibnppc.dylib, libnppc_static.a, libnppial.dylib, libnppial_static.a, libnppicc.dylib, libnppicc_static.a, libnppicom.dylib, libnppicom_static.a, libnppidei.dylib, libnppidei_static.a, libnppif.dylib, libnppif_static.a, libnppig.dylib, libnppig_static.a, libnppim.dylib, libnppisu_static.a, libnppitc.dylib, libnppitc_static.a, libnpps.dylib, libnpps_static.a\nLinux\nlibnppc.so, libnppc_static.a, libnppial.so, libnppial_static.a, libnppicc.so, libnppicc_static.a, libnppicom.so, libnppicom_static.a, libnppidei.so, libnppidei_static.a, libnppif.so, libnppif_static.a libnppig.so, libnppig_static.a, libnppim.so, libnppim_static.a, libnppist.so, libnppist_static.a, libnppisu.so, libnppisu_static.a, libnppitc.so libnppitc_static.a, libnpps.so, libnpps_static.a\nAndroid\nlibnppc.so, libnppc_static.a, libnppial.so, libnppial_static.a, libnppicc.so, libnppicc_static.a, libnppicom.so, libnppicom_static.a, libnppidei.so, libnppidei_static.a, libnppif.so, libnppif_static.a libnppig.so, libnppig_static.a, libnppim.so, libnppim_static.a, libnppist.so, libnppist_static.a, libnppisu.so, libnppisu_static.a, libnppitc.so libnppitc_static.a, libnpps.so, libnpps_static.a\nComponent\nNVIDIA JPEG Library\nWindows\nnvjpeg.lib, nvjpeg.dll\nLinux\nlibnvjpeg.so, libnvjpeg_static.a\nComponent\nInternal common library required for statically linking to cuBLAS, cuSPARSE, cuFFT, cuRAND, nvJPEG and NPP\nMac OSX\nlibculibos.a\nLinux\nlibculibos.a\nComponent\nNVIDIA Runtime Compilation Library and Header\nAll\nnvrtc.h\nWindows\nnvrtc.dll, nvrtc-builtins.dll\nMac OSX\nlibnvrtc.dylib, libnvrtc-builtins.dylib\nLinux\nlibnvrtc.so, libnvrtc-builtins.so, libnvrtc_static.a, libnvrtc-builtins_static.a\nComponent\nNVIDIA Optimizing Compiler Library\nWindows\nnvvm.dll\nMac OSX\nlibnvvm.dylib\nLinux\nlibnvvm.so\nComponent\nNVIDIA JIT Linking Library\nWindows\nlibnvJitLink.dll, libnvJitLink.lib\nLinux\nlibnvJitLink.so, libnvJitLink_static.a\nComponent\nNVIDIA Common Device Math Functions Library\nWindows\nlibdevice.10.bc\nMac OSX\nlibdevice.10.bc\nLinux\nlibdevice.10.bc\nComponent\nCUDA Occupancy Calculation Header Library\nAll\ncuda_occupancy.h\nComponent\nCUDA Floating Point Type Headers\nAll\ncuda_fp16.h, cuda_fp16.hpp, cuda_bf16.h, cuda_bf16.hpp, cuda_fp8.h, cuda_fp8.hpp, cuda_fp6.h, cuda_fp6.hpp, cuda_fp4.h, cuda_fp4.hpp\nComponent\nCUDA Headers for Runtime Compilation\nAll\ncrt/host_defines.h, cuComplex.h, cuda_awbarrier_helpers.h, cuda_awbarrier_primitives.h, cuda_wbarrier.h, cuda_pipeline_helpers.h, cuda_pipeline_primitives.h, cuda_pipeline.h, cuda_runtime_api.h, cuda.h, cuda/std/tuple, cuda/std/type_traits, cuda/std/type_traits, cuda/std/utility, device_types.h, vector_functions.h, vector_types.h\nComponent\nCUDA Profiling Tools Interface (CUPTI) Library\nWindows\ncupti.dll\nMac OSX\nlibcupti.dylib\nLinux\nlibcupti.so\nComponent\nNVIDIA Tools Extension Library\nWindows\nnvToolsExt.dll, nvToolsExt.lib\nMac OSX\nlibnvToolsExt.dylib\nLinux\nlibnvToolsExt.so\nComponent\nNVIDIA CUDA Driver Libraries\nLinux\nlibcuda.so, libnvidia-ptxjitcompiler.so, libnvptxcompiler_static.a\nComponent\nNVIDIA CUDA File IO Libraries and Header\nAll\ncufile.h\nLinux\nlibcufile.so, libcufile_rdma.so, libcufile_static.a, libcufile_rdma_static.a\nIn addition to the rights above, for parties that are developing software intended solely for use on Jetson development kits or Jetson modules, and running Linux for Tegra software, the following shall apply:\nThe SDK may be distributed in its entirety, as provided by NVIDIA, and without separation of its components, for you and/or your licensees to create software development kits for use only on the Jetson platform and running Linux for Tegra software.\n2.7. Attachment B\nAdditional Licensing Obligations\nThe following third party components included in the SOFTWARE are licensed to Licensee pursuant to the following terms and conditions:\nLicensee’s use of the GDB third party component is subject to the terms and conditions of GNU GPL v3:\nThis product includes copyrighted third-party software licensed\nunder the terms of the GNU General Public License v3 (\"GPL v3\").\nAll third-party software packages are copyright by their respective\nauthors. GPL v3 terms and conditions are hereby incorporated into\nthe Agreement by this reference: http://www.gnu.org/licenses/gpl.txt\nConsistent with these licensing requirements, the software listed below is provided under the terms of the specified open source software licenses. To obtain source code for software provided under licenses that require redistribution of source code, including the GNU General Public License (GPL) and GNU Lesser General Public License (LGPL), contact oss-requests@nvidia.com. This offer is valid for a period of three (3) years from the date of the distribution of this product by NVIDIA CORPORATION.\nComponent License\nCUDA-GDB GPL v3\nLicensee represents and warrants that any and all third party licensing and/or royalty payment obligations in connection with Licensee’s use of the H.264 video codecs are solely the responsibility of Licensee.\nLicensee’s use of the Thrust library is subject to the terms and conditions of the Apache License Version 2.0. All third-party software packages are copyright by their respective authors. Apache License Version 2.0 terms and conditions are hereby incorporated into the Agreement by this reference. http://www.apache.org/licenses/LICENSE-2.0.html\nIn addition, Licensee acknowledges the following notice: Thrust includes source code from the Boost Iterator, Tuple, System, and Random Number libraries.\nBoost Software License - Version 1.0 - August 17th, 2003\n. . . .\nPermission is hereby granted, free of charge, to any person or\norganization obtaining a copy of the software and accompanying\ndocumentation covered by this license (the \"Software\") to use,\nreproduce, display, distribute, execute, and transmit the Software,\nand to prepare derivative works of the Software, and to permit\nthird-parties to whom the Software is furnished to do so, all\nsubject to the following:\nThe copyright notices in the Software and this entire statement,\nincluding the above license grant, this restriction and the following\ndisclaimer, must be included in all copies of the Software, in whole\nor in part, and all derivative works of the Software, unless such\ncopies or derivative works are solely in the form of machine-executable\nobject code generated by a source language processor.\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND\nNON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR\nANYONE DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES OR\nOTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING\nFROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\nOTHER DEALINGS IN THE SOFTWARE.\nLicensee’s use of the LLVM third party component is subject to the following terms and conditions:\n========================================================================================================\nAll LLVM after 8.0 are distributed under Apache-2.0 with LLVM-exception license, an OSI-approved license\n========================================================================================================\nApache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/\nTERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n1. Definitions.\n\"License\" shall mean the terms and conditions for use, reproduction,\nand distribution as defined by Sections 1 through 9 of this document.\n\"Licensor\" shall mean the copyright owner or entity authorized by\nthe copyright owner that is granting the License.\n\"Legal Entity\" shall mean the union of the acting entity and all\nother entities that control, are controlled by, or are under common\ncontrol with that entity. For the purposes of this definition,\n\"control\" means (i) the power, direct or indirect, to cause the\ndirection or management of such entity, whether by contract or\notherwise, or (ii) ownership of fifty percent (50%) or more of the\noutstanding shares, or (iii) beneficial ownership of such entity.\n\"You\" (or \"Your\") shall mean an individual or Legal Entity\nexercising permissions granted by this License.\n\"Source\" form shall mean the preferred form for making modifications,\nincluding but not limited to software source code, documentation\nsource, and configuration files.\n\"Object\" form shall mean any form resulting from mechanical\ntransformation or translation of a Source form, including but\nnot limited to compiled object code, generated documentation,\nand conversions to other media types.\n\"Work\" shall mean the work of authorship, whether in Source or\nObject form, made available under the License, as indicated by a\ncopyright notice that is included in or attached to the work\n(an example is provided in the Appendix below).\n\"Derivative Works\" shall mean any work, whether in Source or Object\nform, that is based on (or derived from) the Work and for which the\neditorial revisions, annotations, elaborations, or other modifications\nrepresent, as a whole, an original work of authorship. For the purposes\nof this License, Derivative Works shall not include works that remain\nseparable from, or merely link (or bind by name) to the interfaces of,\nthe Work and Derivative Works thereof.\n\"Contribution\" shall mean any work of authorship, including\nthe original version of the Work and any modifications or additions\nto that Work or Derivative Works thereof, that is intentionally\nsubmitted to Licensor for inclusion in the Work by the copyright owner\nor by an individual or Legal Entity authorized to submit on behalf of\nthe copyright owner. For the purposes of this definition, \"submitted\"\nmeans any form of electronic, verbal, or written communication sent\nto the Licensor or its representatives, including but not limited to\ncommunication on electronic mailing lists, source code control systems,\nand issue tracking systems that are managed by, or on behalf of, the\nLicensor for the purpose of discussing and improving the Work, but\nexcluding communication that is conspicuously marked or otherwise\ndesignated in writing by the copyright owner as \"Not a Contribution.\"\n\"Contributor\" shall mean Licensor and any individual or Legal Entity\non behalf of whom a Contribution has been received by Licensor and\nsubsequently incorporated within the Work.\n2. Grant of Copyright License. Subject to the terms and conditions of\nthis License, each Contributor hereby grants to You a perpetual,\nworldwide, non-exclusive, no-charge, royalty-free, irrevocable\ncopyright license to reproduce, prepare Derivative Works of,\npublicly display, publicly perform, sublicense, and distribute the\nWork and such Derivative Works in Source or Object form.\n3. Grant of Patent License. Subject to the terms and conditions of\nthis License, each Contributor hereby grants to You a perpetual,\nworldwide, non-exclusive, no-charge, royalty-free, irrevocable\n(except as stated in this section) patent license to make, have made,\nuse, offer to sell, sell, import, and otherwise transfer the Work,\nwhere such license applies only to those patent claims licensable\nby such Contributor that are necessarily infringed by their\nContribution(s) alone or by combination of their Contribution(s)\nwith the Work to which such Contribution(s) was submitted. If You\ninstitute patent litigation against any entity (including a\ncross-claim or counterclaim in a lawsuit) alleging that the Work\nor a Contribution incorporated within the Work constitutes direct\nor contributory patent infringement, then any patent licenses\ngranted to You under this License for that Work shall terminate\nas of the date such litigation is filed.\n4. Redistribution. You may reproduce and distribute copies of the\nWork or Derivative Works thereof in any medium, with or without\nmodifications, and in Source or Object form, provided that You\nmeet the following conditions:\n(a) You must give any other recipients of the Work or\nDerivative Works a copy of this License; and\n(b) You must cause any modified files to carry prominent notices\nstating that You changed the files; and\n(c) You must retain, in the Source form of any Derivative Works\nthat You distribute, all copyright, patent, trademark, and\nattribution notices from the Source form of the Work,\nexcluding those notices that do not pertain to any part of\nthe Derivative Works; and\n(d) If the Work includes a \"NOTICE\" text file as part of its\ndistribution, then any Derivative Works that You distribute must\ninclude a readable copy of the attribution notices contained\nwithin such NOTICE file, excluding those notices that do not\npertain to any part of the Derivative Works, in at least one\nof the following places: within a NOTICE text file distributed\nas part of the Derivative Works; within the Source form or\ndocumentation, if provided along with the Derivative Works; or,\nwithin a display generated by the Derivative Works, if and\nwherever such third-party notices normally appear. The contents\nof the NOTICE file are for informational purposes only and\ndo not modify the License. You may add Your own attribution\nnotices within Derivative Works that You distribute, alongside\nor as an addendum to the NOTICE text from the Work, provided\nthat such additional attribution notices cannot be construed\nas modifying the License.\nYou may add Your own copyright statement to Your modifications and\nmay provide additional or different license terms and conditions\nfor use, reproduction, or distribution of Your modifications, or\nfor any such Derivative Works as a whole, provided Your use,\nreproduction, and distribution of the Work otherwise complies with\nthe conditions stated in this License.\n5. Submission of Contributions. Unless You explicitly state otherwise,\nany Contribution intentionally submitted for inclusion in the Work\nby You to the Licensor shall be under the terms and conditions of\nthis License, without any additional terms or conditions.\nNotwithstanding the above, nothing herein shall supersede or modify\nthe terms of any separate license agreement you may have executed\nwith Licensor regarding such Contributions.\n6. Trademarks. This License does not grant permission to use the trade\nnames, trademarks, service marks, or product names of the Licensor,\nexcept as required for reasonable and customary use in describing the\norigin of the Work and reproducing the content of the NOTICE file.\n7. Disclaimer of Warranty. Unless required by applicable law or\nagreed to in writing, Licensor provides the Work (and each\nContributor provides its Contributions) on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or\nimplied, including, without limitation, any warranties or conditions\nof TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A\nPARTICULAR PURPOSE. You are solely responsible for determining the\nappropriateness of using or redistributing the Work and assume any\nrisks associated with Your exercise of permissions under this License.\n8. Limitation of Liability. In no event and under no legal theory,\nwhether in tort (including negligence), contract, or otherwise,\nunless required by applicable law (such as deliberate and grossly\nnegligent acts) or agreed to in writing, shall any Contributor be\nliable to You for damages, including any direct, indirect, special,\nincidental, or consequential damages of any character arising as a\nresult of this License or out of the use or inability to use the\nWork (including but not limited to damages for loss of goodwill,\nwork stoppage, computer failure or malfunction, or any and all\nother commercial damages or losses), even if such Contributor\nhas been advised of the possibility of such damages.\n9. Accepting Warranty or Additional Liability. While redistributing\nthe Work or Derivative Works thereof, You may choose to offer,\nand charge a fee for, acceptance of support, warranty, indemnity,\nor other liability obligations and/or rights consistent with this\nLicense. However, in accepting such obligations, You may act only\non Your own behalf and on Your sole responsibility, not on behalf\nof any other Contributor, and only if You agree to indemnify,\ndefend, and hold each Contributor harmless for any liability\nincurred by, or claims asserted against, such Contributor by reason\nof your accepting any such warranty or additional liability.\nEND OF TERMS AND CONDITIONS\nAPPENDIX: How to apply the Apache License to your work.\nTo apply the Apache License to your work, attach the following\nboilerplate notice, with the fields enclosed by brackets \"[]\"\nreplaced with your own identifying information. (Don't include\nthe brackets!) The text should be enclosed in the appropriate\ncomment syntax for the file format. We also recommend that a\nfile or class name and description of purpose be included on the\nsame \"printed page\" as the copyright notice for easier\nidentification within third-party archives.\nCopyright [yyyy] [name of copyright owner]\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\nhttp://www.apache.org/licenses/LICENSE-2.0\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\n-----------------------------------------\nLLVM Exceptions to the Apache 2.0 License\n-----------------------------------------\nAs an exception, if, as a result of your compiling your source code, portions\nof this Software are embedded into an Object form of such source code, you\nmay redistribute such embedded portions in such Object form without complying\nwith the conditions of Sections 4(a), 4(b) and 4(d) of the License.\nIn addition, if you combine or link compiled forms of this Software with\nsoftware that is licensed under the GPLv2 (\"Combined Software\") and if a\ncourt of competent jurisdiction determines that the patent provision (Section\n3), the indemnity provision (Section 9) or other Section of the License\nconflicts with the conditions of the GPLv2, you may retroactively and\nprospectively choose to deem waived or otherwise exclude such Section(s) of\nthe License, but only in their entirety and only with respect to the Combined\nSoftware.\n========================================================\nSoftware from third parties included in the LLVM Project\n========================================================\nThe LLVM Project contains third party software which is under different license\nterms. All such code will be identified clearly using at least one of two\nmechanisms:\n1) It will be in a separate directory tree with its own `LICENSE.txt` or\n`LICENSE` file at the top containing the specific license and restrictions\nwhich apply to that software, or\n2) It will contain specific license and restriction terms at the top of every\nfile.\n==================================================================================================\nLLVM releases prior to LLVM 8.0 was licensed under this University of Illinois Open Source License\n==================================================================================================\nUniversity of Illinois/NCSA\nOpen Source License\nCopyright (c) 2003-2019 University of Illinois at Urbana-Champaign.\nAll rights reserved.\nDeveloped by:\nLLVM Team\nUniversity of Illinois at Urbana-Champaign\nhttp://llvm.org\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \"Software\"), to deal with\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n* Redistributions of source code must retain the above copyright notice,\nthis list of conditions and the following disclaimers.\n* Redistributions in binary form must reproduce the above copyright notice,\nthis list of conditions and the following disclaimers in the\ndocumentation and/or other materials provided with the distribution.\n* Neither the names of the LLVM Team, University of Illinois at\nUrbana-Champaign, nor the names of its contributors may be used to\nendorse or promote products derived from this Software without specific\nprior written permission.\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS\nFOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nCONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE\nSOFTWARE.\nLicensee’s use of the PCRE third party component is subject to the following terms and conditions:\n------------\nPCRE LICENCE\n------------\nPCRE is a library of functions to support regular expressions whose syntax\nand semantics are as close as possible to those of the Perl 5 language.\nRelease 8 of PCRE is distributed under the terms of the \"BSD\" licence, as\nspecified below. The documentation for PCRE, supplied in the \"doc\"\ndirectory, is distributed under the same terms as the software itself. The\nbasic library functions are written in C and are freestanding. Also\nincluded in the distribution is a set of C++ wrapper functions, and a just-\nin-time compiler that can be used to optimize pattern matching. These are\nboth optional features that can be omitted when the library is built.\nTHE BASIC LIBRARY FUNCTIONS\n---------------------------\nWritten by: Philip Hazel\nEmail local part: ph10\nEmail domain: cam.ac.uk\nUniversity of Cambridge Computing Service,\nCambridge, England.\nCopyright (c) 1997-2012 University of Cambridge\nAll rights reserved.\nPCRE JUST-IN-TIME COMPILATION SUPPORT\n-------------------------------------\nWritten by: Zoltan Herczeg\nEmail local part: hzmester\nEmain domain: freemail.hu\nCopyright(c) 2010-2012 Zoltan Herczeg\nAll rights reserved.\nSTACK-LESS JUST-IN-TIME COMPILER\n--------------------------------\nWritten by: Zoltan Herczeg\nEmail local part: hzmester\nEmain domain: freemail.hu\nCopyright(c) 2009-2012 Zoltan Herczeg\nAll rights reserved.\nTHE C++ WRAPPER FUNCTIONS\n-------------------------\nContributed by: Google Inc.\nCopyright (c) 2007-2012, Google Inc.\nAll rights reserved.\nTHE \"BSD\" LICENCE\n-----------------\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are met:\n* Redistributions of source code must retain the above copyright notice,\nthis list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above copyright\nnotice, this list of conditions and the following disclaimer in the\ndocumentation and/or other materials provided with the distribution.\n* Neither the name of the University of Cambridge nor the name of Google\nInc. nor the names of their contributors may be used to endorse or\npromote products derived from this software without specific prior\nwritten permission.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\nAND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\nIMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\nARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE\nLIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\nCONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\nSUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS\nINTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\nCONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\nARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\nPOSSIBILITY OF SUCH DAMAGE.\nSome of the cuBLAS library routines were written by or derived from code written by Vasily Volkov and are subject to the Modified Berkeley Software Distribution License as follows:\nCopyright (c) 2007-2009, Regents of the University of California\nAll rights reserved.\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n* Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions and the following\ndisclaimer in the documentation and/or other materials provided\nwith the distribution.\n* Neither the name of the University of California, Berkeley nor\nthe names of its contributors may be used to endorse or promote\nproducts derived from this software without specific prior\nwritten permission.\nTHIS SOFTWARE IS PROVIDED BY THE AUTHOR \"AS IS\" AND ANY EXPRESS OR\nIMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\nWARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\nDISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,\nINDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\nSERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)\nHOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,\nSTRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING\nIN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\nPOSSIBILITY OF SUCH DAMAGE.\nSome of the cuBLAS library routines were written by or derived from code written by Davide Barbieri and are subject to the Modified Berkeley Software Distribution License as follows:\nCopyright (c) 2008-2009 Davide Barbieri @ University of Rome Tor Vergata.\nAll rights reserved.\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n* Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions and the following\ndisclaimer in the documentation and/or other materials provided\nwith the distribution.\n* The name of the author may not be used to endorse or promote\nproducts derived from this software without specific prior\nwritten permission.\nTHIS SOFTWARE IS PROVIDED BY THE AUTHOR \"AS IS\" AND ANY EXPRESS OR\nIMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\nWARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\nDISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,\nINDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\nSERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)\nHOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,\nSTRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING\nIN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\nPOSSIBILITY OF SUCH DAMAGE.\nSome of the cuBLAS library routines were derived from code developed by the University of Tennessee and are subject to the Modified Berkeley Software Distribution License as follows:\nCopyright (c) 2010 The University of Tennessee.\nAll rights reserved.\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n* Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions and the following\ndisclaimer listed in this license in the documentation and/or\nother materials provided with the distribution.\n* Neither the name of the copyright holders nor the names of its\ncontributors may be used to endorse or promote products derived\nfrom this software without specific prior written permission.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\nOWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\nLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\nSome of the cuBLAS library routines were written by or derived from code written by Jonathan Hogg and are subject to the Modified Berkeley Software Distribution License as follows:\nCopyright (c) 2012, The Science and Technology Facilities Council (STFC).\nAll rights reserved.\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n* Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions and the following\ndisclaimer in the documentation and/or other materials provided\nwith the distribution.\n* Neither the name of the STFC nor the names of its contributors\nmay be used to endorse or promote products derived from this\nsoftware without specific prior written permission.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE STFC BE\nLIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\nCONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\nSUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR\nBUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,\nWHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE\nOR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN\nIF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\nSome of the cuBLAS library routines were written by or derived from code written by Ahmad M. Abdelfattah, David Keyes, and Hatem Ltaief, and are subject to the Apache License, Version 2.0, as follows:\n-- (C) Copyright 2013 King Abdullah University of Science and Technology\nAuthors:\nAhmad Abdelfattah (ahmad.ahmad@kaust.edu.sa)\nDavid Keyes (david.keyes@kaust.edu.sa)\nHatem Ltaief (hatem.ltaief@kaust.edu.sa)\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions\nare met:\n* Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above copyright\nnotice, this list of conditions and the following disclaimer in the\ndocumentation and/or other materials provided with the distribution.\n* Neither the name of the King Abdullah University of Science and\nTechnology nor the names of its contributors may be used to endorse\nor promote products derived from this software without specific prior\nwritten permission.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\nHOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\nLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE\nSome of the cuSPARSE library routines were written by or derived from code written by Li-Wen Chang and are subject to the NCSA Open Source License as follows:\nCopyright (c) 2012, University of Illinois.\nAll rights reserved.\nDeveloped by: IMPACT Group, University of Illinois, http://impact.crhc.illinois.edu\nPermission is hereby granted, free of charge, to any person obtaining\na copy of this software and associated documentation files (the\n\"Software\"), to deal with the Software without restriction, including\nwithout limitation the rights to use, copy, modify, merge, publish,\ndistribute, sublicense, and/or sell copies of the Software, and to\npermit persons to whom the Software is furnished to do so, subject to\nthe following conditions:\n* Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions and the following\ndisclaimers in the documentation and/or other materials provided\nwith the distribution.\n* Neither the names of IMPACT Group, University of Illinois, nor\nthe names of its contributors may be used to endorse or promote\nproducts derived from this Software without specific prior\nwritten permission.\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\nNONINFRINGEMENT. IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT\nHOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER\nIN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR\nIN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE\nSOFTWARE.\nSome of the cuRAND library routines were written by or derived from code written by Mutsuo Saito and Makoto Matsumoto and are subject to the following license:\nCopyright (c) 2009, 2010 Mutsuo Saito, Makoto Matsumoto and Hiroshima\nUniversity. All rights reserved.\nCopyright (c) 2011 Mutsuo Saito, Makoto Matsumoto, Hiroshima\nUniversity and University of Tokyo. All rights reserved.\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n* Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions and the following\ndisclaimer in the documentation and/or other materials provided\nwith the distribution.\n* Neither the name of the Hiroshima University nor the names of\nits contributors may be used to endorse or promote products\nderived from this software without specific prior written\npermission.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\nOWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\nLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\nSome of the cuRAND library routines were derived from code developed by D. E. Shaw Research and are subject to the following license:\nCopyright 2010-2011, D. E. Shaw Research.\nAll rights reserved.\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n* Redistributions of source code must retain the above copyright\nnotice, this list of conditions, and the following disclaimer.\n* Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions, and the following\ndisclaimer in the documentation and/or other materials provided\nwith the distribution.\n* Neither the name of D. E. Shaw Research nor the names of its\ncontributors may be used to endorse or promote products derived\nfrom this software without specific prior written permission.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\nOWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\nLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\nSome of the Math library routines were written by or derived from code developed by Norbert Juffa and are subject to the following license:\nCopyright (c) 2015-2017, Norbert Juffa\nAll rights reserved.\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions\nare met:\n1. Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n2. Redistributions in binary form must reproduce the above copyright\nnotice, this list of conditions and the following disclaimer in the\ndocumentation and/or other materials provided with the distribution.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\nHOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\nLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\nLicensee’s use of the lz4 third party component is subject to the following terms and conditions:\nCopyright (C) 2011-2013, Yann Collet.\nBSD 2-Clause License (http://www.opensource.org/licenses/bsd-license.php)\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n* Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions and the following disclaimer\nin the documentation and/or other materials provided with the\ndistribution.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\nOWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\nLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\nThe NPP library uses code from the Boost Math Toolkit, and is subject to the following license:\nBoost Software License - Version 1.0 - August 17th, 2003\n. . . .\nPermission is hereby granted, free of charge, to any person or\norganization obtaining a copy of the software and accompanying\ndocumentation covered by this license (the \"Software\") to use,\nreproduce, display, distribute, execute, and transmit the Software,\nand to prepare derivative works of the Software, and to permit\nthird-parties to whom the Software is furnished to do so, all\nsubject to the following:\nThe copyright notices in the Software and this entire statement,\nincluding the above license grant, this restriction and the following\ndisclaimer, must be included in all copies of the Software, in whole\nor in part, and all derivative works of the Software, unless such\ncopies or derivative works are solely in the form of machine-executable\nobject code generated by a source language processor.\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND\nNON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR\nANYONE DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES OR\nOTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING\nFROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\nOTHER DEALINGS IN THE SOFTWARE.\nPortions of the Nsight Eclipse Edition is subject to the following license:\nThe Eclipse Foundation makes available all content in this plug-in\n(\"Content\"). Unless otherwise indicated below, the Content is provided\nto you under the terms and conditions of the Eclipse Public License\nVersion 1.0 (\"EPL\"). A copy of the EPL is available at http://\nwww.eclipse.org/legal/epl-v10.html. For purposes of the EPL, \"Program\"\nwill mean the Content.\nIf you did not receive this Content directly from the Eclipse\nFoundation, the Content is being redistributed by another party\n(\"Redistributor\") and different terms and conditions may apply to your\nuse of any object code in the Content. Check the Redistributor's\nlicense that was provided with the Content. If no such license exists,\ncontact the Redistributor. Unless otherwise indicated below, the terms\nand conditions of the EPL still apply to any source code in the\nContent and such source code may be obtained at http://www.eclipse.org.\nSome of the cuBLAS library routines uses code from OpenAI, which is subject to the following license:\nLicense URL\nhttps://github.com/openai/openai-gemm/blob/master/LICENSE\nLicense Text\nThe MIT License\nCopyright (c) 2016 OpenAI (http://openai.com), 2016 Google Inc.\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\nThe above copyright notice and this permission notice shall be included in\nall copies or substantial portions of the Software.\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.\nLicensee’s use of the Visual Studio Setup Configuration Samples is subject to the following license:\nThe MIT License (MIT)\nCopyright (C) Microsoft Corporation. All rights reserved.\nPermission is hereby granted, free of charge, to any person\nobtaining a copy of this software and associated documentation\nfiles (the \"Software\"), to deal in the Software without restriction,\nincluding without limitation the rights to use, copy, modify, merge,\npublish, distribute, sublicense, and/or sell copies of the Software,\nand to permit persons to whom the Software is furnished to do so,\nsubject to the following conditions:\nThe above copyright notice and this permission notice shall be included\nin all copies or substantial portions of the Software.\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS\nOR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\nLicensee’s use of linmath.h header for CPU functions for GL vector/matrix operations from lunarG is subject to the Apache License Version 2.0.\nThe DX12-CUDA sample uses the d3dx12.h header, which is subject to the MIT license .\nComponents of the driver and compiler used for binary management, including nvFatBin, nvcc,\nand cuobjdump, use the Zstandard library which is subject to the following license:\nBSD License\nFor Zstandard software\nCopyright (c) Meta Platforms, Inc. and affiliates. All rights reserved.\nRedistribution and use in source and binary forms, with or without modification, are permitted\nprovided that the following conditions are met:\n* Redistributions of source code must retain the above copyright notice, this\nlist of conditions and the following disclaimer.\n* Redistributions in binary form must reproduce the above copyright notice,\nthis list of conditions and the following disclaimer in the documentation\nand/or other materials provided with the distribution.\n* Neither the name Facebook, nor Meta, nor the names of its contributors may\nbe used to endorse or promote products derived from this software without\nspecific prior written permission.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY\nEXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\nDISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY\nDIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,\nBUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR\nPROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,\nWHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\nARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF\nSUCH DAMAGE.\nComponents of the ctadvisor component, use the SQLite library which is subject to the following license:\nAll of the code and documentation in SQLite has been dedicated to the public domain by the\nauthors. All code authors, and representatives of the companies they work for, have signed\naffidavits dedicating their contributions to the public domain and originals of those signed\naffidavits are stored in a firesafe at the main offices of Hwaci. All contributors are citizens\nof countries that allow creative works to be dedicated into the public domain. Anyone is free\nto copy, modify, publish, use, compile, sell, or distribute the original SQLite code, either\nin source code form or as a compiled binary, for any purpose, commercial or non-commercial,\nand by any means.\nPortions of support for math operations on 128-bit floating-point data type in compiler were derived from SLEEF library which is subject to the following license:\nBoost Software License - Version 1.0 - August 17th, 2003\nPermission is hereby granted, free of charge, to any person or organization\nobtaining a copy of the software and accompanying documentation covered by\nthis license (the \"Software\") to use, reproduce, display, distribute,\nexecute, and transmit the Software, and to prepare derivative works of the\nSoftware, and to permit third-parties to whom the Software is furnished to\ndo so, all subject to the following:\nThe copyright notices in the Software and this entire statement, including\nthe above license grant, this restriction and the following disclaimer,\nmust be included in all copies of the Software, in whole or in part, and\nall derivative works of the Software, unless such copies or derivative\nworks are solely in the form of machine-executable object code generated by\na source language processor.\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT\nSHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE\nFOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,\nARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER\nDEALINGS IN THE SOFTWARE.\nPortions of support for math operations on 128-bit floating-point data type in compiler were derived from SoftFloat library which is subject to the following license:\nThe SoftFloat package was written by me, John R. Hauser. Release 3 of SoftFloat\nwas a completely new implementation supplanting earlier releases. The project to\ncreate Release 3 (now through 3e) was done in the employ of the University of\nCalifornia, Berkeley, within the Department of Electrical Engineering and\nComputer Sciences, first for the Parallel Computing Laboratory (Par Lab) and\nthen for the ASPIRE Lab. The work was officially overseen by Prof. Krste\nAsanovic, with funding provided by these sources:\nPar Lab: Microsoft (Award #024263), Intel (Award #024894), and U.C. Discovery\n(Award #DIG07-10227), with additional support from Par Lab affiliates Nokia,\nNVIDIA, Oracle, and Samsung.\nASPIRE Lab: DARPA PERFECT program (Award #HR0011-12-2-0016), with additional\nsupport from ASPIRE industrial sponsor Intel and ASPIRE affiliates Google, Nokia,\nNVIDIA, Oracle, and Samsung.\nThe following applies to the whole of SoftFloat Release 3e as well as to each\nsource file individually.\nCopyright 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018 The Regents of the\nUniversity of California. All rights reserved.\nRedistribution and use in source and binary forms, with or without modification,\nare permitted provided that the following conditions are met:\nRedistributions of source code must retain the above copyright notice, this list\nof conditions, and the following disclaimer.\nRedistributions in binary form must reproduce the above copyright notice, this\nlist of conditions, and the following disclaimer in the documentation and/or\nother materials provided with the distribution.\nNeither the name of the University nor the names of its contributors may be used\nto endorse or promote products derived from this software without specific prior\nwritten permission.\nTHIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS \"AS IS\", AND ANY EXPRESS\nOR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED. IN NO EVENT\nSHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,\nPROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR\nBUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\nCONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING\nIN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF\nSUCH DAMAGE.",
+      "licenseId": "LicenseRef-NVIDIA-CUDA-EULA",
+      "name": "NVIDIA CUDA Toolkit End User License Agreement",
+      "seeAlsos": [
+        "https://docs.nvidia.com/cuda/archive/13.0.2/eula/index.html"
+      ],
+      "comment": "{\"domain\":\"AutoMarkov-SPDX-License-Evidence-v1\",\"evidence_kind\":\"full_text\",\"sha256\":\"sha256:565d1bdf61ba7cda4cac8e2ddc9151da47958d0040be2395991201a998e2ecdd\"}"
+    },
+    {
+      "extractedText": "Copyright (c) 2016-2025, NVIDIA CORPORATION. All rights reserved.\n\nUnless otherwise noted in the ADDITIONAL LICENSES section, the entirety of the NVSHMEM repository is covered under the LICENSE AGREEMENT FOR NVIDIA SOFTWARE DEVELOPMENT KITS and the NVSHMEM SUPPLEMENT TO SOFTWARE LICENSE AGREEMENT FOR NVIDIA SOFTWARE DEVELOPMENT KITS supplement below.\n\nLICENSE AGREEMENT FOR NVIDIA SOFTWARE DEVELOPMENT KITS\n\nThis license agreement, including exhibits attached (\"Agreement”) is a legal agreement between you and NVIDIA Corporation (\"NVIDIA\") and governs your use of a NVIDIA software development kit (“SDK”). \n\nEach SDK has its own set of software and materials, but here is a description of the types of items that may be included in a SDK: source code, header files, APIs, data sets and assets (examples include images, textures, models, scenes, videos, native API input/output files), binary software, sample code, libraries, utility programs, programming code and documentation. \n\nThis Agreement can be accepted only by an adult of legal age of majority in the country in which the SDK is used. \n\nIf you are entering into this Agreement on behalf of a company or other legal entity, you represent that you have the legal authority to bind the entity to this Agreement, in which case “you” will mean the entity you represent. \n\nIf you don’t have the required age or authority to accept this Agreement, or if you don’t accept all the terms and conditions of this Agreement, do not download, install or use the SDK.  \n\nYou agree to use the SDK only for purposes that are permitted by (a) this Agreement, and (b) any applicable law, regulation or generally accepted practices or guidelines in the relevant jurisdictions.\n\n1.  License. \n\n1.1 Grant\n\nSubject to the terms of this Agreement, NVIDIA hereby grants you a non-exclusive, non-transferable license, without the right to sublicense (except as expressly provided in this Agreement) to: \n\n(i) Install and use the SDK,\n\n(ii)    Modify and create derivative works of source code delivered in the SDK, and\n \n(iii) Distribute those portions of the SDK that are identified in this Agreement as distributable, as incorporated into a software application that meets the distribution requirements indicated in this Agreement.\n\n1.2 Distribution Requirements\n\nThese are the distribution requirements for you to exercise the distribution grant:\n\n(i) Your application must have material additional functionality, beyond the included portions of the SDK.\n\n(ii)    The distributable portions of the SDK shall only be accessed by your application.  \n\n(iii)    The following notice shall be included in modifications and derivative works of sample source code distributed: “This software contains source code provided by NVIDIA Corporation.”\n\n(iv)     Unless a developer tool is identified in this Agreement as distributable, it is delivered for your internal use only.\n\n(v) The terms under which you distribute your application must be consistent with the terms of this Agreement, including (without limitation) terms relating to the license grant and license restrictions and protection of NVIDIA’s intellectual property rights. Additionally, you agree that you will protect the privacy, security and legal rights of your application users. \n\n(vi) You agree to notify NVIDIA in writing of any known or suspected distribution or use of the SDK not in compliance with the requirements of this Agreement, and to enforce the terms of your agreements with respect to distributed SDK.\n\n1.3 Authorized Users\n\nYou may allow employees and contractors of your entity or of your subsidiary(ies) to access and use the SDK from your secure network to perform work on your behalf. \n\nIf you are an academic institution you may allow users enrolled or employed by the academic institution to access and use the SDK from your secure network. \n\nYou are responsible for the compliance with the terms of this Agreement by your authorized users. If you become aware that your authorized users didn’t follow the terms of this Agreement, you agree to take reasonable steps to resolve the non-compliance and prevent new occurrences. \n\n1.4 Pre-Release SDK \nThe SDK versions identified as alpha, beta, preview or otherwise as pre-release, may not be fully functional, may contain errors or design flaws, and may have reduced or different security, privacy, accessibility, availability, and reliability standards relative to commercial versions of NVIDIA software and materials. Use of a pre-release SDK may result in unexpected results, loss of data, project delays or other unpredictable damage or loss. \nYou may use a pre-release SDK at your own risk, understanding that pre-release SDKs are not intended for use in production or business-critical systems. \nNVIDIA may choose not to make available a commercial version of any pre-release SDK. NVIDIA may also choose to abandon development and terminate the availability of a pre-release SDK at any time without liability. \n1.5  Updates\n\nNVIDIA may, at its option, make available patches, workarounds or other updates to this SDK. Unless the updates are provided with their separate governing terms, they are deemed part of the SDK licensed to you as provided in this Agreement.\n\nYou agree that the form and content of the SDK that NVIDIA provides may change without prior notice to you. While NVIDIA generally maintains compatibility between versions, NVIDIA may in some cases make changes that introduce incompatibilities in future versions of the SDK.\n\n1.6  Third Party Licenses\n\nThe SDK may come bundled with, or otherwise include or be distributed with, third party software licensed by a NVIDIA supplier and/or open source software provided under an open source license. Use of third party software is subject to the third-party license terms, or in the absence of third party terms, the terms of this Agreement. Copyright to third party software is held by the copyright holders indicated in the third-party software or license.\n\n1.7 Reservation of Rights\n\nNVIDIA reserves all rights, title and interest in and to the SDK not expressly granted to you under this Agreement.\n\n2.  Limitations. \n\nThe following license limitations apply to your use of the SDK:\n\n2.1 You may not reverse engineer, decompile or disassemble, or remove copyright or other proprietary notices from any portion of the SDK or copies of the SDK. \n\n2.2 Except as expressly provided in this Agreement, you may not copy, sell, rent, sublicense, transfer, distribute, modify, or create derivative works of any portion of the SDK. \n\n2.3 Unless you have an agreement with NVIDIA for this purpose, you may not indicate that an application created with the SDK is sponsored or endorsed by NVIDIA. \n\n2.4 You may not bypass, disable, or circumvent any encryption, security, digital rights management or authentication mechanism in the SDK. \n\n2.5 You may not use the SDK in any manner that would cause it to become subject to an open source software license. As examples, licenses that require as a condition of use, modification, and/or distribution that the SDK be (i) disclosed or distributed in source code form; (ii) licensed for the purpose of making derivative works; or (iii) redistributable at no charge.\n\n2.6  Unless you have an agreement with NVIDIA for this purpose, you may not use the SDK with any system or application where the use or failure of the system or application can reasonably be expected to threaten or result in personal injury, death, or catastrophic loss. Examples include use in nuclear, avionics, navigation, military, medical, life support or other life critical applications. NVIDIA does not design, test or manufacture the SDK for these critical uses and NVIDIA shall not be liable to you or any third party, in whole or in part, for any claims or damages arising from such uses. \n\n2.7 You agree to defend, indemnify and hold harmless NVIDIA and its affiliates, and their respective employees, contractors, agents, officers and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, fines, restitutions and expenses (including but not limited to attorney’s fees and costs incident to establishing the right of indemnification) arising out of or related to your use of the SDK outside of the scope of this Agreement, or not in compliance with its terms.\n\n3.  Ownership. \n\n3.1 NVIDIA or its licensors hold all rights, title and interest in and to the SDK and its modifications and derivative works, including their respective intellectual property rights. This SDK may include software and materials from NVIDIA’s licensors, and these licensors are intended third party beneficiaries that may enforce this Agreement with respect to their intellectual property rights. \n\n3.2 You may, but don’t have to, provide to NVIDIA suggestions, feature requests or other feedback regarding the SDK, including possible enhancements or modifications to the SDK. For any feedback that you voluntarily provide, you hereby grant NVIDIA and its affiliates a perpetual, non-exclusive, worldwide, irrevocable license to use, reproduce, modify, license, sublicense (through multiple tiers of sublicensees), and distribute (through multiple tiers of distributors) it without the payment of any royalties or fees to you. NVIDIA will use feedback at its choice. \n\n4.   No Warranties. \n\nTHE SDK IS PROVIDED BY NVIDIA “AS IS” AND “WITH ALL FAULTS.” TO THE MAXIMUM EXTENT PERMITTED BY LAW, NVIDIA AND ITS AFFILIATES EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND OR NATURE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, OR THE ABSENCE OF ANY DEFECTS THEREIN, WHETHER LATENT OR PATENT. NO WARRANTY IS MADE ON THE BASIS OF TRADE USAGE, COURSE OF DEALING OR COURSE OF TRADE. \n\n5.  Limitations of Liability. \n\nTO THE MAXIMUM EXTENT PERMITTED BY LAW, NVIDIA AND ITS AFFILIATES SHALL NOT BE LIABLE FOR ANY SPECIAL, INCIDENTAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, OR ANY LOST PROFITS, LOSS OF USE, LOSS OF DATA OR LOSS OF GOODWILL, OR THE COSTS OF PROCURING SUBSTITUTE PRODUCTS, ARISING OUT OF OR IN CONNECTION WITH THIS AGREEMENT OR THE USE OR PERFORMANCE OF THE SDK, WHETHER SUCH LIABILITY ARISES FROM ANY CLAIM BASED UPON BREACH OF CONTRACT, BREACH OF WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCT LIABILITY OR ANY OTHER CAUSE OF ACTION OR THEORY OF LIABILITY. IN NO EVENT WILL NVIDIA’S AND ITS AFFILIATES TOTAL CUMULATIVE LIABILITY UNDER OR ARISING OUT OF THIS AGREEMENT EXCEED US$10.00. THE NATURE OF THE LIABILITY OR THE NUMBER OF CLAIMS OR SUITS SHALL NOT ENLARGE OR EXTEND THIS LIMIT. \n\nThese exclusions and limitations of liability shall apply regardless if NVIDIA or its affiliates have been advised of the possibility of such damages, and regardless of whether a remedy fails its essential purpose. These exclusions and limitations of liability form an essential basis of the bargain between the parties, and, absent any of these exclusions or limitations of liability, the provisions of this Agreement, including, without limitation, the economic terms, would be substantially different. \n\n6.   Termination. \n\n6.1 This Agreement will continue to apply until terminated by either you or NVIDIA as described below. \n\n6.2 If you want to terminate this Agreement, you may do so by stopping to use the SDK. \n\n6.3 NVIDIA may, at any time, terminate this Agreement if: (i) you fail to comply with any term of this Agreement and the non-compliance is not fixed within thirty (30) days following notice from NVIDIA (or immediately if you violate NVIDIA’s intellectual property rights); (ii) you commence or participate in any legal proceeding against NVIDIA with respect to the SDK; or (iii) NVIDIA decides to no longer provide the SDK in a country or, in NVIDIA’s sole discretion, the continued use of it is no longer commercially viable. \n\n6.4 Upon any termination of this Agreement, you agree to promptly discontinue use of the SDK and destroy all copies in your possession or control. Your prior distributions in accordance with this Agreement are not affected by the termination of this Agreement. Upon written request, you will certify in writing that you have complied with your commitments under this section. Upon any termination of this Agreement all provisions survive except for the licenses granted to you. \n\n7.  General.  \n \nIf you wish to assign this Agreement or your rights and obligations, including by merger, consolidation, dissolution or operation of law, contact NVIDIA to ask for permission. Any attempted assignment not approved by NVIDIA in writing shall be void and of no effect. NVIDIA may assign, delegate or transfer this Agreement and its rights and obligations, and if to a non-affiliate you will be notified. \n\nYou agree to cooperate with NVIDIA and provide reasonably requested information to verify your compliance with this Agreement.\n\nThis Agreement will be governed in all respects by the laws of the United States and of the State of Delaware as those laws are applied to contracts entered into and performed entirely within Delaware by Delaware residents, without regard to the conflicts of laws principles. The United Nations Convention on Contracts for the International Sale of Goods is specifically disclaimed. You agree to all terms of this Agreement in the English language.\n\nThe state or federal courts residing in Santa Clara County, California shall have exclusive jurisdiction over any dispute or claim arising out of this Agreement. Notwithstanding this, you agree that NVIDIA shall still be allowed to apply for injunctive remedies or an equivalent type of urgent legal relief in any jurisdiction. \n\nIf any court of competent jurisdiction determines that any provision of this Agreement is illegal, invalid or unenforceable, such provision will be construed as limited to the extent necessary to be consistent with and fully enforceable under the law and the remaining provisions will remain in full force and effect. Unless otherwise specified, remedies are cumulative.\n\nEach party acknowledges and agrees that the other is an independent contractor in the performance of this Agreement. \n\nThe SDK is “commercial items” consisting of “commercial computer software” and “commercial computer software documentation” provided, to the extent consistent with a governing federal procurement contract, with RESTRICTED RIGHTS. Contractor/manufacturer is NVIDIA, 2788 San Tomas Expressway, Santa Clara, CA 95051.\n\nThe SDK is subject to United States export laws and regulations. You agree that you will not ship, transfer or export the SDK into any country, or use the SDK in any manner, prohibited by the United States Bureau of Industry and Security or economic sanctions regulations administered by the U.S. Department of Treasury’s Office of Foreign Assets Control (OFAC), or any applicable export laws, restrictions or regulations. These laws include restrictions on destinations, end users and end use. By accepting this Agreement, you confirm that you are not a resident or citizen of any country currently embargoed by the U.S. and that you are not otherwise prohibited from receiving the SDK.\n\nAny notice delivered by NVIDIA to you under this Agreement will be delivered via mail, email or fax. You agree that any notices that NVIDIA sends you electronically will satisfy any legal communication requirements. Please direct your legal notices or other correspondence to NVIDIA Corporation, 2788 San Tomas Expressway, Santa Clara, California 95051, United States of America, Attention: Legal Department.\n\nThis Agreement and any exhibits incorporated into this Agreement constitute the entire agreement of the parties with respect to the subject matter of this Agreement and supersede all prior negotiations or documentation exchanged between the parties relating to this SDK license. Any additional and/or conflicting terms on documents issued by you are null, void, and invalid. Any amendment or waiver under this Agreement shall be in writing and signed by representatives of both parties.\n\n(v. September 3, 2019)\n\nNVSHMEM SUPPLEMENT TO SOFTWARE LICENSE AGREEMENT FOR NVIDIA SOFTWARE DEVELOPMENT KITS\n\nThe terms in this supplement govern your use of the NVIDIA NVSHMEM SDK under the terms of your license agreement (“Agreement”) as modified by this supplement. Capitalized terms used but not defined below have the meaning assigned to them in the Agreement.\n\nThis supplement is an exhibit to the Agreement and is incorporated as an integral part of the Agreement. In the event of conflict between the terms in this supplement and the terms in the Agreement, the terms in this supplement govern.  \n\n1. License Scope. The SDK is licensed for you to develop applications only for use in systems with NVIDIA GPUs.\n\n2. Distribution. The following portions of the SDK are distributable under the Agreement: any portion of the SDK. \n\n3. Licensing. If the distribution terms in this Agreement are not suitable for your organization, or for any questions regarding this Agreement, please contact NVIDIA at nvidia-compute-license-questions@nvidia.com.\n (v. July 11, 2019)\n\n\n=======================================================================\nADDITIONAL LICENSES\nLicenses specitic to pre-existing software incorporated into NVSHMEM\n=======================================================================\n\n------------------------------------------------------------------------\nPortions derived from DF-NVSHMEM-prototype\n(https://github.com/NVIDIA/DF-NVSHMEM-prototype), under these terms:\n\nCopyright (c) 2014, NVIDIA Corporation.  All rights reserved.\n \nThe U.S. Department of Energy funded the development of this software\nunder subcontract 7078610 with Lawrence Berkeley National Laboratory.\n \nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are met:\n \n   * Redistributions of source code must retain the above copyright notice,\n     this list of conditions and the following disclaimer.\n   * Redistributions in binary form must reproduce the above copyright\n     notice, this list of conditions and the following disclaimer in the\n     documentation and/or other materials provided with the distribution.\n   * Neither the name of the NVIDIA Corporation Lawrence Berkeley National\n     Laboratory, the U.S. Department of Energy, nor the names of its\n     contributors may be used to endorse or promote products derived from\n     this software without specific prior written permission.\n \nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\nAND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\nIMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\nARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE\nLIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\nCONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\nSUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS\nINTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\nCONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\nARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF\nTHE POSSIBILITY OF SUCH DAMAGE.\n\n------------------------------------------------------------------------\n------------------------------------------------------------------------\n END Portions derived from DF-NVSHMEM-prototype\n------------------------------------------------------------------------\n\n\n\n----------------------------------------------------------------------------------\n\nPortions derived from Sandia OpenSHMEM\n(https://github.com/Sandia-OpenSHMEM/SOS), under these terms:\n\nCopyright 2011 Sandia Corporation. Under the terms of Contract\nDE-AC04-94AL85000 with Sandia Corporation, the U.S.  Government\nretains certain rights in this software.\n\nCopyright (c) 2017 Intel Corporation. All rights reserved.\nThis software is available to you under the BSD license.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n\n- Redistributions of source code must retain the above copyright\n  notice, this list of conditions and the following disclaimer.\n\n- Redistributions in binary form must reproduce the above copyright\n  notice, this list of conditions and the following disclaimer listed\n  in this license in the documentation and/or other materials\n  provided with the distribution.\n\n- Neither the name of the copyright holders nor the names of its\n  contributors may be used to endorse or promote products derived from\n  this software without specific prior written permission.\n\nThe copyright holders provide no reassurances that the source code\nprovided does not infringe any patent, copyright, or any other\nintellectual property rights of third parties.  The copyright holders\ndisclaim any liability to any recipient for claims brought against\nrecipient by any third party for infringement of that parties\nintellectual property rights.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\nOWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\nLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\n----------------------------------------------------------------------------------\n\nCopyright Notice\n1998--2020, Argonne National Laboratory\n\nPermission is hereby granted to use, reproduce, prepare derivative works, and\nto redistribute to others.  This software was authored by:\n\nMathematics and Computer Science Division\nArgonne National Laboratory, Argonne IL 60439\n\n(and)\n\nDepartment of Computer Science\nUniversity of Illinois at Urbana-Champaign\n\n\n\t\t\t      GOVERNMENT LICENSE\n\nPortions of this material resulted from work developed under a U.S.\nGovernment Contract and are subject to the following license: the Government\nis granted for itself and others acting on its behalf a paid-up, nonexclusive,\nirrevocable worldwide license in this computer software to reproduce, prepare\nderivative works, and perform publicly and display publicly.\n\n\t\t\t\t  DISCLAIMER\n\nThis computer code material was prepared, in part, as an account of work\nsponsored by an agency of the United States Government.  Neither the United\nStates, nor the University of Chicago, nor any of their employees, makes any\nwarranty express or implied, or assumes any legal liability or responsibility\nfor the accuracy, completeness, or usefulness of any information, apparatus,\nproduct, or process disclosed, or represents that its use would not infringe\nprivately owned rights.\n\n----------------------------------------------------------------------------------\n\n----------------------------------------------------------------------------------\n END Portions derived from Sandia OpenSHMEM\n----------------------------------------------------------------------------------\n\n\n\n----------------------------------------------------------------------------------\nmlx5_ifc.h is included in NVSHMEM as received from the rdma-core repository.\nAttribution Statements: Nvidia actively chooses the BSD license to apply to files with this copyright and license.\n/*\n * Copyright (c) 2019 Mellanox Technologies, Inc.  All rights reserved.\n *\n * This software is available to you under a choice of one of two\n * licenses.  You may choose to be licensed under the terms of the GNU\n * General Public License (GPL) Version 2, available from the file\n * COPYING in the main directory of this source tree, or the\n * OpenIB.org BSD license below:\n *\n *     Redistribution and use in source and binary forms, with or\n *     without modification, are permitted provided that the following\n *     conditions are met:\n *\n *      - Redistributions of source code must retain the above\n *        copyright notice, this list of conditions and the following\n *        disclaimer.\n *\n *      - Redistributions in binary form must reproduce the above\n *        copyright notice, this list of conditions and the following\n *        disclaimer in the documentation and/or other materials\n *        provided with the distribution.\n *\n * THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\n * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\n * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS\n * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN\n * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN\n * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n * SOFTWARE.\n */\n----------------------------------------------------------------------------------\n\n----------------------------------------------------------------------------------\n END Inclusion of mlx5_ifc.h from RDMA Core\n----------------------------------------------------------------------------------\n\n\n\nThe NVSHMEM libfabric transport includes several headers from the libfabric project as-is\nin binary distributions.\nAttribution Statements: Nvidia actively chooses the BSD license to apply to files with this copyright and license.\nCopyright (c) 2015-2021 Intel Corporation.  All rights reserved.\nCopyright (c) 2015-2019 Cisco Systems, Inc.  All rights reserved.\n==================================================================\n\t\t       BSD license\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions\nare met:\n  * Redistributions of source code must retain the above copyright\n    notice, this list of conditions and the following disclaimer.\n  * Redistributions in binary form must reproduce the above\n    copyright notice, this list of conditions and the following\n    disclaimer in the documentation and/or other materials provided\n    with the distribution.\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS\nFOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE\nCOPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,\nINCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,\nBUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\nLOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\nCAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT\nLIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN\nANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\nPOSSIBILITY OF SUCH DAMAGE.\n==================================================================\n\n----------------------------------------------------------------------------------\n END Inclusion of mlx5_ifc.h from RDMA Core\n----------------------------------------------------------------------------------\n\n\n\n----------------------------------------------------------------------------------\n\nmlx5_prm.h is included in NVSHMEM as received from the dpdk repository.\n/* SPDX-License-Identifier: BSD-3-Clause\n * Copyright 2016 6WIND S.A.\n * Copyright 2016 Mellanox Technologies, Ltd\n */\n----------------------------------------------------------------------------------\n\n----------------------------------------------------------------------------------\n END Inclusion of mlx5_prm.h from dpdk\n----------------------------------------------------------------------------------\n",
+      "licenseId": "LicenseRef-NVIDIA-NVSHMEM-SDK-SLA",
+      "name": "NVSHMEM Supplement to Software License Agreement for NVIDIA Software Development Kits",
+      "seeAlsos": [
+        "https://raw.githubusercontent.com/NVIDIA/nvshmem/131da55f643ac87c810ba0bc51d359258bf433a1/License.txt"
+      ],
+      "comment": "{\"domain\":\"AutoMarkov-SPDX-License-Evidence-v1\",\"evidence_kind\":\"full_text\",\"sha256\":\"sha256:1f5b7ada702926bc73327e6eb02dc2d41facc844cc4512ac900451bda06a459e\"}"
+    },
+    {
+      "extractedText": "NVIDIA Proprietary Software",
+      "licenseId": "LicenseRef-NVIDIA-Proprietary",
+      "name": "NVIDIA Proprietary Software",
+      "seeAlsos": [
+        "https://pypi.org/pypi/nvidia-cublas/13.1.1.3/json#info.license_expression",
+        "https://pypi.org/pypi/nvidia-cuda-cupti/13.0.85/json#info.license",
+        "https://pypi.org/pypi/nvidia-cuda-nvrtc/13.0.88/json#info.license",
+        "https://pypi.org/pypi/nvidia-cufft/12.0.0.61/json#info.license",
+        "https://pypi.org/pypi/nvidia-cufile/1.15.1.6/json#info.license",
+        "https://pypi.org/pypi/nvidia-curand/10.4.0.35/json#info.license",
+        "https://pypi.org/pypi/nvidia-cusolver/12.0.4.66/json#info.license",
+        "https://pypi.org/pypi/nvidia-cusparse/12.6.3.3/json#info.license",
+        "https://pypi.org/pypi/nvidia-cusparselt-cu13/0.8.1/json#info.license"
+      ],
+      "comment": "{\"domain\":\"AutoMarkov-SPDX-License-Evidence-v1\",\"evidence_kind\":\"upstream_short_reference\",\"sha256\":\"sha256:cadbd9ec42d8720863721bf443e1236eb3665eaba1f1f144fe1a662068547fb9\"}"
+    },
+    {
+      "extractedText": "LicenseRef-NVIDIA-SOFTWARE-LICENSE",
+      "licenseId": "LicenseRef-NVIDIA-SOFTWARE-LICENSE",
+      "name": "NVIDIA Software License",
+      "seeAlsos": [
+        "https://pypi.org/pypi/cuda-bindings/13.3.1/json#info.license_expression"
+      ],
+      "comment": "{\"domain\":\"AutoMarkov-SPDX-License-Evidence-v1\",\"evidence_kind\":\"upstream_short_reference\",\"sha256\":\"sha256:df7937c88667a2bc38edb70cb4a366873ab77d9433f9f5f15d0ddd13a1dc6668\"}"
+    },
+    {
+      "extractedText": "Software License Agreement\nLICENSE AGREEMENT FOR NVIDIA SOFTWARE DEVELOPMENT KITS\nThis license agreement, including exhibits attached (“Agreement”) is a legal agreement between you and NVIDIA Corporation (“NVIDIA”) and governs your use of a NVIDIA software development kit (“SDK”).\nEach SDK has its own set of software and materials, but here is a description of the types of items that may be included in a SDK: source code, header files, APIs, data sets and assets (examples include images, textures, models, scenes, videos, native API input/output files), binary software, sample code, libraries, utility programs, programming code and documentation.\nThis Agreement can be accepted only by an adult of legal age of majority in the country in which the SDK is used.\nIf you are entering into this Agreement on behalf of a company or other legal entity, you represent that you have the legal authority to bind the entity to this Agreement, in which case “you” will mean the entity you represent.\nIf you don’t have the required age or authority to accept this Agreement, or if you don’t accept all the terms and conditions of this Agreement, do not download, install or use the SDK.\nYou agree to use the SDK only for purposes that are permitted by (a) this Agreement, and (b) any applicable law, regulation or generally accepted practices or guidelines in the relevant jurisdictions.\nLicense.\nGrant\nSubject to the terms of this Agreement, NVIDIA hereby grants you a non-exclusive, nontransferable license, without the right to sublicense (except as expressly provided in this Agreement) to:\nInstall and use the SDK,\nModify and create derivative works of sample source code delivered in the SDK, and\nDistribute those portions of the SDK that are identified in this Agreement as distributable, as incorporated in object code format into a software application that meets the distribution requirements indicated in this Agreement.\nDistribution Requirements\nThese are the distribution requirements for you to exercise the distribution grant:\nYour application must have material additional functionality, beyond the included portions of the SDK.\nThe distributable portions of the SDK shall only be accessed by your application.\nThe following notice shall be included in modifications and derivative works of sample source code distributed: “This software contains source code provided by NVIDIA Corporation.”\nUnless a developer tool is identified in this Agreement as distributable, it is delivered for your internal use only.\nThe terms under which you distribute your application must be consistent with the terms of this Agreement, including (without limitation) terms relating to the license grant and license restrictions and protection of NVIDIA’s intellectual property rights. Additionally, you agree that you will protect the privacy, security and legal rights of your application users.\nYou agree to notify NVIDIA in writing of any known or suspected distribution or use of the SDK not in compliance with the requirements of this Agreement, and to enforce the terms of your agreements with respect to distributed SDK.\nAuthorized Users\nYou may allow employees and contractors of your entity or of your subsidiary(ies) to access and use the SDK from your secure network to perform work on your behalf.\nIf you are an academic institution you may allow users enrolled or employed by the academic institution to access and use the SDK from your secure network.\nYou are responsible for the compliance with the terms of this Agreement by your authorized users. If you become aware that your authorized users didn’t follow the terms of this Agreement, you agree to take reasonable steps to resolve the non-compliance and prevent new occurrences.\nPre-Release SDK\nThe SDK versions identified as alpha, beta, preview or otherwise as pre-release, may not be fully functional, may contain errors or design flaws, and may have reduced or different security, privacy, accessibility, availability, and reliability standards relative to commercial versions of NVIDIA software and materials. Use of a pre-release SDK may result in unexpected results, loss of data, project delays or other unpredictable damage or loss.\nYou may use a pre-release SDK at your own risk, understanding that pre-release SDKs are not intended for use in production or business-critical systems.\nNVIDIA may choose not to make available a commercial version of any pre-release SDK. NVIDIA may also choose to abandon development and terminate the availability of a prerelease SDK at any time without liability.\nUpdates\nNVIDIA may, at its option, make available patches, workarounds or other updates to this SDK. Unless the updates are provided with their separate governing terms, they are deemed part of the SDK licensed to you as provided in this Agreement.\nYou agree that the form and content of the SDK that NVIDIA provides may change without prior notice to you. While NVIDIA generally maintains compatibility between versions, NVIDIA may in some cases make changes that introduce incompatibilities in future versions of the SDK.\nComponents Under Other Licenses\nThe SDK may come bundled with, or otherwise include or be distributed with, NVIDIA or third party software licensed with separate legal notices or terms as may be described in proprietary notices accompanying the SDK. If and to the extent there is a conflict between the terms in this Agreement and the license terms associated with the component, the license terms associated with the components control only to the extent necessary to resolve the conflict.\nReservation of Rights\nNVIDIA reserves all rights, title and interest in and to the SDK not expressly granted to you under this Agreement.\nLimitations.\nThe following license limitations apply to your use of the SDK:\n2.1 You may not reverse engineer, decompile or disassemble, or remove copyright or other proprietary notices from any portion of the SDK or copies of the SDK.\n2.2 Except as expressly provided in this Agreement, you may not copy, sell, rent, sublicense, transfer, distribute, modify, or create derivative works of any portion of the SDK.\n2.3 Unless you have an agreement with NVIDIA for this purpose, you may not indicate that an application created with the SDK is sponsored or endorsed by NVIDIA.\n2.4 You may not bypass, disable, or circumvent any encryption, security, digital rights management or authentication mechanism in the SDK.\n2.5 You may not use the SDK in any manner that would cause it to become subject to an open source software license. As examples, licenses that require as a condition of use, modification, and/or distribution that the SDK be (i) disclosed or distributed in source code form; (ii) licensed for the purpose of making derivative works; or (iii) redistributable at no charge.\n2.6 You acknowledge that the SDK as delivered is not tested or certified by NVIDIA for use in connection with the design, construction, maintenance, and/or operation of any system where the use or failure of such system could result in a situation that threatens the safety of human life or results in catastrophic damages (each, a “Critical Application”). Examples of Critical Applications include use in avionics, navigation, autonomous vehicle applications, ai solutions for automotive products, military, medical, life support or other life critical applications. NVIDIA shall not be liable to you or any third party, in whole or in part, for any claims or damages arising from such uses. You are solely responsible for ensuring that any product or service developed with the SDK as a whole includes sufficient features to comply with all applicable legal and regulatory standards and requirements.\n2.7 You agree to defend, indemnify and hold harmless NVIDIA and its affiliates, and their respective employees, contractors, agents, officers and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, fines, restitutions and expenses (including but not limited to attorney’s fees and costs incident to establishing the right of indemnification) arising out of or related to products or services that use the SDK in or for Critical Applications, and for use of the SDK, outside of the scope of this Agreement or not in compliance with its terms.\nOwnership.\n3.1 NVIDIA or its licensors hold all rights, title and interest in and to the SDK and its modifications and derivative works, including their respective intellectual property rights, subject to your rights under Section 3.2. This SDK may include software and materials from NVIDIA’s licensors, and these licensors are intended third party beneficiaries that may enforce this Agreement with respect to their intellectual property rights.\n3.2 You hold all rights, title and interest in and to your applications and your derivative works of the sample source code delivered in the SDK, including their respective intellectual property rights, subject to NVIDIA’s rights under section 3.1.\n3.3 You may, but don’t have to, provide to NVIDIA suggestions, feature requests or other feedback regarding the SDK, including possible enhancements or modifications to the SDK. For any feedback that you voluntarily provide, you hereby grant NVIDIA and its affiliates a perpetual, non-exclusive, worldwide, irrevocable license to use, reproduce, modify, license, sublicense (through multiple tiers of sublicensees), and distribute (through multiple tiers of distributors) it without the payment of any royalties or fees to you. NVIDIA will use feedback at its choice. NVIDIA is constantly looking for ways to improve its products, so you may send feedback to NVIDIA through the developer portal at https://developer.nvidia.com.\nNo Warranties.\nTHE SDK IS PROVIDED BY NVIDIA “AS IS” AND “WITH ALL FAULTS.” TO THE MAXIMUM EXTENT PERMITTED BY LAW, NVIDIA AND ITS AFFILIATES EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND OR NATURE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, OR THE ABSENCE OF ANY DEFECTS THEREIN, WHETHER LATENT OR PATENT. NO WARRANTY IS MADE ON THE BASIS OF TRADE USAGE, COURSE OF DEALING OR COURSE OF TRADE.\nLimitations of Liability.\nTO THE MAXIMUM EXTENT PERMITTED BY LAW, NVIDIA AND ITS AFFILIATES SHALL NOT BE LIABLE FOR ANY SPECIAL, INCIDENTAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, OR ANY LOST PROFITS, LOSS OF USE, LOSS OF DATA OR LOSS OF GOODWILL, OR THE COSTS OF PROCURING SUBSTITUTE PRODUCTS, ARISING OUT OF OR IN CONNECTION WITH THIS AGREEMENT OR THE USE OR PERFORMANCE OF THE SDK, WHETHER SUCH LIABILITY ARISES FROM ANY CLAIM BASED UPON BREACH OF CONTRACT, BREACH OF WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCT LIABILITY OR ANY OTHER CAUSE OF ACTION OR THEORY OF LIABILITY. IN NO EVENT WILL NVIDIA’S AND ITS AFFILIATES TOTAL CUMULATIVE LIABILITY UNDER OR ARISING OUT OF THIS AGREEMENT EXCEED US$10.00. THE NATURE OF THE LIABILITY OR THE NUMBER OF CLAIMS OR SUITS SHALL NOT ENLARGE OR EXTEND THIS LIMIT.\nThese exclusions and limitations of liability shall apply regardless if NVIDIA or its affiliates have been advised of the possibility of such damages, and regardless of whether a remedy fails its essential purpose. These exclusions and limitations of liability form an essential basis of the bargain between the parties, and, absent any of these exclusions or limitations of liability, the provisions of this Agreement, including, without limitation, the economic terms, would be substantially different.\nTermination.\n6.1 This Agreement will continue to apply until terminated by either you or NVIDIA as described below.\n6.2 If you want to terminate this Agreement, you may do so by stopping to use the SDK.\n6.3 NVIDIA may, at any time, terminate this Agreement if: (i) you fail to comply with any term of this Agreement and the non-compliance is not fixed within thirty (30) days following notice from NVIDIA (or immediately if you violate NVIDIA’s intellectual property rights); (ii) you commence or participate in any legal proceeding against NVIDIA with respect to the SDK; or (iii) NVIDIA decides to no longer provide the SDK in a country or, in NVIDIA’s sole discretion, the continued use of it is no longer commercially viable.\n6.4 Upon any termination of this Agreement, you agree to promptly discontinue use of the SDK and destroy all copies in your possession or control. Your prior distributions in accordance with this Agreement are not affected by the termination of this Agreement. Upon written request, you will certify in writing that you have complied with your commitments under this section. Upon any termination of this Agreement all provisions survive except for the licenses granted to you.\nGeneral.\nIf you wish to assign this Agreement or your rights and obligations, including by merger, consolidation, dissolution or operation of law, contact NVIDIA to ask for permission. Any attempted assignment not approved by NVIDIA in writing shall be void and of no effect. NVIDIA may assign, delegate or transfer this Agreement and its rights and obligations, and if to a non-affiliate you will be notified.\nYou agree to cooperate with NVIDIA and provide reasonably requested information to verify your compliance with this Agreement.\nThis Agreement will be governed in all respects by the laws of the United States and of the State of Delaware as those laws are applied to contracts entered into and performed entirely within Delaware by Delaware residents, without regard to the conflicts of laws principles. The United Nations Convention on Contracts for the International Sale of Goods is specifically disclaimed. You agree to all terms of this Agreement in the English language.\nThe state or federal courts residing in Santa Clara County, California shall have exclusive jurisdiction over any dispute or claim arising out of this Agreement. Notwithstanding this, you agree that NVIDIA shall still be allowed to apply for injunctive remedies or an equivalent type of urgent legal relief in any jurisdiction.\nIf any court of competent jurisdiction determines that any provision of this Agreement is illegal, invalid or unenforceable, such provision will be construed as limited to the extent necessary to be consistent with and fully enforceable under the law and the remaining provisions will remain in full force and effect. Unless otherwise specified, remedies are cumulative.\nEach party acknowledges and agrees that the other is an independent contractor in the performance of this Agreement.\nThe SDK has been developed entirely at private expense and is “commercial items” consisting of “commercial computer software” and “commercial computer software documentation” provided with RESTRICTED RIGHTS. Use, duplication or disclosure by the U.S. Government or a U.S. Government subcontractor is subject to the restrictions in this Agreement pursuant to DFARS 227.7202-3(a) or as set forth in subparagraphs (b)(1) and (2) of the Commercial Computer Software - Restricted Rights clause at FAR 52.227-19, as applicable. Contractor/manufacturer is NVIDIA, 2788 San Tomas Expressway, Santa Clara, CA 95051\nThe SDK is subject to United States export laws and regulations. You agree that you will not ship, transfer or export the SDK into any country, or use the SDK in any manner, prohibited by the United States Bureau of Industry and Security or economic sanctions regulations administered by the U.S. Department of Treasury’s Office of Foreign Assets Control (OFAC), or any applicable export laws, restrictions or regulations. These laws include restrictions on destinations, end users and end use. By accepting this Agreement, you confirm that you are not a resident or citizen of any country currently embargoed by the U.S. and that you are not otherwise prohibited from receiving the SDK.\nAny notice delivered by NVIDIA to you under this Agreement will be delivered via mail, email or fax. You agree that any notices that NVIDIA sends you electronically will satisfy any legal communication requirements. Please direct your legal notices or other correspondence to NVIDIA Corporation, 2788 San Tomas Expressway, Santa Clara, California 95051, United States of America, Attention: Legal Department.\nThis Agreement and any exhibits incorporated into this Agreement constitute the entire agreement of the parties with respect to the subject matter of this Agreement and supersede all prior negotiations or documentation exchanged between the parties relating to this SDK license. Any additional and/or conflicting terms on documents issued by you are null, void, and invalid. Any amendment or waiver under this Agreement shall be in writing and signed by representatives of both parties.\n(v. February 22, 2022)\ncuDNN SUPPLEMENT TO SOFTWARE LICENSE AGREEMENT FOR NVIDIA SOFTWARE DEVELOPMENT KITS\nThe terms in this supplement govern your use of the NVIDIA cuDNN SDK under the terms of your license agreement (“Agreement”) as modified by this supplement. Capitalized terms used but not defined below have the meaning assigned to them in the Agreement.\nThis supplement is an exhibit to the Agreement and is incorporated as an integral part of the Agreement. In the event of conflict between the terms in this supplement and the terms in the Agreement, the terms in this supplement govern.\n4.1 License Scope. The SDK is licensed for you to develop applications only for use in systems with NVIDIA GPUs.\n2. Distribution. The following portions of the SDK are distributable under the Agreement: the runtime files .so and .dll.\nIn addition to the rights above, for parties that are developing software intended solely for use on Jetson development kits or Jetson modules and running Linux for Tegra software the following shall apply: the SDK may be distributed in its entirety, as provided by NVIDIA and without separation of its components, for you and/or your licensees to create software development kits for use only on the Jetson platform and running Linux for Tegra software.\n3. Licensing. If the distribution terms in this Agreement are not suitable for your organization, or for any questions regarding this Agreement, please contact NVIDIA at nvidia-compute-license-questions@nvidia.com.\n(v. February 22, 2022)",
+      "licenseId": "LicenseRef-NVIDIA-cuDNN-SLA",
+      "name": "cuDNN Supplement to Software License Agreement for NVIDIA Software Development Kits",
+      "seeAlsos": [
+        "https://docs.nvidia.com/deeplearning/cudnn/backend/v9.20.0/reference/eula.html"
+      ],
+      "comment": "{\"domain\":\"AutoMarkov-SPDX-License-Evidence-v1\",\"evidence_kind\":\"full_text\",\"sha256\":\"sha256:f2491d96c29cc9ea45eee3c9a9f739ee48ec4497dab2de859a9b7aef9aa60654\"}"
+    }
+  ],
+  "documentNamespace": "https://automarkov.local/spdx/profiles/rllib-taxi-synthesis/9e62ccf2a7c768b05aae4e078f97459f51aeb04c5d2bdf5ab682ca4061d34f6a",
+  "name": "automarkov-profile-rllib-taxi-synthesis",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-absl-py-1",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/58/0a/a10b45aab35b175aded078a462dc8d0c698f5b13946e7cb0869097b78bb6/absl_py-2.5.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "absl-py",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.5.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0f17b89f2a4eaaedc4f28c622998aa690564b3012a396a4ffad0821007fe03ba"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-annotated-types-2",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "annotated-types",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.8.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-attrs-3",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "attrs",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "26.1.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-automarkov-profile-rllib-4",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "automarkov-profile-rllib",
+      "sourceInfo": "{\"virtual\":\".\"}",
+      "versionInfo": "0.1.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-certifi-5",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/0b/a7/71ac2cff56fec219ed242bb11b8efb69fcc4bec75db06fb7bfe35de520e6/certifi-2026.7.22-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "name": "certifi",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2026.7.22",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-charset-normalizer-6",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/a5/34/49b9060e8418b14fb5cba9cf6bfb383111e2538a03a1fb18e66a95aeb3d5/charset_normalizer-3.4.9-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "charset-normalizer",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.4.9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "04ce310cb89c15df659582aee80a0603788732a5e017d5bd5c81158106ce249c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-click-7",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/fb/e2/79c688af8b210d232694e31e59da9f6ec747bae31c3f5946e4e9b98860d5/click-8.4.2-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "click",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "8.4.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cloudpickle-8",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/88/39/799be3f2f0f38cc727ee3b4f1445fe6d5e4133064ec2e4115069418a5bb6/cloudpickle-3.1.2-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "cloudpickle",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.1.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9acb47f6afd73f60dc1df93bb801b472f05ff42fa6c84167d25cb206be1fbf4a"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-colorama-9",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "colorama",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.4.6"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cuda-bindings-10",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/95/7a/c5e3c34a409b148f5c0f5a4ea374158f95d488862c1dffedf9aa5c639df9/cuda_bindings-13.3.1-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-SOFTWARE-LICENSE",
+      "licenseDeclared": "LicenseRef-NVIDIA-SOFTWARE-LICENSE",
+      "name": "cuda-bindings",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "13.3.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "04436a9364059c84b8f9636f359eccda1cf814341f5b670c71d80d2f79dbc708"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cuda-pathfinder-11",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/fc/b4/d088047afe39827556df21118cac9ffd20cc3f968c99a7681494d1eb333c/cuda_pathfinder-1.6.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "cuda-pathfinder",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.6.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1503af579d8379c24bdd65528379bc57039b0455be9f5f9686cf8e473a1fce51"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cuda-toolkit-12",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/d1/c7/a79086a62c98befcdb8349656c6f114e2db3b8b2422f6e25c97a7f2a9a3c/cuda_toolkit-13.0.3.0-py2.py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-CUDA-EULA",
+      "licenseDeclared": "LicenseRef-NVIDIA-CUDA-EULA",
+      "name": "cuda-toolkit",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "13.0.3.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d693caaa261214ddd7dbb60d68e71cbed884e68c2be7509778f3051da0b91c3f"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-dm-tree-13",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/78/10/587a2cdc05995069aa63b659d884eb3e58a3c86a5b4a00acdb7a316bddf3/dm_tree-0.1.10-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "dm-tree",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.1.10",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f0e8907bb6809dc195be3af077e382126eaebe06c00f835d09ae26e36d2165ff"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-farama-notifications-14",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/7c/f0/21f81892e4ed10f4ec3ef2e7cf8635fb76e7c0907c55d0da66be50094760/farama_notifications-0.0.6-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "farama-notifications",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.0.6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f84839188efa1ce5bb361c2a84881b2dc2c0d0d7fb661ff00421820170930935"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-filelock-15",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/c1/e8/72f8cef9fdfeffe06213fe8508039396ee48daa0e3259457ed766173bfd6/filelock-3.32.2-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "filelock",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.32.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "87dd94cf281e586d135fa51132b8e3d9a598b316e90377a288663c9321036c82"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-fsspec-16",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/fd/3c/6a2bf344106328fd04963664a60b9bb6496fc25df8e962fcdc1367285fb9/fsspec-2026.7.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "fsspec",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2026.7.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b57ddbafedfaef7018c1ecab32aa200a9d7ca26b77965f64e48b70061249d279"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-gymnasium-17",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/c7/53/39cd8c2f85e213fce1f32367c4bdbd3402d3bcde7d0826a1172a0f2c5cc0/gymnasium-1.2.2-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "gymnasium",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.2.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f04ec362b1fdf73a8b327db5ef89384a3f2ba411e05d3521513414fbbb2199c8"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-idna-18",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "idna",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.18",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-jinja2-19",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "jinja2",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.1.6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-jsonschema-20",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/69/90/f63fb5873511e014207a475e2bb4e8b2e570d655b00ac19a9a0ca0a385ee/jsonschema-4.26.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "jsonschema",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "4.26.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-jsonschema-specifications-21",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "jsonschema-specifications",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2025.9.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-lz4-22",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/25/3b/b55cb577aa148ed4e383e9700c36f70b651cd434e1c07568f0a86c9d5fbb/lz4-4.4.5-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "lz4",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "4.4.5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "75419bb1a559af00250b8f1360d508444e80ed4b26d9d40ec5b09fe7875cb989"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-markupsafe-23",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/30/ac/0273f6fcb5f42e314c6d8cd99effae6a5354604d461b8d392b5ec9530a54/markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "markupsafe",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.0.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0bf2a864d67e76e5c9a34dc26ec616a66b9888e25e7b9460e1c76d3293bd9dbf"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-minigrid-24",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/9e/78/c9c3ea97f2abc21d180d4b8443a7c2841b6de92036678ec995453ec76fa0/minigrid-3.1.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "minigrid",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.1.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e8365f99d9369dd854bee08cef6352841b66ca16e2bf0eaa6218f02bcfb1c457"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-mpe2-25",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/5f/38/ef2d061a86d56ac50e1dd1d3d79306e87a19b8591a43789fd59edf550621/mpe2-1.1.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "mpe2",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.1.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "42a33adf24ed4298e07b6b59842b1fd3142855f4fe9faa812a1ba6aa41b3e02c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-mpmath-26",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/43/e3/7d92a15f894aa0c9c4b49b8ee9ac9850d6e63b03c9c32c0367a13ae62209/mpmath-1.3.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "mpmath",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.3.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-msgpack-27",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/03/8d/671d81534ea0e2b0e8a121be100020da09eb78861fe3aa8f3ef7dcd3bed1/msgpack-1.2.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "msgpack",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.2.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a28d076ca7c82b9c8728ad90b7147489449557038bed50e4241eb832395169b4"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-networkx-28",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/9e/c9/b2622292ea83fbb4ec318f5b9ab867d0a28ab43c5717bb85b0a5f6b3b0a4/networkx-3.6.1-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "networkx",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.6.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d47fbf302e7d9cbbb9e2555a0d267983d2aa476bac30e90dfbe5669bd57f3762"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-numpy-29",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/02/03/74fe2a4cb3817d94d86402f2506554130a2f01414e299b5a843e5a8a957f/numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "licenseDeclared": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "name": "numpy",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.4.6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "89cd468399cfd2504718f0ba50e410dca55a170b61a02ad92bb18c8a65186e93"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cublas-30",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/3b/cd/154ca20c38269e05eff77c1464e6c1da89f50a6390b565e9d82e06bc11e1/nvidia_cublas-13.1.1.3-py3-none-manylinux_2_27_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-Proprietary",
+      "licenseDeclared": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cublas",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "13.1.1.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "37936a16db8fe4ac1f065c2139360608a543a09275cb1a1af612e08cfa065436"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cuda-cupti-31",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/33/6d/737d164b4837a9bbd202f5ae3078975f0525a55730fe871d8ed4e3b952b0/nvidia_cuda_cupti-13.0.85-py3-none-manylinux_2_25_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-Proprietary",
+      "licenseDeclared": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cuda-cupti",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "13.0.85",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4eb01c08e859bf924d222250d2e8f8b8ff6d3db4721288cf35d14252a4d933c8"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cuda-nvrtc-32",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/c3/68/483a78f5e8f31b08fb1bb671559968c0ca3a065ac7acabfc7cee55214fd6/nvidia_cuda_nvrtc-13.0.88-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-Proprietary",
+      "licenseDeclared": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cuda-nvrtc",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "13.0.88",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ad9b6d2ead2435f11cbb6868809d2adeeee302e9bb94bcf0539c7a40d80e8575"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cuda-runtime-33",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/2e/24/d1558f3b68b1d26e706813b1d10aa1d785e4698c425af8db8edc3dced472/nvidia_cuda_runtime-13.0.96-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-CUDA-EULA",
+      "licenseDeclared": "LicenseRef-NVIDIA-CUDA-EULA",
+      "name": "nvidia-cuda-runtime",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "13.0.96",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7f82250d7782aa23b6cfe765ecc7db554bd3c2870c43f3d1821f1d18aebf0548"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cudnn-cu13-34",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/6e/5e/edb9c0ae051602c3ccaffe424256463636d639e27d7f302dde9975ef9e7a/nvidia_cudnn_cu13-9.20.0.48-py3-none-manylinux_2_27_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-cuDNN-SLA",
+      "licenseDeclared": "LicenseRef-NVIDIA-cuDNN-SLA",
+      "name": "nvidia-cudnn-cu13",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "9.20.0.48",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0c45dd8eeb50b603f07995b1b300c62ffe6a1980482b82b3bcf94a4ca9d49304"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cufft-35",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/a8/2f/7b57e29836ea8714f81e9898409196f47d772d5ddedddf1592eadb8ab743/nvidia_cufft-12.0.0.61-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-Proprietary",
+      "licenseDeclared": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cufft",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "12.0.0.61",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6c44f692dce8fd5ffd3e3df134b6cdb9c2f72d99cf40b62c32dde45eea9ddad3"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cufile-36",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/3f/70/4f193de89a48b71714e74602ee14d04e4019ad36a5a9f20c425776e72cd6/nvidia_cufile-1.15.1.6-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-Proprietary",
+      "licenseDeclared": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cufile",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.15.1.6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "08a3ecefae5a01c7f5117351c64f17c7c62efa5fffdbe24fc7d298da19cd0b44"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-curand-37",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/a5/9f/be0a41ca4a4917abf5cb9ae0daff1a6060cc5de950aec0396de9f3b52bc5/nvidia_curand-10.4.0.35-py3-none-manylinux_2_27_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-Proprietary",
+      "licenseDeclared": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-curand",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "10.4.0.35",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1aee33a5da6e1db083fe2b90082def8915f30f3248d5896bcec36a579d941bfc"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cusolver-38",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/5f/67/cba3777620cdacb99102da4042883709c41c709f4b6323c10781a9c3aa34/nvidia_cusolver-12.0.4.66-py3-none-manylinux_2_27_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-Proprietary",
+      "licenseDeclared": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cusolver",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "12.0.4.66",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0a759da5dea5c0ea10fd307de75cdeb59e7ea4fcb8add0924859b944babf1112"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cusparse-39",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/fa/18/623c77619c31d62efd55302939756966f3ecc8d724a14dab2b75f1508850/nvidia_cusparse-12.6.3.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-Proprietary",
+      "licenseDeclared": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cusparse",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "12.6.3.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2b3c89c88d01ee0e477cb7f82ef60a11a4bcd57b6b87c33f789350b59759360b"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-cusparselt-cu13-40",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/34/7d/2661f2fb3ac4302f3a246f5fc030213ac60c1fe0bce84f9783dbd831dbb7/nvidia_cusparselt_cu13-0.8.1-py3-none-manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-Proprietary",
+      "licenseDeclared": "LicenseRef-NVIDIA-Proprietary",
+      "name": "nvidia-cusparselt-cu13",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.8.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "786ce87568c303fadb5afcc7102d454cd3040d75f6f8626f5db460d1871f4dd0"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-nccl-cu13-41",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/67/f4/58e4e91b6919367c7aafb8e36fce9aad1a3047e536bf7e2fd560927d3a4c/nvidia_nccl_cu13-2.29.7-py3-none-manylinux_2_18_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 AND BSD-3-Clause",
+      "licenseDeclared": "Apache-2.0 AND BSD-3-Clause",
+      "name": "nvidia-nccl-cu13",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.29.7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "edd81538446786ec3b73972543e53bb43bcaf0bfc8ef76cb679fcc390ffe136d"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-nvjitlink-42",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/f0/ee/580ca6f29dcab0221db8706badca1bbbb084f1975c4d4e83329c3a7e31f0/nvidia_nvjitlink-13.3.33-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-CUDA-EULA",
+      "licenseDeclared": "LicenseRef-NVIDIA-CUDA-EULA",
+      "name": "nvidia-nvjitlink",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "13.3.33",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "26a6de7fb4c8fdaa7703d3dad720d6d427ddfea5c48a528fd97c11733ad830e5"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-nvshmem-cu13-43",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/3c/35/a9bf80a609e74e3b000fef598933235c908fcefcef9026042b8e6dfde2a9/nvidia_nvshmem_cu13-3.4.5-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-NVIDIA-NVSHMEM-SDK-SLA",
+      "licenseDeclared": "LicenseRef-NVIDIA-NVSHMEM-SDK-SLA",
+      "name": "nvidia-nvshmem-cu13",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.4.5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "290f0a2ee94c9f3687a02502f3b9299a9f9fe826e6d0287ee18482e78d495b80"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-nvidia-nvtx-44",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/c2/f3/d86c845465a2723ad7e1e5c36dcd75ddb82898b3f53be47ebd429fb2fa5d/nvidia_nvtx-13.0.85-py3-none-manylinux1_x86_64.manylinux_2_5_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "nvidia-nvtx",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "13.0.85",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4936d1d6780fbe68db454f5e72a42ff64d1fd6397df9f363ae786930fd5c1cd4"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-ormsgpack-45",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/1b/33/543627f323ff3c73091f51d6a20db28a1a33531af30873ea90c5ac95a9b5/ormsgpack-1.12.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "ormsgpack",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.12.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "43013a3f3e2e902e1d05e72c0f1aeb5bedbb8e09240b51e26792a3c89267e181"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-packaging-46",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 OR BSD-2-Clause",
+      "licenseDeclared": "Apache-2.0 OR BSD-2-Clause",
+      "name": "packaging",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "26.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pandas-47",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/d1/50/d6cc4d7e508bbccf5d6027314a8312bc7ac73d0ec7f195f53838daafab40/pandas-3.0.5-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pandas",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.0.5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2c0cf1dd9b55a22d105fc46c1b489af3bd42264fcba7c66297bf47a9a1d9c78a"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pettingzoo-48",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/95/da/89907ebf66f435ad36395ec25af4a79e5f9a58821314811f33649959162d/pettingzoo-1.26.1-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pettingzoo",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.26.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f4715dde696bf159d68bb1d3f764ff5083eb7e0cc32ac31a748e81ae530181dd"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-protobuf-49",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/e4/be/5b3cfe508bfab6761414ff944e3366eb13be4fd71efcd69450f89ba39f43/protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "protobuf",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "7.35.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "74758715c53d7158fb76caf4f0cfdacc5329a4b1bb994f865d6cf302d413a1c4"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pyarrow-50",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/c8/6e/d3fafc41f378b2c65be43b827798c0fae42049a641c8526633ed3eb573e2/pyarrow-25.0.1-cp311-cp311-manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "pyarrow",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "25.0.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "25f8720bf6387d5dc2ebd2622112de630760419e4b66134405dd24110d15f37e"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pydantic-51",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/fd/7b/122376b1fd3c62c1ed9dc80c931ace4844b3c55407b6fb2d199377c9736f/pydantic-2.13.4-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pydantic",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.13.4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pydantic-core-52",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/80/50/540cd3aeefc041beb111125c4bff779831a2111fc6b15a9138cda277d32c/pydantic_core-2.46.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pydantic-core",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.46.4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f9fa868638bf362d3d138ea55829cefb3d5f4b0d7f142234382a15e2485dbec4"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pygame-ce-53",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/05/02/c315738725cd08d2ff4cc8f8dd29638e69e70f200d3610bcd291cbb886b8/pygame_ce-2.5.8-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LGPL-2.1-or-later",
+      "licenseDeclared": "LGPL-2.1-or-later",
+      "name": "pygame-ce",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.5.8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "33e1b5a78cd6d25c2c8f00c09cdc0ba8000eec81b53dc7d8d7323d8319691d69"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-python-dateutil-54",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 OR BSD-3-Clause",
+      "licenseDeclared": "Apache-2.0 OR BSD-3-Clause",
+      "name": "python-dateutil",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.9.0.post0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pyyaml-55",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/71/60/917329f640924b18ff085ab889a11c763e0b573da888e8404ff486657602/pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pyyaml",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "6.0.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b8bb0864c5a28024fac8a632c443c87c5aa6f215c0b126c449ae1a150412f31d"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-ray-56",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/6e/bd/4a704cfe4321d732c363093bb03798b027982f3828495b27bfbbb86c0fc5/ray-2.56.1-cp311-cp311-manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "ray",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.56.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e7003a47a42ef2ad33ec0b34dc5b6afb03f63fe59465e6f4c8f6d05492d9e4a6"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-referencing-57",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "referencing",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.37.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-requests-58",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/a0/f4/c67b0b3f1b9245e8d266f0f112c500d50e5b4e83cb6f3b71b6528104182a/requests-2.34.2-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "requests",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.34.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-rpds-py-59",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/5e/19/7e98f468bd50346faff5b10e5297374b443bfdddacc8e9fbc65984539597/rpds_py-2026.6.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "rpds-py",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2026.6.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9c1255b302953c86a486b81d330d5ee1d5bd937691ce271b6be0ef0e299eaab7"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-safetensors-60",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/28/50/f203ff3a3ddfe19308efc83c5a3a29ed02bf786732ec35e68bf9162f3365/safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "safetensors",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.8.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fd6f3f93c9a0a7cc2788ee63fb763353d4bd2e89b0751bc78fcf7dda00bea774"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-scipy-61",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/09/7d/af933f0f6e0767995b4e2d705a0665e454d1c19402aa7e895de3951ebb04/scipy-1.17.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "scipy",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.17.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "43af8d1f3bea642559019edfe64e9b11192a8978efbd1539d7bc2aaa23d92de4"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-setuptools-62",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "setuptools",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "84.0.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-six-63",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "six",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.17.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-sympy-64",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "sympy",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "1.14.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-tensorboardx-65",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/87/0f/69fbab4c30b2f3a76e6de67585ea72a8eccf381751f5c0046b966fde9658/tensorboardx-2.6.5-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "tensorboardx",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.6.5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c10b891d00af306537cb8b58a039b2ba41571f0da06f433a41c4ca8d6abe1373"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-torch-66",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/01/79/1f2d34ad7034ee1c7ffc1cf8bf0f8213af2a81df6ecdb3997ecec107c09d/torch-2.13.0-cp311-cp311-manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 AND Apache-2.0 WITH LLVM-exception AND BSD-2-Clause AND BSD-3-Clause AND BSL-1.0 AND MIT",
+      "licenseDeclared": "Apache-2.0 AND Apache-2.0 WITH LLVM-exception AND BSD-2-Clause AND BSD-3-Clause AND BSL-1.0 AND MIT",
+      "name": "torch",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.13.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "60fcdcb2f3876e21146cb4524ef06397d727ca9ad5f020818547e25075fe3cb7"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-triton-67",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/cd/5e/fce69606f7f240297f163e25539906732b199530d486ce67ae319877e821/triton-3.7.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "triton",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "3.7.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6744957e9fd610a29680ec2346057d0c86948ed3812468670719f391e94b44a5"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-typing-extensions-68",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "PSF-2.0",
+      "licenseDeclared": "PSF-2.0",
+      "name": "typing-extensions",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "4.16.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-typing-inspection-69",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/42/f7/7a3935abdebd5cf18705a5f0335dd6a3a18bef3baa7cb9edc3b6b9922cc8/typing_inspection-0.4.3-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "typing-inspection",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "0.4.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5f42b23858a91e0b4ef521f5418f03a0da3c9216fd2995ef5e73463100e676cd"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-tzdata-70",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "tzdata",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2026.3"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-urllib3-71",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "urllib3",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.7.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-wrapt-72",
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "https://files.pythonhosted.org/packages/71/71/4cd2151a236f44a6e2dd4ed8011838d7ba0be3d656c8bafdfc65a2ed1917/wrapt-2.3.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "name": "wrapt",
+      "sourceInfo": "{\"registry\":\"https://pypi.org/simple\"}",
+      "versionInfo": "2.3.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fc648a335d7e01adb3640b25f02fd0ea05886cf04d0af7f4ee902bc7b5e466e8"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "relatedSpdxElement": "SPDXRef-Package-absl-py-1",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-annotated-types-2",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-attrs-3",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-automarkov-profile-rllib-4",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-certifi-5",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-charset-normalizer-6",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-click-7",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cloudpickle-8",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-colorama-9",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cuda-bindings-10",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cuda-pathfinder-11",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cuda-toolkit-12",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-dm-tree-13",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-farama-notifications-14",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-filelock-15",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-fsspec-16",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-gymnasium-17",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-idna-18",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-jinja2-19",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-jsonschema-20",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-jsonschema-specifications-21",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-lz4-22",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-markupsafe-23",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-minigrid-24",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mpe2-25",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-mpmath-26",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-msgpack-27",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-networkx-28",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-numpy-29",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cublas-30",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cuda-cupti-31",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cuda-nvrtc-32",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cuda-runtime-33",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cudnn-cu13-34",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cufft-35",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cufile-36",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-curand-37",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cusolver-38",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cusparse-39",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-cusparselt-cu13-40",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-nccl-cu13-41",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-nvjitlink-42",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-nvshmem-cu13-43",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-nvidia-nvtx-44",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-ormsgpack-45",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-packaging-46",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pandas-47",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pettingzoo-48",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-protobuf-49",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pyarrow-50",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pydantic-51",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pydantic-core-52",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pygame-ce-53",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-python-dateutil-54",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-pyyaml-55",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-ray-56",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-referencing-57",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-requests-58",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rpds-py-59",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-safetensors-60",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-scipy-61",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-setuptools-62",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-six-63",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-sympy-64",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-tensorboardx-65",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-torch-66",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-triton-67",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-typing-extensions-68",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-typing-inspection-69",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-tzdata-70",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-urllib3-71",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-wrapt-72",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.3"
+}

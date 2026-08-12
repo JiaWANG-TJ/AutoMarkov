@@ -1,0 +1,18 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "env-metadrive",
+  "enabled": true,
+  "imports": [
+    "metadrive",
+    "scenarionet"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "ray",
+    "smacv2",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

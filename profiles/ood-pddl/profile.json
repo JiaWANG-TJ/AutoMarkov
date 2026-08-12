@@ -1,0 +1,59 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:13a63d4e15d36cd9ec12024ea875992e099cf7c050e79298305259e60aaffffa",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "planning.pddl.v1"
+  ],
+  "conflict_groups": [
+    "planning-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:cc7df878f54fda7cfc95d24a3dfd7f420fe5ac121f5b8436a8ae1fa92e5edb45",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:16ae4a51eb6532782a9a50942fd9c4571f91bcf2149680202602d37fad114e8b",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "unified-planning": "1.3.0"
+  },
+  "platform": null,
+  "profile_id": "ood-pddl",
+  "protocol_edges": [],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/artifacts/input"
+  ],
+  "repository_commits": {
+    "unified-planning": "42e66926e400ab1367b5b02af504d8c7016b9243"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:0888470162f6f3419192501016003f9685535262c61f09d2c5849e4bc7a850b9",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:7c071e0eb8cf2ae54ab7a34d8cb595e71ca0e5939f7e8bdb55391f47b395c39c",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": [
+    "/mnt/automarkov/artifacts/output"
+  ]
+}

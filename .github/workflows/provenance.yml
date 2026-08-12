@@ -1,0 +1,131 @@
+name: provenance-contract
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  metadata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: 安装冻结的核心依赖
+        run: uv sync --locked
+      - name: 验证全部 profile lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          for profile in profiles/*; do
+            uv lock --check --directory "${profile}"
+          done
+      - name: 验证 provenance 合同
+        run: |
+          uv run --locked automarkov verify-provenance --repository-root .
+          uv run --locked pytest -q tests/contract/test_profile_recipe_workflow.py tests/contract/test_provenance_full_identity_review.py tests/contract/test_provenance_native_final_review.py tests/contract/test_provenance_native_identity_hardening.py tests/contract/test_provenance_native_license_smoke_review.py tests/contract/test_provenance_native_policy_review.py tests/contract/test_provenance_native_publish_tree_closure.py tests/contract/test_provenance_native_review_closure.py tests/contract/test_provenance_native_upstream_review.py tests/contract/test_provenance_review_regressions.py tests/contract/test_runtime_profiles.py tests/contract/test_upstream_manifests.py tests/unit/test_provenance_extra_closure.py
+
+  import-smoke:
+    if: github.event_name == 'workflow_dispatch'
+    needs: metadata
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        profile:
+          - authoring
+          - core
+          - env-citylearn
+          - env-metadrive
+          - env-minigrid
+          - env-mpe2
+          - env-smacv2
+          - ood-openspiel
+          - ood-pddl
+          - retrieval-tavily
+          - rllib-core
+          - rllib-taxi-synthesis
+          - runner-control
+          - sealed-env-taxi-gold
+          - sealed-evaluator-rllib
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78
+        with:
+          version: "0.11.16"
+          enable-cache: false
+          restore-cache: false
+          save-cache: false
+      - name: 执行 profile import smoke
+        env:
+          PROFILE: ${{ matrix.profile }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          profile_root="profiles/${PROFILE}"
+          python_version="$(
+            python - "${profile_root}/profile.json" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as handle:
+              print(json.load(handle)["python_version"])
+          PY
+          )"
+          uv python install "${python_version}"
+          uv python pin --directory "${profile_root}" "${python_version}"
+          mapfile -t source_build_packages < <(
+            python - "${profile_root}/pyproject.toml" <<'PY'
+          import sys
+          import tomllib
+
+          with open(sys.argv[1], "rb") as handle:
+              settings = tomllib.load(handle).get("tool", {}).get("uv", {})
+          for package in settings.get("no-build-isolation-package", []):
+              print(package)
+          PY
+          )
+          sync_omit_args=()
+          for package in "${source_build_packages[@]}"; do
+            sync_omit_args+=(--no-install-package "${package}")
+          done
+          if [ "${PROFILE}" = "rllib-taxi-synthesis" ]; then
+            profile_cache="$(mktemp -d "/tmp/automarkov-taxi-uv-cache.XXXXXX")"
+            trap 'rm -rf -- "${profile_cache}"' EXIT
+            UV_CACHE_DIR="${profile_cache}" uv sync --locked --python "${python_version}" --no-dev --no-install-project --directory "${profile_root}"
+            "${profile_root}/.venv/bin/python" "${profile_root}/taxi_deny.py" harden --cache-root "${profile_cache}"
+            "${profile_root}/.venv/bin/python" "${profile_root}/taxi_deny.py" verify --cache-root "${profile_cache}"
+            rm -rf -- "${profile_cache}"
+            test ! -e "${profile_cache}"
+            trap - EXIT
+          else
+            uv sync --locked --python "${python_version}" --no-dev --no-install-project --directory "${profile_root}" "${sync_omit_args[@]}" && if [ "${#source_build_packages[@]}" -gt 0 ]; then test "$("${profile_root}/.venv/bin/python" -c 'import importlib.metadata; print(importlib.metadata.version("setuptools"))')" = "84.0.0"; uv sync --locked --python "${python_version}" --no-dev --no-install-project --directory "${profile_root}"; fi
+          fi
+          actual_python_version="$("${profile_root}/.venv/bin/python" -c 'import platform; print(platform.python_version())')"
+          test "${actual_python_version}" = "${python_version}"
+          "${profile_root}/.venv/bin/python" -I - "${profile_root}/smoke.json" <<'PY'
+          import importlib
+          import importlib.util
+          import json
+          import sys
+          from pathlib import Path
+
+          smoke = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          for module_name in smoke["imports"]:
+              importlib.import_module(module_name)
+          visible = [
+              module_name
+              for module_name in smoke["forbidden_imports"]
+              if importlib.util.find_spec(module_name) is not None
+          ]
+          if visible:
+              raise SystemExit(f"forbidden imports are visible: {visible}")
+          PY

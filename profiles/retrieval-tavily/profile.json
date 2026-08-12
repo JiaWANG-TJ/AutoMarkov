@@ -1,0 +1,68 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:b1c7e94d2cf991362b42519dda4f2f4acd5a829b2226930f10fdfa634b4442b3",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "evidence.crawl.v1",
+    "evidence.extract.v1",
+    "evidence.search.v1"
+  ],
+  "conflict_groups": [
+    "tavily-egress-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "tavily-key-lease.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [
+    "api.tavily.com:443"
+  ],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:5a63b0cbcd6ec024b3412297732f0706003e38cac37da55dd862a6e6657fb319",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:dcce8eb342f6d32585736a91689858cb2e499a1c3db944686e1f2189e091115d",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "httpx": "0.28.1",
+    "tavily-python": "0.7.27"
+  },
+  "platform": null,
+  "profile_id": "retrieval-tavily",
+  "protocol_edges": [
+    "EvidenceGateway"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/artifacts/requests"
+  ],
+  "repository_commits": {
+    "tavily-python": "de924695765d5cf28bd1975c1cfca0cd07cd7005"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:45681f1a07890e7c6a271210dab9423ae1630fc595e1b5a278b24e1492ce1b89",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:fcafe653adbfb4f13f481c09937f7663b307cbc1093d5353550372faf0945830",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": [
+    "/mnt/automarkov/artifacts/evidence"
+  ]
+}

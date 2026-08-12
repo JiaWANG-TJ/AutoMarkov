@@ -1,0 +1,62 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:68666d1e86c1e876603fca3e52f6be3a68388e321eb41a139fb1397dc6e789da",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "remote_env.mpe2.v1"
+  ],
+  "conflict_groups": [
+    "farama-rllib-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "remote-env-server.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:c8c890d94d1747818c4b8699d24923da48a9a634f23a4e6666650f1cb8c58d38",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:59899438d7c7e447f72370fdd1063ec1209fc0697ac54bff294f003bb33b33f6",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "gymnasium": "1.2.2",
+    "mpe2": "1.1.0",
+    "pettingzoo": "1.26.1"
+  },
+  "platform": null,
+  "profile_id": "env-mpe2",
+  "protocol_edges": [
+    "RemoteEnv"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [],
+  "repository_commits": {
+    "mpe2": "7590d9d52791e321974d4fda6090fb18f34dbf49",
+    "pettingzoo": "1756a4d7494b532651f0024ff7087ef4945432a6"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:44c5ec8d050986369e640c6652f6e17d188dc2a167aaf2b2ef3e4e4af23f7fbf",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:7939413929a73d14c10df337aa20c5893262190c9efbe87b13c5f23c58eee174",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": []
+}

@@ -1,0 +1,84 @@
+{
+  "dependencies": [
+    {
+      "license": "MIT",
+      "name": "anyio",
+      "source": "https://pypi.org/pypi/anyio/4.14.2/json#info.license_expression",
+      "version": "4.14.2"
+    },
+    {
+      "license": "MPL-2.0",
+      "name": "certifi",
+      "source": "https://pypi.org/pypi/certifi/2026.7.22/json#info.classifiers",
+      "version": "2026.7.22"
+    },
+    {
+      "license": "MIT",
+      "name": "charset-normalizer",
+      "source": "https://pypi.org/pypi/charset-normalizer/3.4.9/json#info.license",
+      "version": "3.4.9"
+    },
+    {
+      "license": "MIT",
+      "name": "h11",
+      "source": "https://pypi.org/pypi/h11/0.16.0/json#info.classifiers",
+      "version": "0.16.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "httpcore",
+      "source": "https://pypi.org/pypi/httpcore/1.0.9/json#info.license_expression",
+      "version": "1.0.9"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "httpx",
+      "source": "https://pypi.org/pypi/httpx/0.28.1/json#info.classifiers+info.license",
+      "version": "0.28.1"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "idna",
+      "source": "https://pypi.org/pypi/idna/3.18/json#info.license_expression",
+      "version": "3.18"
+    },
+    {
+      "license": "Apache-2.0 AND CNRI-Python",
+      "name": "regex",
+      "source": "https://pypi.org/pypi/regex/2026.7.19/json#info.license_expression",
+      "version": "2026.7.19"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "requests",
+      "source": "https://pypi.org/pypi/requests/2.34.2/json#info.classifiers",
+      "version": "2.34.2"
+    },
+    {
+      "license": "MIT",
+      "name": "tavily-python",
+      "source": "https://pypi.org/pypi/tavily-python/0.7.27/json#info.classifiers",
+      "version": "0.7.27"
+    },
+    {
+      "license": "MIT",
+      "name": "tiktoken",
+      "source": "https://pypi.org/pypi/tiktoken/0.13.0/json#info.license",
+      "version": "0.13.0"
+    },
+    {
+      "license": "PSF-2.0",
+      "name": "typing-extensions",
+      "source": "https://pypi.org/pypi/typing-extensions/4.16.0/json#info.license_expression",
+      "version": "4.16.0"
+    },
+    {
+      "license": "MIT",
+      "name": "urllib3",
+      "source": "https://pypi.org/pypi/urllib3/2.7.0/json#info.license_expression",
+      "version": "2.7.0"
+    }
+  ],
+  "profile_id": "retrieval-tavily",
+  "schema_version": "automarkov.profile-licenses.v1"
+}

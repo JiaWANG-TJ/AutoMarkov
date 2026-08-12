@@ -1,0 +1,66 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:1786ba7291c618fac66a5c8ef29e0d442dd92abdf327a10adbce6688aa45eaee",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "fixed_commit.control.v1",
+    "remote_env.mtls.v1"
+  ],
+  "conflict_groups": [
+    "runner-control-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "fixed-commit-signing.v1",
+    "remote-env-issuer.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:59de8d118928b91612d60e31d241f97b1abdbf278f44e1ed90ab607fcd3bb5a0",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:fe88479e48ecead54b8069202654fd7a4b068b5225027571b52331610b928322",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "cryptography": "49.0.0",
+    "pydantic": "2.12.0",
+    "rfc8785": "0.1.4"
+  },
+  "platform": null,
+  "profile_id": "runner-control",
+  "protocol_edges": [
+    "FixedCommitRunner",
+    "RemoteEnv"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/artifacts/control"
+  ],
+  "repository_commits": {},
+  "restricted": false,
+  "sbom_hash": "sha256:792e573b14f1ad3356a611abd44827ca27c881c497baa6e8a32cca3343cac9c7",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:c6cc6a04d63a77a767b42b5ca44e9362722641e8d5c36617d984421a01fef36d",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": [
+    "/mnt/automarkov/artifacts/attestations"
+  ]
+}

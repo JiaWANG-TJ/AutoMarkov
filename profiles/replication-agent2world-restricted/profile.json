@@ -1,0 +1,51 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:8eb931355abbef97ee33cbb32a6450ab39d05b5a69992e02838c137bc7fd2487",
+  "build_enabled": false,
+  "ca_bundle_hash": null,
+  "capabilities": [],
+  "conflict_groups": [
+    "restricted-agent2world-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "restricted_disabled",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:97957bc91e104b31692b7faf6973d9b13e37e093c20889a9ed12782288d6d43a",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:7a7e0d6336e8e0d974c03f7315276e68d9af43db8223f4eaae3ec019075eb49e",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {},
+  "platform": null,
+  "profile_id": "replication-agent2world-restricted",
+  "protocol_edges": [],
+  "publishable": false,
+  "python_version": "3.10.18",
+  "read_mounts": [],
+  "repository_commits": {
+    "agent2world": "1330f3cde9509f05d204a255f0f7f43208515dce"
+  },
+  "restricted": true,
+  "sbom_hash": "sha256:aede2113e20d7d087c00386ca9e6c0e10fb10af90d611944e03033e9ebad1c73",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:e534177f66809b645d06c4c56153614867cc50d927eb7c3a8a62d283583a0e79",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": []
+}

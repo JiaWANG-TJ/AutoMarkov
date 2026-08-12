@@ -1,0 +1,14 @@
+[project]
+name = "automarkov-profile-env-metadrive"
+version = "0.1.0"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "metadrive-simulator==0.4.3",
+  "scenarionet @ git+https://github.com/metadriverse/scenarionet@d4acdb5f5a844744fc85cb2dc3880d7d4a6eb170",
+  "setuptools==84.0.0",
+]
+
+[tool.uv]
+build-constraint-dependencies = ["setuptools==84.0.0"]
+no-build-isolation-package = ["progressbar", "scenarionet"]
+required-version = "==0.11.16"

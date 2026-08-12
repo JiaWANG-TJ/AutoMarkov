@@ -1,0 +1,11 @@
+[project]
+name = "automarkov-profile-retrieval-tavily"
+version = "0.1.0"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "httpx==0.28.1",
+  "tavily-python==0.7.27",
+]
+
+[tool.uv]
+required-version = "==0.11.16"

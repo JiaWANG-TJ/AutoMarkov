@@ -1,0 +1,180 @@
+{
+  "dependencies": [
+    {
+      "license": "Apache-2.0",
+      "name": "absl-py",
+      "source": "https://pypi.org/pypi/absl-py/2.5.0/json#info.license_expression",
+      "version": "2.5.0"
+    },
+    {
+      "license": "MIT",
+      "name": "attrs",
+      "source": "https://pypi.org/pypi/attrs/26.1.0/json#info.license_expression",
+      "version": "26.1.0"
+    },
+    {
+      "license": "MIT",
+      "name": "cachebox",
+      "source": "https://pypi.org/pypi/cachebox/5.2.3/json#info.classifiers",
+      "version": "5.2.3"
+    },
+    {
+      "license": "MPL-2.0",
+      "name": "certifi",
+      "source": "https://pypi.org/pypi/certifi/2026.7.22/json#info.classifiers",
+      "version": "2026.7.22"
+    },
+    {
+      "license": "MIT",
+      "name": "charset-normalizer",
+      "source": "https://pypi.org/pypi/charset-normalizer/3.4.9/json#info.license",
+      "version": "3.4.9"
+    },
+    {
+      "license": "MIT",
+      "name": "deepdiff",
+      "source": "https://pypi.org/pypi/deepdiff/9.1.0/json#info.classifiers",
+      "version": "9.1.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "dm-env",
+      "source": "https://pypi.org/pypi/dm-env/1.6/json#info.classifiers",
+      "version": "1.6"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "dm-tree",
+      "source": "https://pypi.org/pypi/dm-tree/0.1.10/json#info.classifiers",
+      "version": "0.1.10"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "enum34",
+      "source": "https://files.pythonhosted.org/packages/11/c4/2da1f4952ba476677a42f25cd32ab8aaf0e1c0d0e00b89822b835c7e654c/enum34-1.1.10.tar.gz#sha256=cce6a7477ed816bd2542d03d53db9f0db935dd013b70f336a95c73979289f248&path=enum34-1.1.10/enum/LICENSE",
+      "version": "1.1.10"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "idna",
+      "source": "https://pypi.org/pypi/idna/3.18/json#info.license_expression",
+      "version": "3.18"
+    },
+    {
+      "license": "BSD-2-Clause",
+      "name": "mock",
+      "source": "https://files.pythonhosted.org/packages/07/8c/14c2ae915e5f9dca5a22edd68b35be94400719ccfa068a03e0fb63d0f6f6/mock-5.2.0.tar.gz#sha256=4e460e818629b4b173f32d08bf30d3af8123afbb8e04bb5707a1fd4799e503f0&path=mock-5.2.0/LICENSE.txt",
+      "version": "5.2.0"
+    },
+    {
+      "license": "BSD-2-Clause",
+      "name": "mpyq",
+      "source": "https://files.pythonhosted.org/packages/ff/10/76041d97aa01e4d0f93481942b4faf5652123acdd90fbff4e40bb8d9024c/mpyq-0.2.5.tar.gz#sha256=30aaf5962be569f3f2b53978060cd047434ee4f5a215925dd6ff0fef04ec0007&path=mpyq-0.2.5/LICENSE",
+      "version": "0.2.5"
+    },
+    {
+      "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "name": "numpy",
+      "source": "https://pypi.org/pypi/numpy/2.4.6/json#info.license_expression",
+      "version": "2.4.6"
+    },
+    {
+      "license": "MIT",
+      "name": "orderly-set",
+      "source": "https://pypi.org/pypi/orderly-set/5.5.0/json#info.classifiers",
+      "version": "5.5.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "portpicker",
+      "source": "https://pypi.org/pypi/portpicker/1.6.0/json#info.classifiers",
+      "version": "1.6.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "protobuf",
+      "source": "https://pypi.org/pypi/protobuf/3.20.1/json#info.license",
+      "version": "3.20.1"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "psutil",
+      "source": "https://pypi.org/pypi/psutil/7.2.2/json#info.license",
+      "version": "7.2.2"
+    },
+    {
+      "license": "LGPL-2.1-or-later",
+      "name": "pygame",
+      "source": "https://files.pythonhosted.org/packages/49/cc/08bba60f00541f62aaa252ce0cfbd60aebd04616c0b9574f755b583e45ae/pygame-2.6.1.tar.gz#sha256=56fb02ead529cee00d415c3e007f75e0780c655909aaa8e8bf616ee09c9feb1f&path=pygame-2.6.1/docs/LGPL.txt",
+      "version": "2.6.1"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "pysc2",
+      "source": "https://pypi.org/pypi/pysc2/4.0.0/json#info.classifiers",
+      "version": "4.0.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "requests",
+      "source": "https://pypi.org/pypi/requests/2.34.2/json#info.classifiers",
+      "version": "2.34.2"
+    },
+    {
+      "license": "MIT",
+      "name": "s2clientprotocol",
+      "source": "https://pypi.org/pypi/s2clientprotocol/5.0.16.97563.0/json#info.classifiers",
+      "version": "5.0.16.97563.0"
+    },
+    {
+      "license": "MIT",
+      "name": "s2protocol",
+      "source": "https://pypi.org/pypi/s2protocol/5.0.16.97563.0/json#info.classifiers",
+      "version": "5.0.16.97563.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "scipy",
+      "source": "https://pypi.org/pypi/scipy/1.17.1/json#info.classifiers+info.license",
+      "version": "1.17.1"
+    },
+    {
+      "license": "MIT",
+      "name": "setuptools",
+      "source": "https://pypi.org/pypi/setuptools/84.0.0/json#info.license_expression",
+      "version": "84.0.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "sk-video",
+      "source": "https://files.pythonhosted.org/packages/b3/4b/c9613e4261e9c43988d45d0a4db3880d6591a22238f9a5dd81a412b898ae/sk-video-1.1.10.tar.gz#sha256=fb7125cfa2b31253dcf181d0bf285edd6bb25ffebf61dbd8ba11fadb783609a1&path=sk-video-1.1.10/LICENSE.txt",
+      "version": "1.1.10"
+    },
+    {
+      "license": "MIT",
+      "name": "smacv2",
+      "source": "https://raw.githubusercontent.com/oxwhirl/smacv2/577ab5a2cff2391f8df582da5731ea9cd6adf3c6/LICENSE",
+      "version": "1.0.0"
+    },
+    {
+      "license": "MIT",
+      "name": "urllib3",
+      "source": "https://pypi.org/pypi/urllib3/2.7.0/json#info.license_expression",
+      "version": "2.7.0"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "websocket-client",
+      "source": "https://pypi.org/pypi/websocket-client/1.9.0/json#info.classifiers",
+      "version": "1.9.0"
+    },
+    {
+      "license": "BSD-2-Clause",
+      "name": "wrapt",
+      "source": "https://pypi.org/pypi/wrapt/2.3.0/json#info.license_expression",
+      "version": "2.3.0"
+    }
+  ],
+  "profile_id": "env-smacv2",
+  "schema_version": "automarkov.profile-licenses.v1"
+}

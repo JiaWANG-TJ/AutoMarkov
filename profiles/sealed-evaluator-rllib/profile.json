@@ -1,0 +1,73 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:95e90ff7c6f27b81d371f85656c41d79245fbda57853a911a82ea0aabb679190",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "sealed_evaluation.rllib.v1"
+  ],
+  "conflict_groups": [
+    "sealed-rllib-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "remote-env-sealed-client.v1",
+    "sealed-evaluator-signing.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:b138619e1d1f5b82c216dfb790f9c4d6312f04882ea01fa87a91629bb16b6c81",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:d4070ae31c74de834b223a74765aeca3874a89c727429854fbed60e2bbf6ffde",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "cryptography": "49.0.0",
+    "gymnasium": "1.2.2",
+    "pettingzoo": "1.26.1",
+    "pydantic": "2.12.0",
+    "ray": "2.56.1",
+    "rfc8785": "0.1.4",
+    "safetensors": "0.8.0",
+    "torch": "2.13.0"
+  },
+  "platform": null,
+  "profile_id": "sealed-evaluator-rllib",
+  "protocol_edges": [
+    "RemoteEnv",
+    "SealedEvaluator"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/artifacts/evaluation",
+    "/mnt/automarkov/sealed/evaluation"
+  ],
+  "repository_commits": {
+    "ray": "936f0d7d49d9da8ac1a9f04cc8a89faf2cb3c42a"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:39d945a1a99af842b68417b6b5d8f243f7cc18828c736836ef2277e7bbda2491",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:ab441bfdec1d2e824a0426e2136a62f6d63d58081dfd54a416639c80a354d795",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": [
+    "/mnt/automarkov/artifacts/verdicts"
+  ]
+}

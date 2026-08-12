@@ -1,0 +1,25 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "sealed-evaluator-rllib",
+  "enabled": true,
+  "imports": [
+    "cryptography",
+    "gymnasium",
+    "pettingzoo",
+    "pydantic",
+    "ray",
+    "rfc8785",
+    "safetensors",
+    "torch"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "scenarionet",
+    "smacv2",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

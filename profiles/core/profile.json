@@ -1,0 +1,63 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:429bccbf62749fce22782a52aea31e75de7b1311da957abf85e082de7666f0ba",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "domain.protocols.v1"
+  ],
+  "conflict_groups": [
+    "core-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:fca7358e5986776c1a953f17553d6628581ed7f1ff454a93c9dd9aa9f0328241",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:69c83826aa007fce14e1a707451dea1242bf7a0adaf9f717e3538803920f75e9",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "cryptography": "49.0.0",
+    "jsonschema": "4.26.0",
+    "pydantic": "2.12.0",
+    "rfc8785": "0.1.4",
+    "typing-extensions": "4.16.0"
+  },
+  "platform": null,
+  "profile_id": "core",
+  "protocol_edges": [],
+  "publishable": true,
+  "python_version": "3.12.11",
+  "read_mounts": [
+    "/mnt/automarkov/artifacts/input"
+  ],
+  "repository_commits": {
+    "pydantic": "a7928e692e5a7841c4379d1af1fd37966941dade"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:5cc31c10e04eaaa0d8ef7dc5a33d891ed5403b578e72b51c7d6d152193164447",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:74c2c8c8d7443a9ac4098d0953abbf853c11a3258271080ab2bf44fb5aa2e27a",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": [
+    "/mnt/automarkov/artifacts/output"
+  ]
+}

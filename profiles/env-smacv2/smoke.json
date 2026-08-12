@@ -1,0 +1,19 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "env-smacv2",
+  "enabled": true,
+  "imports": [
+    "smacv2"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "ray",
+    "scenarionet",
+    "swanlab",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

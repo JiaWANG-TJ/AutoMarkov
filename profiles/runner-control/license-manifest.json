@@ -1,0 +1,60 @@
+{
+  "dependencies": [
+    {
+      "license": "MIT",
+      "name": "annotated-types",
+      "source": "https://pypi.org/pypi/annotated-types/0.8.0/json#info.license_expression",
+      "version": "0.8.0"
+    },
+    {
+      "license": "MIT-0",
+      "name": "cffi",
+      "source": "https://pypi.org/pypi/cffi/2.1.1/json#info.license_expression",
+      "version": "2.1.1"
+    },
+    {
+      "license": "Apache-2.0 OR BSD-3-Clause",
+      "name": "cryptography",
+      "source": "https://pypi.org/pypi/cryptography/49.0.0/json#info.license_expression",
+      "version": "49.0.0"
+    },
+    {
+      "license": "BSD-3-Clause",
+      "name": "pycparser",
+      "source": "https://pypi.org/pypi/pycparser/3.0/json#info.license_expression",
+      "version": "3.0"
+    },
+    {
+      "license": "MIT",
+      "name": "pydantic",
+      "source": "https://pypi.org/pypi/pydantic/2.12.0/json#info.license_expression",
+      "version": "2.12.0"
+    },
+    {
+      "license": "MIT",
+      "name": "pydantic-core",
+      "source": "https://pypi.org/pypi/pydantic-core/2.41.1/json#info.license_expression",
+      "version": "2.41.1"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "rfc8785",
+      "source": "https://pypi.org/pypi/rfc8785/0.1.4/json#info.classifiers",
+      "version": "0.1.4"
+    },
+    {
+      "license": "PSF-2.0",
+      "name": "typing-extensions",
+      "source": "https://pypi.org/pypi/typing-extensions/4.16.0/json#info.license_expression",
+      "version": "4.16.0"
+    },
+    {
+      "license": "MIT",
+      "name": "typing-inspection",
+      "source": "https://pypi.org/pypi/typing-inspection/0.4.3/json#info.license_expression",
+      "version": "0.4.3"
+    }
+  ],
+  "profile_id": "runner-control",
+  "schema_version": "automarkov.profile-licenses.v1"
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "core",
+  "enabled": true,
+  "imports": [
+    "cryptography",
+    "jsonschema",
+    "pydantic",
+    "rfc8785"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "oasis",
+    "open_spiel",
+    "ray",
+    "scenarionet",
+    "smacv2",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

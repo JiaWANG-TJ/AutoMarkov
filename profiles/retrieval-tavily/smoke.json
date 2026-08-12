@@ -1,0 +1,19 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "retrieval-tavily",
+  "enabled": true,
+  "imports": [
+    "httpx",
+    "tavily"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "ray",
+    "scenarionet",
+    "smacv2",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

@@ -1,0 +1,48 @@
+{
+  "dependencies": [
+    {
+      "license": "BSD-3-Clause",
+      "name": "cloudpickle",
+      "source": "https://pypi.org/pypi/cloudpickle/3.1.2/json#info.classifiers+info.license",
+      "version": "3.1.2"
+    },
+    {
+      "license": "MIT",
+      "name": "farama-notifications",
+      "source": "https://pypi.org/pypi/farama-notifications/0.0.6/json#info.classifiers",
+      "version": "0.0.6"
+    },
+    {
+      "license": "MIT",
+      "name": "gymnasium",
+      "source": "https://pypi.org/pypi/gymnasium/1.2.2/json#info.classifiers",
+      "version": "1.2.2"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "minigrid",
+      "source": "https://raw.githubusercontent.com/Farama-Foundation/Minigrid/90928729376741a41222a257911343b97103b548/LICENSE",
+      "version": "3.1.0"
+    },
+    {
+      "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "name": "numpy",
+      "source": "https://pypi.org/pypi/numpy/2.4.6/json#info.license_expression",
+      "version": "2.4.6"
+    },
+    {
+      "license": "LGPL-2.1-or-later",
+      "name": "pygame-ce",
+      "source": "https://files.pythonhosted.org/packages/26/2d/0f942ec31d558a6a1f2fd0df9965ff0055f165ed5b8d36f6509b1f3768a2/pygame_ce-2.5.8.tar.gz#sha256=3c8e69088ead310037972c391306ea58e74d7296b35d1890067749235fd554ba&path=pygame_ce-2.5.8/docs/LGPL.txt",
+      "version": "2.5.8"
+    },
+    {
+      "license": "PSF-2.0",
+      "name": "typing-extensions",
+      "source": "https://pypi.org/pypi/typing-extensions/4.16.0/json#info.license_expression",
+      "version": "4.16.0"
+    }
+  ],
+  "profile_id": "env-minigrid",
+  "schema_version": "automarkov.profile-licenses.v1"
+}

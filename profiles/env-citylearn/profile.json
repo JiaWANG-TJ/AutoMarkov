@@ -1,0 +1,64 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:dcf251e4aad4718eb21274bc95e63b5f3714996cf7be017bbebe779df3ad9044",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "remote_env.citylearn.v1"
+  ],
+  "conflict_groups": [
+    "citylearn-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "remote-env-server.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "cpu",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:c8654ae4ae81a9fe041676f5eb238450bafe6481ec3c21acc9bd4aac74b6e90b",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:e7c7cc119aaad9209be2f50ab2b1ab1c7fc93746e11f0e30cc4bd540bfdec521",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "citylearn": "2.5.0",
+    "gymnasium": "0.28.1",
+    "numpy": "1.26.4",
+    "setuptools": "84.0.0"
+  },
+  "platform": null,
+  "profile_id": "env-citylearn",
+  "protocol_edges": [
+    "RemoteEnv"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/assets/citylearn"
+  ],
+  "repository_commits": {
+    "citylearn": "29062af6d077409e1c37a3e53a6cac30fd4d02bc"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:f6832ee95be02a2747dd48779cc886a7902771da3e0a4aba10aefbb57a0f3c52",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:15e6fe6dcef73728734a58c52bdf7fa7c54e0eb16a7263a5e63012df30763583",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": []
+}

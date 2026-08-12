@@ -1,0 +1,17 @@
+# profile.json 的 build_context_files 与域分离哈希冻结全部构建输入；实际 OCI digest 仅在镜像构建并验证后登记。
+FROM --platform=linux/amd64 python:3.11.13-slim-bookworm@sha256:cec9aa7aa96eea4fa036e9b82be1e6b325f2e3707f462d885868df51ec0a4b47
+COPY --from=ghcr.io/astral-sh/uv:0.11.16@sha256:440fd6477af86a2f1b38080c539f1672cd22acb1b1a47e321dba5158ab08864d /uv /uvx /bin/
+RUN rm -f /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources \
+    && printf '%s\n' \
+        'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20250910T000000Z bookworm main' \
+        > /etc/apt/sources.list.d/debian-snapshot.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates=20230311+deb12u1 git=1:2.39.5-0+deb12u2 \
+    && test "$(git --version)" = "git version 2.39.5" \
+    && test -s /etc/ssl/certs/ca-certificates.crt \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /opt/automarkov-profile
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-dev --no-install-project --no-install-package mpyq --no-install-package s2protocol --no-install-package smacv2 \
+    && test "$(.venv/bin/python -c 'import importlib.metadata; print(importlib.metadata.version("setuptools"))')" = "84.0.0" \
+    && uv sync --locked --no-dev --no-install-project

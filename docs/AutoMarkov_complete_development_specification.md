@@ -3520,6 +3520,8 @@ $$
 
 ## 8.6 隔离 dependency profiles
 
+`build_context_hash` 使用 `AutoMarkov-Runtime-Profile-Build-Context-v2` domain；它对每个 allowlisted path 同时绑定 Git 语义的规范化 mode（不可执行 `0644`、可执行 `0755`）与内容 SHA-256。executable bit 或 bytes 任一变化都会产生新的 build context 与 profile identity，同时忽略 checkout umask 导致的 group/other 位差异。
+
 不得构建包含所有环境和复现实验的单一 Python environment。每个 profile 都有独立 `pyproject.toml`、`uv.lock`、Python ABI、container digest、SBOM、license manifest 和 compatibility test；核心进程只安装 `core` protocol types。
 
 | Profile | 允许依赖与用途 |
@@ -3543,9 +3545,15 @@ $$
 
 Trainer-local policy export 不是独立 RuntimeProfile 或跨 profile edge。trainer 在其已绑定的 frozen RLlib/PyTorch profile、checkout 与 filesystem namespace 内启动无 sealed/gold capability 的一次性 `ProcessExecution`；该 profile 已 pin `safetensors==0.8.0`。training terminal record 先绑定 checkpoint tree 的 canonical manifest（UTF-8 relative path、size、SHA-256 按 path bytes 排序）；export execution 在加载前重验整棵 tree 及 manifest，使用 read-only snapshot/file descriptors 避免 TOCTOU，验证预注册 architecture/connector IDs 后导出 finite、closed name/shape/dtype tensor map、strict JCS manifest 与 source-checkpoint commitment，随后销毁。只有 safetensors、manifest、commitment 和 terminal record 可跨 profile；checkpoint、pickle/cloudpickle、Python object/code/import path、optimizer state与可执行 connector 永不跨 profile。
 
-profile resolution 以 `(profile_name, lock_hash, image_digest, platform)` 唯一标识。核心不得直接 import profile package；`EnvironmentBinding` 根据 frozen manifest 启动 worker。如果两个 suite 版本约束冲突，创建两个 profile，而不是修改全局 lock。不存在 `automarkov[all]` release extra。
+仓库中的 `automarkov.runtime-profile-manifest.v2` 使用 closed image-state contract：`recipe_frozen` 通过按 UTF-8 path 排序且唯一的 `build_context_files` 绑定全部构建输入及其 domain-separated `build_context_hash`，且所有 runtime evidence 为空；每个 profile 的 `.dockerignore` 必须先拒绝全部路径，再按该 tuple 逐项 allowlist，并作为第一个受 hash 保护的构建输入，因而未登记的 `.venv`、cache、metadata 或工作树文件不会进入容器 build context。只有镜像真实构建、校验并完成 import smoke 后才能原子升级为 `built`。`built` 必须同时绑定实际 OCI manifest digest、`linux/amd64` platform、libc、OpenSSL、CA bundle hash、content-addressed build attestation ID/hash 与 import-smoke attestation ID/hash，任一缺失都拒绝；消费方必须从 ArtifactRepository 指定 head 解析并重验两份 attestation，不能只信 manifest 内的字符串。在可信 resolver 实现前，metadata verifier 对任何 `built` 声明 fail closed。复用现场服务的 `llm-qwen36-vllm` 使用 `attached_unverified`，直到 T05 immutable runtime manifest 完成 `/health`、认证 `/v1/models` 与真实 completion 三项证明；受限 Agent2World 使用 `restricted_disabled`。任何非 `built` profile 都不得凭构建输入 hash 冒充 image identity，也不得进入要求容器镜像的 fixed-commit job。
 
-密码学与 canonical JSON 禁止自写实现。Ed25519/X.509 使用 PyCA `cryptography==49.0.0`；JCS 使用 Trail of Bits `rfc8785==0.1.4`（PyPI wheel SHA-256 `520d690b448ecf0703691c76e1a34a24ddcd4fc5bc41d589cb7c58ec651bcd48`）；TLS 使用 Python stdlib `ssl.SSLContext` 并把 minimum/maximum version 都设为 TLS 1.3。每个 profile 的 `uv.lock` 保留实际 platform wheel/sdist SHA-256 和 PyPI provenance，SBOM 记录 package source/tag；container manifest 另外冻结 Python patch、`ssl.OPENSSL_VERSION`、CA bundle 与 image digest。`cryptography` 的 platform wheel hash 随 ABI/platform 变化，必须由该 profile lock 精确给出，不能只信版本字符串。preflight 对版本、artifact hash、OpenSSL/TLS capability、RFC 8785 official vectors、Ed25519/X.509 vectors 和 cross-profile interop 全部 fail closed。
+可执行 profile resolution 以 `(profile_name, lock_hash, image_digest, platform)` 唯一标识。核心不得直接 import profile package；`EnvironmentBinding` 根据 frozen manifest 启动 worker。如果两个 suite 版本约束冲突，创建两个 profile，而不是修改全局 lock。不存在 `automarkov[all]` release extra。
+
+所有 T04 recipe 冻结 `target_platform=linux/amd64`、Debian bookworm glibc 2.36 与 profile 的 CPython patch version。uv universal lock 的目标安装闭包必须从 virtual root 开始，按 frozen CPython/Linux marker environment 遍历并传播 requested extras 与 `optional-dependencies`；引用未冻结 `platform_release`/`platform_version` 的 marker、缺失 dependency/extra 或同名多版本歧义均 fail closed。registry artifact selection 必须复用 `packaging==26.3` 的 `cpython_tags`、`compatible_tags`、`parse_wheel_filename` 与 `parse_sdist_filename`：显式 ABI=`cpXY`，platform tag 按 `manylinux_2_36_x86_64` 下降至 2.5、相应 legacy alias、最后 `linux_x86_64` 排序；wheel URL、distribution name 与 version 必须绑定 lock，唯一最优 compatible wheel 优先，只有不存在 compatible wheel 时才回退 identity-matched HTTPS sdist。多个同 rank 最优工件、非 HTTPS/userinfo/query/fragment、macOS/Windows/ARM/musllinux/glibc>2.36、name/version substitution 全部拒绝。目标闭包外的 universal-lock 条目仍进入 SBOM/license inventory，但 `downloadLocation=NOASSERTION` 且无 checksum；目标闭包内 registry 条目只记录唯一 selected URL/hash。active pip upstream 必须恰有一个 checksum 且等于该 selected hash；deferred/reference/restricted/attached 条目不得携带未消费的 artifact checksum。active Git source 只以 lock 中 exact repository URL+40-hex commit 为重建身份，不把 GitHub 自动生成 archive 的易变压缩字节作为长期唯一身份。
+
+源码构建 closure 也是中央 closed policy：`authoring={google-search-results}`、`env-citylearn={tinynumpy}`、`env-metadrive={progressbar,scenarionet}`、`env-smacv2={mpyq,s2protocol,smacv2}`，不能只根据当前 lock 临时推断后放行。四个 profile 必须把 `setuptools==84.0.0` 同时作为 direct locked dependency 与 `[tool.uv].build-constraint-dependencies`，并把 exact source set 写入 `no-build-isolation-package`。recipe 第一阶段执行 locked sync 且逐项 `--no-install-package` 排除 source set，使 setuptools 从已有 lock artifact 安装并进入 SBOM/license/profile identity；精确版本断言通过后，第二阶段才执行完整 locked sync。central verifier 必须重算目标闭包中的 5 个 selected sdist 与 2 个 exact Git source，要求它与 profile policy 相等，并验证 Containerfile/CI 的两阶段顺序和 SPDX `BUILD_DEPENDENCY_OF` 关系。`build-constraint-dependencies` 本身不能代替 lock/hash 绑定，也不能允许 legacy backend 在隔离环境中动态解析浮动 `setuptools>=40.8.0`。
+
+密码学与 canonical JSON 禁止自写实现。Ed25519/X.509 使用 PyCA `cryptography==49.0.0`；JCS 使用 Trail of Bits `rfc8785==0.1.4`（PyPI wheel SHA-256 `520d690b448ecf0703691c76e1a34a24ddcd4fc5bc41d589cb7c58ec651bcd48`）；TLS 使用 Python stdlib `ssl.SSLContext` 并把 minimum/maximum version 都设为 TLS 1.3。每个 profile 的 `uv.lock` 保留 universal resolution 的 wheel/sdist SHA-256 和 PyPI provenance，SBOM 按上述目标闭包只冻结实际 selected artifact；container manifest 另外冻结 Python patch、`ssl.OPENSSL_VERSION`、CA bundle 与 image digest。`cryptography` 的 platform wheel hash 随 ABI/platform 变化，必须由该 profile 的 target selection 精确给出，不能只信版本字符串。preflight 对版本、artifact hash、OpenSSL/TLS capability、RFC 8785 official vectors、Ed25519/X.509 vectors 和 cross-profile interop 全部 fail closed。
 
 一个逻辑 `Run` 可以由多个 `ProcessExecution` 组成；每个 execution 恰绑定一个 profile，run manifest 则在启动前冻结完整 profile graph、每个节点的 profile/principal identity，以及允许的 protocol edge、version、authentication、message schema、capability、budget/egress policy 与 transcript-hash contract。持久化跨 profile handoff 仍只使用 immutable `Artifact`；在线 edge kind 只允许 `LocalLlmRuntime` inference、`EvidenceGateway` retrieval、`ClarificationBroker`、`ExperimentApprovalPolicy`、`RemoteEnv`、`SealedEvaluator` 与 `FixedCommitRunner` control/attestation。`RemoteEnv` 是唯一高频 environment step stream。未知 edge 或 execution 临时增加的 socket/HTTP target 必须 fail closed；session 结束后 request/response digest、snapshot、terminal summary、attestation 和需要留存的 tensor digest 成为 content-addressed artifacts。
 
@@ -4587,9 +4595,12 @@ Do not modify the user's objective or hidden evaluation protocol.
 不应将全部外部仓库复制进核心源码。使用 manifest 管理：
 
 ```yaml
+schema_version: "automarkov.upstream-manifest.v2"
 repository: "https://github.com/..."
 commit: ""
 release: ""
+resolution_status: "pinned | external_restricted | blocked_unresolved"
+integration_status: "active | attached_unverified | deferred | reference_only | restricted_disabled | blocked_unresolved"
 purpose: ""
 license: ""
 license_file_hash: "sha256:..."
@@ -4600,6 +4611,8 @@ data_assets: []
 checksums: []
 citation: ""
 ```
+
+`resolution_status` 只表达 upstream 身份是否已固定，`integration_status` 独立表达本项目是否执行它。`active` 必须对应 `pinned` 且与 dependency profile 的 target lock/source 机械绑定；active pip 恰有一个 checksum 并等于 Linux/amd64 selected artifact，active Git 绑定 exact lock URL+commit且 `checksums=[]`。`attached_unverified` 在现场 runtime attestation 前不得 ready；`deferred` 与 `reference_only` 不得进入 active lock/build且不得携带未消费 checksum；`restricted_disabled` 只能对应 `external_restricted`；两种 `blocked_unresolved` 必须同时出现。`pinned` 必须提供 exact commit 或 release，且只用于 `permitted` 资源；`external_restricted` 仍须提供 exact upstream identity，但 payload 只存在于许可边界允许的外部 cache；`blocked_unresolved` 必须同时保持 `commit=null`、`release=null`、`checksums=[]` 和 `redistribution_policy=prohibited`。禁止把 `unknown`、`latest`、`asset-blocked-unresolved` 等占位文本写成 release 或 checksum 以伪造可重建性；SC2 binary/maps 在获得官方构建与内容哈希前必须保持该阻塞状态。
 
 许可允许的 reference 下载至：
 

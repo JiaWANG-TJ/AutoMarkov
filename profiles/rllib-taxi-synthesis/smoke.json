@@ -1,0 +1,22 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "rllib-taxi-synthesis",
+  "enabled": true,
+  "imports": [
+    "gymnasium",
+    "ray",
+    "safetensors",
+    "torch"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "open_spiel",
+    "scenarionet",
+    "smacv2",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": "taxi_deny_v1"
+}

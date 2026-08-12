@@ -1,0 +1,6 @@
+*
+!.dockerignore
+!Containerfile
+!pyproject.toml
+!taxi_deny.py
+!uv.lock

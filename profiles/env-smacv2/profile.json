@@ -1,0 +1,64 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:1479cad542e72eb1b4694bf59f54b002729da6ca0ea23f2e2d8e1d82023b5123",
+  "build_enabled": true,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "remote_env.smacv2.v1"
+  ],
+  "conflict_groups": [
+    "sc2-assets-blocked",
+    "smacv2-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "remote-env-server.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "external_asset",
+  "image_digest": null,
+  "image_status": "recipe_frozen",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:a3b70af4252c05fd1dadd5b1f7277e4acc2bf37b43d3cf3f79d9b25a85e1dc8b",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:9e68130aab2cac1ddc9be0dda081439050f84fa6b8a5cd29c7bac1229e41e6c0",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {},
+  "openssl_version": null,
+  "package_versions": {
+    "protobuf": "3.20.1",
+    "pysc2": "4.0.0",
+    "setuptools": "84.0.0"
+  },
+  "platform": null,
+  "profile_id": "env-smacv2",
+  "protocol_edges": [
+    "RemoteEnv"
+  ],
+  "publishable": true,
+  "python_version": "3.11.13",
+  "read_mounts": [
+    "/mnt/automarkov/assets/starcraft2"
+  ],
+  "repository_commits": {
+    "smacv2": "577ab5a2cff2391f8df582da5731ea9cd6adf3c6"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:23e1f9df097ec1615af8a09bd9aee37d282a695e2ddc54a2c114c2515e604e0f",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:743f37da318dad53029b571e5cb0cfbd1e47f2035a7cc2d7ef024a05c951ce0f",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": []
+}

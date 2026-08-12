@@ -1,0 +1,22 @@
+{
+  "schema_version": "automarkov.profile-smoke.v1",
+  "profile_id": "runner-control",
+  "enabled": true,
+  "imports": [
+    "cryptography",
+    "pydantic",
+    "rfc8785",
+    "ssl"
+  ],
+  "forbidden_imports": [
+    "citylearn",
+    "metadrive",
+    "ray",
+    "scenarionet",
+    "smacv2",
+    "tavily",
+    "vllm"
+  ],
+  "failure_mode": "fail_closed",
+  "preflight": null
+}

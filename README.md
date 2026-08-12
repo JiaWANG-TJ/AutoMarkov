@@ -17,9 +17,11 @@ content addressed; approvals and run transitions are append-only events.
 AutoMarkov is under active development. The G0 core currently provides an
 installable package, strict intake types, eight public protocol views, bounded
 canonical JSON codecs, and immutable content-addressed artifact repositories
-backed by either memory or transactional SQLite. The append-only event reducer,
-runtime integrations, suite adapters, training, and benchmark matrix remain
-tracked follow-up work.
+backed by either memory or transactional SQLite. It also provides the strict
+append-only lifecycle reducer, specified-head replay, atomic terminal and
+cross-run transactions, and a provenance catalog for 17 isolated runtime
+profiles. Runtime integrations, suite adapters, training, and the benchmark
+matrix remain tracked follow-up work.
 
 ## Development
 
@@ -31,6 +33,19 @@ uv run pytest -q tests/unit/test_canonical_json.py \
   tests/contract/test_artifact_repository.py \
   tests/contract/test_artifact_schema_registry.py
 ```
+
+Verify the pinned upstream catalog, profile locks, SBOMs, license manifests,
+Linux/amd64 selected artifacts, and isolation rules without installing the
+profile-specific dependencies:
+
+```bash
+uv run automarkov verify-provenance --repository-root .
+```
+
+This metadata verification does not claim that a profile image or attached
+runtime is ready. Profile-local import smokes, OCI image builds, and attached
+service canaries are separate gates; only a verified build may acquire an OCI
+image digest.
 
 The current CLI walking skeleton accepts one request and returns a typed JSON view:
 

@@ -1,0 +1,63 @@
+{
+  "build_attestation_hash": null,
+  "build_attestation_id": null,
+  "build_context_files": [
+    ".dockerignore",
+    "Containerfile",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "build_context_hash": "sha256:107f13da58caa2d1df438a5b528d0f040a5c3bb095f43c7afff939d76e722fc1",
+  "build_enabled": false,
+  "ca_bundle_hash": null,
+  "capabilities": [
+    "local_llm.openai_chat.v1"
+  ],
+  "conflict_groups": [
+    "vllm-cu129-attached-runtime"
+  ],
+  "containerfile_path": "Containerfile",
+  "credential_ids": [
+    "local-llm-server.v1"
+  ],
+  "dataset_revisions": {},
+  "egress_allowlist": [],
+  "hardware_contract": "gpu",
+  "image_digest": null,
+  "image_status": "attached_unverified",
+  "import_smoke_attestation_hash": null,
+  "import_smoke_attestation_id": null,
+  "libc_version": null,
+  "license_manifest_hash": "sha256:725b7645e573d6aeedeaf4101cb9d5db077e73cf28b40ac7263d06cf4d2d0b31",
+  "license_manifest_path": "license-manifest.json",
+  "lock_hash": "sha256:a84c36d91b87338c52a133eefbe13eddb18d31a4227390fc027362d9a1e06cca",
+  "lockfile_path": "uv.lock",
+  "model_revisions": {
+    "Qwen/Qwen3.6-35B-A3B": "995ad96eacd98c81ed38be0c5b274b04031597b0"
+  },
+  "openssl_version": null,
+  "package_versions": {
+    "vllm": "0.25.1+cu129"
+  },
+  "platform": null,
+  "profile_id": "llm-qwen36-vllm",
+  "protocol_edges": [
+    "LocalLlmRuntime"
+  ],
+  "publishable": false,
+  "python_version": "3.12.11",
+  "read_mounts": [
+    "/mnt/automarkov/models/qwen36"
+  ],
+  "repository_commits": {
+    "vllm": "752a3a504485790a2e8491cacbb35c137339ad34"
+  },
+  "restricted": false,
+  "sbom_hash": "sha256:fb0b3d5253779e69138df2e62e5ab655dfd704b7b30a0df7faac452a75dc440a",
+  "sbom_path": "sbom.spdx.json",
+  "schema_version": "automarkov.runtime-profile-manifest.v2",
+  "smoke_contract_hash": "sha256:3fd4aa59eb5e16be74b299a53150cf8d8d060ca8b3857f56e21a437642685930",
+  "smoke_contract_path": "smoke.json",
+  "target_platform": "linux/amd64",
+  "write_mounts": []
+}

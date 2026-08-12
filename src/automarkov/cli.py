@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Sequence
+from pathlib import Path
 
 from automarkov.api import compile_task
 from automarkov.domain import validate_task_request_payload
+from automarkov.provenance import verify_provenance
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -13,13 +15,23 @@ def _parser() -> argparse.ArgumentParser:
     compile_parser = commands.add_parser("compile")
     compile_parser.add_argument("--request-id", required=True)
     compile_parser.add_argument("--task-text", required=True)
+    provenance_parser = commands.add_parser("verify-provenance")
+    provenance_parser.add_argument(
+        "--repository-root",
+        type=Path,
+        default=Path.cwd(),
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    if args.command != "compile":  # pragma: no cover - argparse owns this branch.
-        raise AssertionError("unreachable command")
+    if args.command == "verify-provenance":
+        report = verify_provenance(args.repository_root)
+        print(report.model_dump_json())
+        return 0 if report.valid else 1
+    if args.command != "compile":  # pragma: no cover - argparse 限定命令集合。
+        raise AssertionError("无法到达的命令")
     request = validate_task_request_payload(
         {
             "schema_version": "automarkov.task-request.v1",
