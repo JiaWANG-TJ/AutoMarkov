@@ -5,6 +5,29 @@ class AutoMarkovError(RuntimeError):
     code = "automarkov_error"
 
 
+class EvidenceGatewayAuthenticationError(AutoMarkovError):
+    code = "evidence_gateway_authentication_error"
+
+    def __init__(self) -> None:
+        super().__init__("evidence gateway command authentication failed")
+
+
+class EvidenceProviderContractError(AutoMarkovError):
+    code = "evidence_provider_contract_error"
+
+    def __init__(self, reason_code: str) -> None:
+        self.reason_code = reason_code
+        super().__init__(f"Tavily provider contract rejected: {reason_code}")
+
+
+class EvidenceBudgetLimitError(AutoMarkovError):
+    code = "evidence_budget_limit_error"
+
+    def __init__(self, reason_code: str) -> None:
+        self.reason_code = reason_code
+        super().__init__(f"frozen evidence budget rejected: {reason_code}")
+
+
 class UnknownRunError(AutoMarkovError):
     code = "unknown_run"
 

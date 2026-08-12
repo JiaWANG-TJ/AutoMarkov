@@ -43,16 +43,57 @@ def _require_safe_int(value: object) -> int:
     return value
 
 
+def _require_nonnegative_safe_int(value: object) -> int:
+    validated = _require_safe_int(value)
+    if validated < 0:
+        raise ValueError("expected a nonnegative interoperable integer")
+    return validated
+
+
+def _require_positive_safe_int(value: object) -> int:
+    validated = _require_safe_int(value)
+    if validated < 1:
+        raise ValueError("expected a positive interoperable integer")
+    return validated
+
+
 def _require_exact_float(value: object) -> float:
     if type(value) is not float or not isfinite(value) or abs(value) > MAX_SAFE_INTEGER:
         raise ValueError("expected an interoperable finite JSON float")
     return 0.0 if value == 0.0 else value
 
 
+def _require_probability_float(value: object) -> float:
+    validated = _require_exact_float(value)
+    if not 0.0 <= validated <= 1.0:
+        raise ValueError("expected a probability in [0, 1]")
+    return validated
+
+
+def _require_confidence_float(value: object) -> float:
+    validated = _require_exact_float(value)
+    if not 0.0 < validated < 1.0:
+        raise ValueError("expected a confidence level in (0, 1)")
+    return validated
+
+
+def _require_nonnegative_float(value: object) -> float:
+    validated = _require_exact_float(value)
+    if validated < 0.0:
+        raise ValueError("expected a nonnegative finite JSON float")
+    return validated
+
+
 def _require_exact_true(value: object) -> Literal[True]:
     if type(value) is not bool or value is not True:
         raise ValueError("expected the exact boolean true")
     return True
+
+
+def _require_exact_false(value: object) -> Literal[False]:
+    if type(value) is not bool or value is not False:
+        raise ValueError("expected the exact boolean false")
+    return False
 
 
 def _is_exact_true_literal(value: object) -> bool:
@@ -64,6 +105,15 @@ def _is_exact_true_literal(value: object) -> bool:
     )
 
 
+def _is_exact_false_literal(value: object) -> bool:
+    return (
+        type(value) is list
+        and len(value) == 1
+        and type(value[0]) is bool
+        and value[0] is False
+    )
+
+
 SafeCanonicalInt = Annotated[
     int,
     BeforeValidator(_require_safe_int),
@@ -71,6 +121,28 @@ SafeCanonicalInt = Annotated[
         {
             "type": "integer",
             "minimum": -MAX_SAFE_INTEGER,
+            "maximum": MAX_SAFE_INTEGER,
+        }
+    ),
+]
+NonNegativeSafeCanonicalInt = Annotated[
+    int,
+    BeforeValidator(_require_nonnegative_safe_int),
+    WithJsonSchema(
+        {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": MAX_SAFE_INTEGER,
+        }
+    ),
+]
+PositiveSafeCanonicalInt = Annotated[
+    int,
+    BeforeValidator(_require_positive_safe_int),
+    WithJsonSchema(
+        {
+            "type": "integer",
+            "minimum": 1,
             "maximum": MAX_SAFE_INTEGER,
         }
     ),
@@ -87,6 +159,42 @@ StrictCanonicalFloat = Annotated[
         }
     ),
 ]
+ProbabilityCanonicalFloat = Annotated[
+    float,
+    BeforeValidator(_require_probability_float),
+    WithJsonSchema(
+        {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "x-automarkov-number-kind": "exact-float",
+        }
+    ),
+]
+ConfidenceCanonicalFloat = Annotated[
+    float,
+    BeforeValidator(_require_confidence_float),
+    WithJsonSchema(
+        {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "exclusiveMaximum": 1.0,
+            "x-automarkov-number-kind": "exact-float",
+        }
+    ),
+]
+NonNegativeCanonicalFloat = Annotated[
+    float,
+    BeforeValidator(_require_nonnegative_float),
+    WithJsonSchema(
+        {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": MAX_SAFE_INTEGER,
+            "x-automarkov-number-kind": "exact-float",
+        }
+    ),
+]
 StrictTrue = Annotated[
     Literal[True],
     BeforeValidator(_require_exact_true),
@@ -95,6 +203,17 @@ StrictTrue = Annotated[
             "type": "boolean",
             "const": True,
             "x-automarkov-boolean-kind": "strict-true",
+        }
+    ),
+]
+StrictFalse = Annotated[
+    Literal[False],
+    BeforeValidator(_require_exact_false),
+    WithJsonSchema(
+        {
+            "type": "boolean",
+            "const": False,
+            "x-automarkov-boolean-kind": "strict-false",
         }
     ),
 ]
@@ -525,8 +644,8 @@ _CanonicalJsonNode = TypeAliasType(
     | int
     | float
     | str
-    | list["_CanonicalJsonNode"]
-    | dict[str, "_CanonicalJsonNode"],
+    | list["_CanonicalJsonNode"]  # pyright: ignore[reportInvalidTypeForm] - 递归别名
+    | dict[str, "_CanonicalJsonNode"],  # pyright: ignore[reportInvalidTypeForm] - 递归别名
 )
 
 
@@ -951,8 +1070,15 @@ class CanonicalPayloadCodec(Generic[_ModelT]):
 
     __slots__ = ("_adapter", "_model_type", "_schema_bytes", "_sealed")
 
-    def __init__(self, model_type: type[_ModelT]) -> None:
-        adapter = TypeAdapter(model_type)
+    def __init__(
+        self,
+        model_type: type[_ModelT] | TypeAdapter[_ModelT],
+    ) -> None:
+        adapter = (
+            model_type
+            if isinstance(model_type, TypeAdapter)
+            else TypeAdapter(model_type)
+        )
         schema = cast(dict[str, object], adapter.json_schema())
         object.__setattr__(self, "_adapter", adapter)
         object.__setattr__(self, "_model_type", model_type)
@@ -965,7 +1091,7 @@ class CanonicalPayloadCodec(Generic[_ModelT]):
         object.__setattr__(self, name, value)
 
     @property
-    def model_type(self) -> type[_ModelT]:
+    def model_type(self) -> type[_ModelT] | TypeAdapter[_ModelT]:
         return self._model_type
 
     @property
@@ -1273,7 +1399,13 @@ def require_registered_model_number_contract(model_type: type[BaseModel]) -> Non
                     and function
                     in {
                         _require_exact_float,
+                        _require_probability_float,
+                        _require_confidence_float,
+                        _require_nonnegative_float,
                         _require_safe_int,
+                        _require_nonnegative_safe_int,
+                        _require_positive_safe_int,
+                        _require_exact_false,
                         _require_exact_true,
                     }
                 )
@@ -1317,14 +1449,23 @@ def require_registered_model_number_contract(model_type: type[BaseModel]) -> Non
                 function_spec.get("function") if type(function_spec) is dict else None
             )
             inner = node.get("schema")
-            if function is _require_exact_float:
+            if function in {
+                _require_exact_float,
+                _require_probability_float,
+                _require_confidence_float,
+                _require_nonnegative_float,
+            }:
                 if type(inner) is not dict or inner.get("type") != "float":
                     raise ValueError(
                         "StrictCanonicalFloat must wrap exactly one float scalar"
                     )
                 pending.append((inner, True, immutable_scope))
                 continue
-            if function is _require_safe_int:
+            if function in {
+                _require_safe_int,
+                _require_nonnegative_safe_int,
+                _require_positive_safe_int,
+            }:
                 if type(inner) is not dict or inner.get("type") != "int":
                     raise ValueError(
                         "SafeCanonicalInt must wrap exactly one int scalar"
@@ -1354,6 +1495,14 @@ def require_registered_model_number_contract(model_type: type[BaseModel]) -> Non
                     or not _is_exact_true_literal(inner.get("expected"))
                 ):
                     raise ValueError("StrictTrue must wrap exactly Literal[True]")
+                continue
+            if function is _require_exact_false:
+                if (
+                    type(inner) is not dict
+                    or inner.get("type") != "literal"
+                    or not _is_exact_false_literal(inner.get("expected"))
+                ):
+                    raise ValueError("StrictFalse must wrap exactly Literal[False]")
                 continue
             raise ValueError("artifact schema contains an unapproved before validator")
         if node_type == "function-after":
@@ -1395,6 +1544,11 @@ def require_registered_model_number_contract(model_type: type[BaseModel]) -> Non
                 )
         if node_type == "literal" and _is_exact_true_literal(node.get("expected")):
             raise ValueError("true-only artifact fields must use StrictTrue")
+        if node_type == "literal" and _is_exact_false_literal(node.get("expected")):
+            raise ValueError(
+                "numeric and boolean literals require an exact-type wire wrapper; "
+                "false-only artifact fields must use StrictFalse"
+            )
         if node_type == "literal":
             expected = node.get("expected")
             if type(expected) is list and any(

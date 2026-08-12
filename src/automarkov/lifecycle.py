@@ -79,6 +79,14 @@ ReasonCode = Annotated[
     str,
     Field(strict=True, min_length=1, max_length=128, pattern=r"^[a-z][a-z0-9_]*$"),
 ]
+ValidationLevelValue: TypeAlias = Literal[
+    "schema",
+    "structural",
+    "executable",
+    "behavioral",
+    "oracle_equivalent",
+    "formally_verified",
+]
 SequenceNo = Annotated[int, Field(strict=True, ge=0, le=9_007_199_254_740_991)]
 NonNegativeSafeInt = Annotated[SafeCanonicalInt, Field(ge=0)]
 PositiveSafeInt = Annotated[SafeCanonicalInt, Field(ge=1)]
@@ -865,11 +873,29 @@ class ValidationClaimed(_UnsignedNonRootRunEvent):
     event_type: Literal["ValidationClaimed"]
     claim: ArtifactReference
     subject: ArtifactReference
-    report: ArtifactReference
+    reports: FrozenSequence[ArtifactReference]
     validator_id: NonEmptyId
     validator_version: NonEmptyId
-    validation_level: Literal["terminal"]
-    validation_scope: Literal["ood_handoff", "package"]
+    validation_level: ValidationLevelValue
+    validation_scope: FrozenSequence[NonEmptyId]
+
+    @model_validator(mode="after")
+    def require_closed_validation_projection(self) -> ValidationClaimed:
+        report_keys = tuple(
+            (item.artifact_id, item.payload_hash) for item in self.reports
+        )
+        if not report_keys or report_keys != tuple(
+            sorted(set(report_keys), key=lambda item: item[0].encode("utf-8"))
+        ):
+            raise ValueError("validation reports must be nonempty, sorted, and unique")
+        if not self.validation_scope or self.validation_scope != tuple(
+            sorted(
+                set(self.validation_scope),
+                key=lambda item: item.encode("utf-8"),
+            )
+        ):
+            raise ValueError("validation scope must be nonempty, sorted, and unique")
+        return self
 
 
 class ValidationFailed(_UnsignedNonRootRunEvent):
@@ -1402,7 +1428,8 @@ OrdinaryAppendEvent: TypeAlias = Annotated[
     | SpecificationConflictDetected
     | SignedApprovalEvent
     | GateOmittedByDesign
-    | ExecutionTopologySubstituted,
+    | ExecutionTopologySubstituted
+    | ValidationClaimed,
     Field(discriminator="event_type"),
 ]
 
@@ -2323,6 +2350,14 @@ class ApprovalEventSnapshot(StrictFrozenModel):
     validity: Literal["valid", "revoked"]
 
 
+class ValidationLevelProjection(StrictFrozenModel):
+    subject: ArtifactReference
+    scope: FrozenSequence[NonEmptyId]
+    level: ValidationLevelValue
+    claim: ArtifactReference
+    reports: FrozenSequence[ArtifactReference]
+
+
 class RunProjection(StrictFrozenModel):
     schema_version: Literal["automarkov.run-view.v2"]
     run_id: RunIdValue
@@ -2336,6 +2371,7 @@ class RunProjection(StrictFrozenModel):
     terminal_event: EventReference | None
     terminal_snapshot_head: EventHead | None
     current_approval_snapshots: FrozenSequence[ApprovalEventSnapshot]
+    validation_levels: FrozenSequence[ValidationLevelProjection]
     post_terminal_audit_event_references: FrozenSequence[EventReference]
     terminal_result: ArtifactReference | None = None
     run_audit_projection: ArtifactReference | None = None
@@ -2817,6 +2853,66 @@ def _approval_snapshots_after(
     )
 
 
+_VALIDATION_LEVEL_RANK: Mapping[str, int] = MappingProxyType(
+    {
+        level: rank
+        for rank, level in enumerate(
+            (
+                "schema",
+                "structural",
+                "executable",
+                "behavioral",
+                "oracle_equivalent",
+                "formally_verified",
+            )
+        )
+    }
+)
+
+
+def _validation_levels_after(
+    levels: tuple[ValidationLevelProjection, ...],
+    event: RunEvent,
+) -> tuple[ValidationLevelProjection, ...]:
+    if not isinstance(event, ValidationClaimed):
+        return levels
+    candidate = ValidationLevelProjection(
+        subject=event.subject,
+        scope=event.validation_scope,
+        level=event.validation_level,
+        claim=event.claim,
+        reports=event.reports,
+    )
+    key = (candidate.subject.artifact_id, tuple(candidate.scope))
+    retained = tuple(
+        item for item in levels if (item.subject.artifact_id, tuple(item.scope)) != key
+    )
+    previous = next(
+        (
+            item
+            for item in levels
+            if (item.subject.artifact_id, tuple(item.scope)) == key
+        ),
+        None,
+    )
+    selected = (
+        previous
+        if previous is not None
+        and _VALIDATION_LEVEL_RANK[previous.level]
+        >= _VALIDATION_LEVEL_RANK[candidate.level]
+        else candidate
+    )
+    return tuple(
+        sorted(
+            (*retained, selected),
+            key=lambda item: (
+                item.subject.artifact_id.encode("utf-8"),
+                tuple(scope.encode("utf-8") for scope in item.scope),
+            ),
+        )
+    )
+
+
 def project_records(
     records: Iterable[EventRecord],
     *,
@@ -2847,6 +2943,7 @@ def project_records(
         terminal_event=None,
         terminal_snapshot_head=None,
         current_approval_snapshots=(),
+        validation_levels=(),
         post_terminal_audit_event_references=(),
     )
     if as_of_head == projection.event_head:
@@ -3102,6 +3199,10 @@ def project_records(
                     else None
                 ),
                 current_approval_snapshots=projection.current_approval_snapshots,
+                validation_levels=_validation_levels_after(
+                    tuple(projection.validation_levels),
+                    trigger,
+                ),
                 post_terminal_audit_event_references=(
                     projection.post_terminal_audit_event_references
                 ),
@@ -3118,6 +3219,10 @@ def project_records(
                     "current_approval_snapshots": _approval_snapshots_after(
                         projection.current_approval_snapshots,
                         record,
+                    ),
+                    "validation_levels": _validation_levels_after(
+                        tuple(projection.validation_levels),
+                        event,
                     ),
                     "post_terminal_audit_event_references": (
                         *projection.post_terminal_audit_event_references,
@@ -4049,6 +4154,7 @@ def _run_projector_contract_preimage() -> dict[str, object]:
             "post-terminal-audit-only-v1",
             "projection-approval-snapshot-v1",
             "projection-post-terminal-audit-reference-v1",
+            "projection-validation-level-max-v1",
             "specified-head-only-v1",
             "stage-gate-full-binding-v1",
             "waiting-identity-gate-authority-v1",
@@ -4066,7 +4172,7 @@ def _terminal_target(cause: TerminalCauseEvent) -> RunState:
     if isinstance(cause, ClarificationRequested):
         return RunState.CLARIFICATION_REQUIRED
     if isinstance(cause, ValidationClaimed):
-        return _VALIDATION_CLAIM_CONTRACTS[cause.validation_scope][0]
+        return _VALIDATION_CLAIM_CONTRACTS[_terminal_validation_scope(cause)][0]
     if isinstance(cause, ValidationFailed):
         return (
             RunState.PARTIAL
@@ -4082,7 +4188,7 @@ def _terminal_reason(cause: TerminalCauseEvent) -> str:
     if isinstance(cause, ClarificationRequested | RunTerminationRequested):
         return cause.reason_code
     if isinstance(cause, ValidationClaimed):
-        return _VALIDATION_CLAIM_CONTRACTS[cause.validation_scope][1]
+        return _VALIDATION_CLAIM_CONTRACTS[_terminal_validation_scope(cause)][1]
     if isinstance(cause, ValidationFailed):
         return cause.failure_code
     return cause.reason_code
@@ -4095,10 +4201,22 @@ def _terminal_cause_matches_predecessor(
     if isinstance(cause, ClarificationRequested):
         return predecessor is RunState.TEXT_REVIEWED
     if isinstance(cause, ValidationClaimed):
-        return predecessor is _VALIDATION_CLAIM_CONTRACTS[cause.validation_scope][2]
+        return (
+            predecessor
+            is _VALIDATION_CLAIM_CONTRACTS[_terminal_validation_scope(cause)][2]
+        )
     if isinstance(cause, ValidationFailed):
         return predecessor in _VALIDATION_SCOPE_PREDECESSORS[cause.validation_scope]
     return allowed_transition(predecessor, _terminal_target(cause))
+
+
+def _terminal_validation_scope(cause: ValidationClaimed) -> str:
+    if len(cause.validation_scope) != 1:
+        raise ValueError("terminal validation claim requires one terminal scope")
+    scope = cause.validation_scope[0]
+    if scope not in _VALIDATION_CLAIM_CONTRACTS:
+        raise ValueError("validation scope is not a terminal claim scope")
+    return scope
 
 
 class CommitTerminalCommand(StrictFrozenModel):

@@ -264,7 +264,7 @@ def test_artifact_bytes_result_v2_declares_the_canonical_document_cap() -> None:
             RuntimeProfileRef,
             {
                 "schema_version": "automarkov.runtime-profile-ref.v1",
-                "profile_id": "request_wrong_namespace",
+                "profile_id": "profiles/rllib-core",
             },
         ),
         (

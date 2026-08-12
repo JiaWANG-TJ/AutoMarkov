@@ -10,10 +10,15 @@ _PACKAGE_ROOT = _REPOSITORY_ROOT / "src" / "automarkov"
 _SEAM_ROOTS = ("automarkov.domain", "automarkov.public")
 _ALLOWED_INTERNAL_PREFIXES = (
     "automarkov.domain",
+    "automarkov.evidence_contracts",
     "automarkov.errors",
     "automarkov.canonical",
     "automarkov.llm_contracts",
     "automarkov.public",
+    "automarkov.provenance",
+)
+_SEAM_SOURCE_PREFIXES = tuple(
+    prefix for prefix in _ALLOWED_INTERNAL_PREFIXES if prefix != "automarkov.provenance"
 )
 _TYPE_ONLY_INTERNAL_PREFIXES = ("automarkov.lifecycle",)
 _ALLOWED_EXTERNAL_ROOTS = {
@@ -106,7 +111,7 @@ def test_domain_and_public_static_import_closure_is_infrastructure_free() -> Non
     seam_sources = {
         module_name: source
         for module_name, source in modules.items()
-        if _matches_prefix(module_name, _ALLOWED_INTERNAL_PREFIXES)
+        if _matches_prefix(module_name, _SEAM_SOURCE_PREFIXES)
     }
     violations: list[str] = []
     for module_name, source in sorted(seam_sources.items()):

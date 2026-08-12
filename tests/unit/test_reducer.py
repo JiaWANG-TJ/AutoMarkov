@@ -620,13 +620,13 @@ def _terminal_records(terminal_state: str) -> list[EventRecord]:
             | {
                 "claim": _artifact_ref("3"),
                 "subject": _artifact_ref("4"),
-                "report": _artifact_ref("5"),
+                "reports": [_artifact_ref("5")],
                 "validator_id": "validator_terminal",
                 "validator_version": "v1",
-                "validation_level": "terminal",
-                "validation_scope": (
+                "validation_level": "schema",
+                "validation_scope": [
                     "package" if terminal_state == "COMPLETED" else "ood_handoff"
-                ),
+                ],
             },
         )
         reason_code = (
@@ -1130,6 +1130,34 @@ def test_all_seven_terminal_states_are_unique_and_then_audit_only(
     assert audited.terminal_event == terminal.terminal_event
     assert audited.terminal_snapshot_head == terminal.terminal_snapshot_head
     assert audited.event_head != terminal.event_head
+
+
+def test_validation_projection_keeps_highest_level_per_subject_scope() -> None:
+    records = _records_at_state("TEXT_REVIEWED")
+    for index, level in enumerate(("schema", "structural", "schema"), start=1):
+        _append(
+            records,
+            _common(
+                records,
+                "automarkov.validation-claimed.v1",
+                "ValidationClaimed",
+            )
+            | {
+                "claim": _artifact_ref(str(index)),
+                "subject": _artifact_ref("8"),
+                "reports": [_artifact_ref(str(index + 3))],
+                "validator_id": f"validator_{level}",
+                "validator_version": "v1",
+                "validation_level": level,
+                "validation_scope": ["transition_kernel"],
+            },
+        )
+
+    projection = project_records(records)
+    assert projection.state is RunState.TEXT_REVIEWED
+    assert len(projection.validation_levels) == 1
+    assert projection.validation_levels[0].level == "structural"
+    assert tuple(projection.validation_levels[0].scope) == ("transition_kernel",)
 
 
 def test_failed_transition_requires_the_exact_predecessor_for_its_cause() -> None:

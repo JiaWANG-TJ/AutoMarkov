@@ -31,6 +31,12 @@ from automarkov.domain import (
     VerifiedEventHead,
     validate_task_request_payload,
 )
+from automarkov.evidence_contracts import (
+    CrawlEvidenceRequest,
+    EvidenceGatewayResult,
+    ExtractEvidenceRequest,
+    SearchEvidenceRequest,
+)
 from automarkov.lifecycle import LifecycleCommitResult, RunProjection
 from automarkov.llm_contracts import (
     LlmCompletionRequest,
@@ -38,17 +44,11 @@ from automarkov.llm_contracts import (
     LlmProbeResult,
     LlmStartRequest,
 )
+from automarkov.provenance import RuntimeProfileId
 
 LifecycleCommandInput: TypeAlias = dict[str, CanonicalJsonValue]
 
 NonEmptyText = Annotated[str, Field(strict=True, min_length=1, max_length=100_000)]
-ProfileId = Annotated[
-    str,
-    Field(
-        strict=True,
-        pattern=r"^profile_[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
-    ),
-]
 EnvironmentHandleId = Annotated[
     str,
     Field(
@@ -368,29 +368,10 @@ class PackageResult(StrictFrozenModel):
     package_artifact_id: ArtifactId
 
 
-class EvidenceSearchRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.evidence-search-request.v1"]
-    query: NonEmptyText
-
-
-class EvidenceUrlsRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.evidence-urls-request.v1"]
-    urls: tuple[NonEmptyText, ...]
-
-
-class EvidenceCrawlRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.evidence-crawl-request.v1"]
-    root_url: NonEmptyText
-
-
-class EvidenceResolveRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.evidence-resolve-request.v1"]
-    claim_artifact_id: ArtifactId
-
-
-class EvidenceResult(StrictFrozenModel):
-    schema_version: Literal["automarkov.evidence-result.v1"]
-    evidence_artifact_id: ArtifactId
+EvidenceSearchRequest = SearchEvidenceRequest
+EvidenceUrlsRequest = ExtractEvidenceRequest
+EvidenceCrawlRequest = CrawlEvidenceRequest
+EvidenceResult = EvidenceGatewayResult
 
 
 class SandboxRunRequest(StrictFrozenModel):
@@ -417,7 +398,7 @@ class ExecutionResult(StrictFrozenModel):
 
 class RuntimeProfileRef(StrictFrozenModel):
     schema_version: Literal["automarkov.runtime-profile-ref.v1"]
-    profile_id: ProfileId
+    profile_id: RuntimeProfileId
 
 
 class EnvironmentRef(StrictFrozenModel):
@@ -428,26 +409,6 @@ class EnvironmentRef(StrictFrozenModel):
 class EnvironmentHandle(StrictFrozenModel):
     schema_version: Literal["automarkov.environment-handle.v1"]
     handle_id: EnvironmentHandleId
-
-
-class RemoteEnvResetRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.remote-env-reset-request.v1"]
-    seed: Annotated[int, Field(strict=True, ge=0, le=9_007_199_254_740_991)]
-
-
-class RemoteEnvStepRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.remote-env-step-request.v1"]
-    action_artifact_id: ArtifactId
-
-
-class RemoteEnvResult(StrictFrozenModel):
-    schema_version: Literal["automarkov.remote-env-result.v1"]
-    frame_artifact_id: ArtifactId
-
-
-class RemoteEnvSpacesResult(StrictFrozenModel):
-    schema_version: Literal["automarkov.remote-env-spaces-result.v1"]
-    spaces_artifact_id: ArtifactId
 
 
 class CloseResult(StrictFrozenModel):
@@ -514,10 +475,26 @@ class LocalLlmRuntime(Protocol):
 
 @runtime_checkable
 class EvidenceGateway(Protocol):
-    def search(self, request: EvidenceSearchRequest) -> EvidenceResult: ...
-    def extract(self, request: EvidenceUrlsRequest) -> EvidenceResult: ...
-    def crawl(self, request: EvidenceCrawlRequest) -> EvidenceResult: ...
-    def resolve(self, request: EvidenceResolveRequest) -> EvidenceResult: ...
+    def search(
+        self,
+        request: SearchEvidenceRequest,
+        *,
+        context: AuthenticatedCommandContext,
+    ) -> EvidenceGatewayResult: ...
+
+    def extract(
+        self,
+        request: ExtractEvidenceRequest,
+        *,
+        context: AuthenticatedCommandContext,
+    ) -> EvidenceGatewayResult: ...
+
+    def crawl(
+        self,
+        request: CrawlEvidenceRequest,
+        *,
+        context: AuthenticatedCommandContext,
+    ) -> EvidenceGatewayResult: ...
 
 
 @runtime_checkable
@@ -529,10 +506,7 @@ class ExecutionSandbox(Protocol):
 
 @runtime_checkable
 class RemoteEnv(Protocol):
-    def reset(self, request: RemoteEnvResetRequest) -> RemoteEnvResult: ...
-    def step(self, request: RemoteEnvStepRequest) -> RemoteEnvResult: ...
-    def spaces(self) -> RemoteEnvSpacesResult: ...
-    def close(self) -> CloseResult: ...
+    def exchange(self, canonical_frame: bytes) -> bytes: ...
 
 
 @runtime_checkable

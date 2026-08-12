@@ -30,6 +30,11 @@ from automarkov.canonical import (
     parse_json_payload,
     require_registered_model_number_contract,
 )
+from automarkov.classification_contracts import (
+    ClassificationResult,
+    OODHandoffSpec,
+    ReductionProposal,
+)
 from automarkov.domain import (
     ArtifactId,
     RunId,
@@ -38,6 +43,7 @@ from automarkov.domain import (
     TaskRequest,
     VerifiedEventHead,
 )
+from automarkov.environment_contracts import SandboxLimits, SandboxPolicy
 from automarkov.errors import (
     ArtifactCycleError,
     ArtifactIdentityConflictError,
@@ -56,6 +62,18 @@ from automarkov.errors import (
     TerminalProvenanceError,
     UnknownArtifactError,
     UnknownRunError,
+)
+from automarkov.evidence_contracts import (
+    CrawlEvidenceRequest,
+    CrawlSafetyReview,
+    EvidenceBudgetManifest,
+    EvidenceLedgerRevision,
+    EvidenceSnapshotArtifact,
+    ExtractEvidenceRequest,
+    ProviderAttemptArtifact,
+    RawEvidenceDocumentArtifact,
+    SearchEvidenceRequest,
+    TavilyLeasePoolManifest,
 )
 from automarkov.lifecycle import (
     RUN_PROJECTOR_HASH,
@@ -91,8 +109,10 @@ from automarkov.lifecycle import (
     RunSuperseded,
     RuntimeReplacementPrerequisite,
     SignedApprovalEvent,
+    StageGatePassed,
     StateTransitioned,
     TerminalResult,
+    ValidationClaimed,
     WaitingRuntime,
     _event_hash,
     append_record,
@@ -126,6 +146,21 @@ from automarkov.public import (
     CommandAuthority,
     PayloadSchemaVersion,
     validate_artifact_put_request,
+)
+from automarkov.task_contracts import (
+    RunCreationPolicy,
+    RunManifestBootstrap,
+    TaskApprovalPolicy,
+    TaskContract,
+    TaskContractAuthoringContext,
+    TaskContractTraceabilityReport,
+    TextCriticReport,
+    validate_task_contract_review_gate,
+)
+from automarkov.validation_contracts import (
+    ValidationClaim,
+    ValidationReport,
+    validate_claim_report_chain,
 )
 
 PAYLOAD_MEDIA_TYPE = "application/vnd.automarkov.canonical-payload+json"
@@ -354,6 +389,7 @@ class ParentBinding(StrictFrozenModel):
 class ExactParentContract(StrictFrozenModel):
     contract_kind: Literal["exact"] = "exact"
     direct_parent_artifact_types: tuple[str, ...]
+    alternative_direct_parent_artifact_type_sets: tuple[tuple[str, ...], ...] = ()
 
 
 class PayloadBoundParentContract(StrictFrozenModel):
@@ -375,6 +411,17 @@ class _RegisteredSchema:
     def direct_parent_artifact_types(self) -> tuple[str, ...]:
         if isinstance(self.parent_contract, ExactParentContract):
             return self.parent_contract.direct_parent_artifact_types
+        return ()
+
+    @property
+    def allowed_direct_parent_artifact_type_sets(
+        self,
+    ) -> tuple[tuple[str, ...], ...]:
+        if isinstance(self.parent_contract, ExactParentContract):
+            return (
+                self.parent_contract.direct_parent_artifact_types,
+                *self.parent_contract.alternative_direct_parent_artifact_type_sets,
+            )
         return ()
 
     @property
@@ -547,6 +594,13 @@ def _parent_contract_bytes(
                 parent_contract.direct_parent_artifact_types
             ),
         }
+        if parent_contract.alternative_direct_parent_artifact_type_sets:
+            contract["alternative_direct_parent_artifact_type_sets"] = [
+                list(parent_types)
+                for parent_types in (
+                    parent_contract.alternative_direct_parent_artifact_type_sets
+                )
+            ]
     else:
         contract = {
             "contract_kind": "payload_bound",
@@ -681,6 +735,9 @@ class ArtifactSchemaRegistry:
         model_type: type[BaseModel],
         *,
         direct_parent_artifact_types: tuple[str, ...] | None = None,
+        alternative_direct_parent_artifact_type_sets: (
+            tuple[tuple[str, ...], ...] | None
+        ) = None,
         payload_parent_bindings: tuple[ParentBinding, ...] | None = None,
     ) -> str:
         artifact_type = _ARTIFACT_TYPE_ADAPTER.validate_python(
@@ -715,6 +772,13 @@ class ArtifactSchemaRegistry:
                 "exactly one of direct_parent_artifact_types or "
                 "payload_parent_bindings is required"
             )
+        if (
+            alternative_direct_parent_artifact_type_sets is not None
+            and direct_parent_artifact_types is None
+        ):
+            raise TypeError(
+                "alternative exact parent sets require a primary exact parent set"
+            )
         parent_contract: ParentContract
         if direct_parent_artifact_types is not None:
             if type(direct_parent_artifact_types) is not tuple:
@@ -734,8 +798,51 @@ class ArtifactSchemaRegistry:
                     "direct parent artifact types must be nonempty strings in "
                     "canonical order"
                 )
+            alternatives = alternative_direct_parent_artifact_type_sets or ()
+            if type(alternatives) is not tuple or any(
+                type(parent_types) is not tuple or not parent_types
+                for parent_types in alternatives
+            ):
+                raise ValueError(
+                    "alternative direct parent artifact type sets must be nonempty tuples"
+                )
+            validated_alternatives = tuple(
+                tuple(
+                    _ARTIFACT_TYPE_ADAPTER.validate_python(item, strict=True)
+                    for item in parent_types
+                )
+                for parent_types in alternatives
+            )
+            canonical_alternatives = tuple(
+                sorted(
+                    validated_alternatives,
+                    key=lambda parent_types: tuple(
+                        item.encode("utf-8") for item in parent_types
+                    ),
+                )
+            )
+            if (
+                any(
+                    parent_types
+                    != tuple(
+                        sorted(
+                            set(parent_types),
+                            key=lambda item: item.encode("utf-8"),
+                        )
+                    )
+                    for parent_types in validated_alternatives
+                )
+                or validated_alternatives != canonical_alternatives
+            ):
+                raise ValueError(
+                    "alternative direct parent artifact type sets must be sorted and unique"
+                )
+            all_contracts = (expected_parent_types, *validated_alternatives)
+            if len(set(all_contracts)) != len(all_contracts):
+                raise ValueError("exact parent contract branches must be unique")
             parent_contract = ExactParentContract(
-                direct_parent_artifact_types=expected_parent_types
+                direct_parent_artifact_types=expected_parent_types,
+                alternative_direct_parent_artifact_type_sets=validated_alternatives,
             )
         else:
             if type(payload_parent_bindings) is not tuple or any(
@@ -804,7 +911,13 @@ class ArtifactSchemaRegistry:
                     parent_type
                     for registered in self._schemas.values()
                     for parent_type in (
-                        registered.direct_parent_artifact_types
+                        tuple(
+                            parent_type
+                            for parent_types in (
+                                registered.allowed_direct_parent_artifact_type_sets
+                            )
+                            for parent_type in parent_types
+                        )
                         if isinstance(registered.parent_contract, ExactParentContract)
                         else tuple(
                             allowed_type
@@ -822,6 +935,17 @@ class ArtifactSchemaRegistry:
                     f"types: {', '.join(missing_parent_types)}"
                 )
             self._frozen = True
+
+    def artifact_types(self) -> tuple[str, ...]:
+        """返回当前已注册的 canonical artifact-type 集合。"""
+
+        with self._lock:
+            return tuple(
+                sorted(
+                    {registered.artifact_type for registered in self._schemas.values()},
+                    key=lambda item: item.encode("utf-8"),
+                )
+            )
 
     def resolve(self, artifact_type: str, payload: object) -> _RegisteredSchema:
         if type(payload) is not dict:
@@ -842,6 +966,375 @@ def _default_schema_registry() -> ArtifactSchemaRegistry:
         "task_request",
         "automarkov.task-request.v1",
         TaskRequest,
+        direct_parent_artifact_types=(),
+    )
+    registry.register(
+        "run_creation_policy",
+        "automarkov.run-creation-policy.v1",
+        RunCreationPolicy,
+        direct_parent_artifact_types=(),
+    )
+    registry.register(
+        "task_approval_policy",
+        "automarkov.task-approval-policy.v1",
+        TaskApprovalPolicy,
+        direct_parent_artifact_types=(),
+    )
+    registry.register(
+        "task_contract_authoring_context",
+        "automarkov.task-contract-authoring-context.v1",
+        TaskContractAuthoringContext,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="author_completion_trace.artifact_id",
+                payload_hash_path="author_completion_trace.payload_hash",
+                allowed_artifact_types=("llm_completion_trace",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="previous_critic_report.artifact_id",
+                payload_hash_path="previous_critic_report.payload_hash",
+                allowed_artifact_types=("text_critic_report",),
+                cardinality="optional",
+            ),
+            ParentBinding(
+                artifact_id_path="previous_task_contract.artifact_id",
+                payload_hash_path="previous_task_contract.payload_hash",
+                allowed_artifact_types=("task_contract",),
+                cardinality="optional",
+            ),
+            ParentBinding(
+                artifact_id_path="task_request.artifact_id",
+                payload_hash_path="task_request.payload_hash",
+                allowed_artifact_types=("task_request",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "task_contract",
+        "automarkov.task-contract.v1",
+        TaskContract,
+        direct_parent_artifact_types=("task_contract_authoring_context",),
+        alternative_direct_parent_artifact_type_sets=(
+            ("classification_result", "reduction_proposal", "task_contract"),
+        ),
+    )
+    registry.register(
+        "task_contract_traceability_report",
+        "automarkov.task-contract-traceability-report.v1",
+        TaskContractTraceabilityReport,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="task_contract.artifact_id",
+                payload_hash_path="task_contract.payload_hash",
+                allowed_artifact_types=("task_contract",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="task_request.artifact_id",
+                payload_hash_path="task_request.payload_hash",
+                allowed_artifact_types=("task_request",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "text_critic_report",
+        "automarkov.text-critic-report.v1",
+        TextCriticReport,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="critic_completion_trace.artifact_id",
+                payload_hash_path="critic_completion_trace.payload_hash",
+                allowed_artifact_types=("llm_completion_trace",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="previous_critic_report.artifact_id",
+                payload_hash_path="previous_critic_report.payload_hash",
+                allowed_artifact_types=("text_critic_report",),
+                cardinality="optional",
+            ),
+            ParentBinding(
+                artifact_id_path="task_contract.artifact_id",
+                payload_hash_path="task_contract.payload_hash",
+                allowed_artifact_types=("task_contract",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="traceability_report.artifact_id",
+                payload_hash_path="traceability_report.payload_hash",
+                allowed_artifact_types=("task_contract_traceability_report",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "run_manifest",
+        "automarkov.run-manifest-bootstrap.v1",
+        RunManifestBootstrap,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path=(
+                    "event_security_context.approval.policy_contract.artifact_id"
+                ),
+                payload_hash_path=(
+                    "event_security_context.approval.policy_contract.payload_hash"
+                ),
+                allowed_artifact_types=("task_approval_policy",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path=("event_security_context.creation_policy.artifact_id"),
+                payload_hash_path=(
+                    "event_security_context.creation_policy.payload_hash"
+                ),
+                allowed_artifact_types=("run_creation_policy",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="task_request.artifact_id",
+                payload_hash_path="task_request.payload_hash",
+                allowed_artifact_types=("task_request",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "evidence_budget_manifest",
+        "automarkov.evidence-budget-manifest.v1",
+        EvidenceBudgetManifest,
+        direct_parent_artifact_types=(),
+    )
+    registry.register(
+        "tavily_lease_pool_manifest",
+        "automarkov.tavily-lease-pool-manifest.v1",
+        TavilyLeasePoolManifest,
+        direct_parent_artifact_types=(),
+    )
+    for artifact_type, schema_version, model_type in (
+        (
+            "tavily_search_request",
+            "automarkov.tavily-search-request.v2",
+            SearchEvidenceRequest,
+        ),
+        (
+            "tavily_extract_request",
+            "automarkov.tavily-extract-request.v1",
+            ExtractEvidenceRequest,
+        ),
+    ):
+        registry.register(
+            artifact_type,
+            schema_version,
+            model_type,
+            payload_parent_bindings=(
+                ParentBinding(
+                    artifact_id_path="budget_ref.artifact_id",
+                    payload_hash_path="budget_ref.payload_hash",
+                    allowed_artifact_types=("evidence_budget_manifest",),
+                    cardinality="one",
+                ),
+                ParentBinding(
+                    artifact_id_path="lease_pool_ref.artifact_id",
+                    payload_hash_path="lease_pool_ref.payload_hash",
+                    allowed_artifact_types=("tavily_lease_pool_manifest",),
+                    cardinality="one",
+                ),
+                ParentBinding(
+                    artifact_id_path="task_input_ref.artifact_id",
+                    payload_hash_path="task_input_ref.payload_hash",
+                    allowed_artifact_types=("task_request",),
+                    cardinality="one",
+                ),
+            ),
+        )
+    registry.register(
+        "crawl_safety_review",
+        "automarkov.crawl-safety-review.v1",
+        CrawlSafetyReview,
+        direct_parent_artifact_types=(),
+    )
+    registry.register(
+        "tavily_crawl_request",
+        "automarkov.tavily-crawl-request.v2",
+        CrawlEvidenceRequest,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="budget_ref.artifact_id",
+                payload_hash_path="budget_ref.payload_hash",
+                allowed_artifact_types=("evidence_budget_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="lease_pool_ref.artifact_id",
+                payload_hash_path="lease_pool_ref.payload_hash",
+                allowed_artifact_types=("tavily_lease_pool_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="safety_review_ref.artifact_id",
+                payload_hash_path="safety_review_ref.payload_hash",
+                allowed_artifact_types=("crawl_safety_review",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="task_input_ref.artifact_id",
+                payload_hash_path="task_input_ref.payload_hash",
+                allowed_artifact_types=("task_request",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "provider_attempt_receipt",
+        "automarkov.provider-attempt-artifact.v1",
+        ProviderAttemptArtifact,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="request_ref.artifact_id",
+                payload_hash_path="request_ref.payload_hash",
+                allowed_artifact_types=(
+                    "tavily_crawl_request",
+                    "tavily_extract_request",
+                    "tavily_search_request",
+                ),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "raw_evidence_document",
+        "automarkov.raw-evidence-document-artifact.v1",
+        RawEvidenceDocumentArtifact,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="attempt_ref.artifact_id",
+                payload_hash_path="attempt_ref.payload_hash",
+                allowed_artifact_types=("provider_attempt_receipt",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "evidence_snapshot",
+        "automarkov.evidence-snapshot-artifact.v1",
+        EvidenceSnapshotArtifact,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="attempt_refs.*.artifact_id",
+                payload_hash_path="attempt_refs.*.payload_hash",
+                allowed_artifact_types=("provider_attempt_receipt",),
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="raw_document_refs.*.artifact_id",
+                payload_hash_path="raw_document_refs.*.payload_hash",
+                allowed_artifact_types=("raw_evidence_document",),
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="request_ref.artifact_id",
+                payload_hash_path="request_ref.payload_hash",
+                allowed_artifact_types=(
+                    "tavily_crawl_request",
+                    "tavily_extract_request",
+                    "tavily_search_request",
+                ),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "evidence_ledger",
+        "automarkov.evidence-ledger-revision.v1",
+        EvidenceLedgerRevision,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="evidence_item_refs.*.artifact_id",
+                payload_hash_path="evidence_item_refs.*.payload_hash",
+                allowed_artifact_types=("raw_evidence_document",),
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="request_ref.artifact_id",
+                payload_hash_path="request_ref.payload_hash",
+                allowed_artifact_types=(
+                    "tavily_crawl_request",
+                    "tavily_extract_request",
+                    "tavily_search_request",
+                ),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="snapshot_ref.artifact_id",
+                payload_hash_path="snapshot_ref.payload_hash",
+                allowed_artifact_types=("evidence_snapshot",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "classification_result",
+        "automarkov.classification-result.v1",
+        ClassificationResult,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path=("evidence_binding.evidence_ledger_ref.artifact_id"),
+                payload_hash_path=("evidence_binding.evidence_ledger_ref.payload_hash"),
+                allowed_artifact_types=("evidence_ledger",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="source_task_ref.artifact_id",
+                payload_hash_path="source_task_ref.payload_hash",
+                allowed_artifact_types=("task_contract",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "reduction_proposal",
+        "automarkov.reduction-proposal.v1",
+        ReductionProposal,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="classification_ref.artifact_id",
+                payload_hash_path="classification_ref.payload_hash",
+                allowed_artifact_types=("classification_result",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="source_task_ref.artifact_id",
+                payload_hash_path="source_task_ref.payload_hash",
+                allowed_artifact_types=("task_contract",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="supersedes_proposal_ref.artifact_id",
+                payload_hash_path="supersedes_proposal_ref.payload_hash",
+                allowed_artifact_types=("reduction_proposal",),
+                cardinality="optional",
+            ),
+            ParentBinding(
+                artifact_id_path="trigger_classification_ref.artifact_id",
+                payload_hash_path="trigger_classification_ref.payload_hash",
+                allowed_artifact_types=("classification_result",),
+                cardinality="optional",
+            ),
+        ),
+    )
+    registry.register(
+        "environment_sandbox_limits",
+        "automarkov.environment-sandbox-limits.v1",
+        SandboxLimits,
+        direct_parent_artifact_types=(),
+    )
+    registry.register(
+        "environment_sandbox_policy",
+        "automarkov.environment-sandbox-policy.v1",
+        SandboxPolicy,
         direct_parent_artifact_types=(),
     )
     registry.register(
@@ -976,6 +1469,45 @@ def _default_schema_registry() -> ArtifactSchemaRegistry:
                 artifact_id_path="runtime_probe_evidence_ref.artifact_id",
                 payload_hash_path="runtime_probe_evidence_ref.payload_hash",
                 allowed_artifact_types=("runtime_probe_evidence",),
+                cardinality="one",
+            ),
+        ),
+    )
+    validation_subject_types = registry.artifact_types()
+    registry.register(
+        "validation_report",
+        "automarkov.validation-report.v1",
+        ValidationReport,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="proof_refs.*.artifact_id",
+                payload_hash_path="proof_refs.*.payload_hash",
+                allowed_artifact_types=validation_subject_types,
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="subject_ref.artifact_id",
+                payload_hash_path="subject_ref.payload_hash",
+                allowed_artifact_types=validation_subject_types,
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "validation_claim",
+        "automarkov.validation-claim.v1",
+        ValidationClaim,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="report_refs.*.artifact_id",
+                payload_hash_path="report_refs.*.payload_hash",
+                allowed_artifact_types=("validation_report",),
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="subject_ref.artifact_id",
+                payload_hash_path="subject_ref.payload_hash",
+                allowed_artifact_types=validation_subject_types,
                 cardinality="one",
             ),
         ),
@@ -1875,6 +2407,211 @@ class _ArtifactRepositoryCore:
         ):
             raise TerminalProvenanceError(reference.artifact_id)
         return cast(dict[str, object], payload)
+
+    @staticmethod
+    def _canonical_payload_object(payload_bytes: bytes) -> dict[str, object]:
+        document = parse_canonical_document(payload_bytes)
+        payload = (
+            cast(dict[str, object], document).get("payload")
+            if type(document) is dict
+            else None
+        )
+        if type(payload) is not dict:
+            raise ValueError(
+                "artifact canonical document must contain an object payload"
+            )
+        return cast(dict[str, object], payload)
+
+    @staticmethod
+    def _reference_key(reference: ArtifactReference) -> tuple[str, str]:
+        return reference.artifact_id, reference.payload_hash
+
+    def _verified_parent_payloads(
+        self,
+        parents: tuple[_VerifiedParent, ...],
+    ) -> dict[str, tuple[_VerifiedParent, dict[str, object]]]:
+        result: dict[str, tuple[_VerifiedParent, dict[str, object]]] = {}
+        for parent in parents:
+            stored = self.get(parent.artifact_id)
+            payload = stored.payload_document.model_dump(mode="json").get("payload")
+            if (
+                stored.envelope.artifact_type != parent.artifact_type
+                or stored.envelope.payload_hash != parent.payload_hash.root
+                or type(payload) is not dict
+            ):
+                raise ArtifactIntegrityError(parent.artifact_id.root)
+            result[parent.artifact_id.root] = (
+                parent,
+                cast(dict[str, object], payload),
+            )
+        return result
+
+    def _validate_t09_cross_artifact_contract(
+        self,
+        artifact_type: str,
+        payload_bytes: bytes,
+        parents: tuple[_VerifiedParent, ...],
+    ) -> None:
+        """在注册 T09 schema 后封闭其跨工件语义，不替代 parent DAG 校验。"""
+
+        if artifact_type not in {
+            "classification_result",
+            "ood_handoff",
+            "reduction_proposal",
+            "task_contract",
+            "validation_claim",
+            "validation_report",
+        }:
+            return
+        payload = self._canonical_payload_object(payload_bytes)
+        expected_schema_versions = {
+            "classification_result": "automarkov.classification-result.v1",
+            "ood_handoff": "automarkov.ood-handoff.v1",
+            "reduction_proposal": "automarkov.reduction-proposal.v1",
+            "task_contract": "automarkov.task-contract.v1",
+            "validation_claim": "automarkov.validation-claim.v1",
+            "validation_report": "automarkov.validation-report.v1",
+        }
+        if payload.get("schema_version") != expected_schema_versions[artifact_type]:
+            return
+        parent_payloads = self._verified_parent_payloads(parents)
+        try:
+            if artifact_type == "classification_result":
+                result = ClassificationResult.model_validate(payload, strict=True)
+                evidence_ref = (
+                    result.evidence_binding.evidence_ledger_ref
+                    if result.evidence_binding.binding_kind == "ledger"
+                    else result.evidence_binding.omission_record_ref
+                )
+                expected = {
+                    self._reference_key(result.source_task_ref): "task_contract",
+                    self._reference_key(evidence_ref): (
+                        "evidence_ledger"
+                        if result.evidence_binding.binding_kind == "ledger"
+                        else "evidence_omission_record"
+                    ),
+                }
+                actual = {
+                    (parent.artifact_id.root, parent.payload_hash.root): (
+                        parent.artifact_type
+                    )
+                    for parent in parents
+                }
+                if actual != expected:
+                    raise ValueError(
+                        "classification parents do not bind its evidence route"
+                    )
+                return
+            if artifact_type == "reduction_proposal":
+                proposal = ReductionProposal.model_validate(payload, strict=True)
+                classification_payload = parent_payloads[
+                    proposal.classification_ref.artifact_id
+                ][1]
+                classification = ClassificationResult.model_validate(
+                    classification_payload,
+                    strict=True,
+                )
+                if classification.classification != "REDUCIBLE" or self._reference_key(
+                    classification.source_task_ref
+                ) != self._reference_key(proposal.source_task_ref):
+                    raise ValueError("reduction requires a matching REDUCIBLE result")
+                if proposal.supersedes_proposal_ref is not None:
+                    previous = ReductionProposal.model_validate(
+                        parent_payloads[proposal.supersedes_proposal_ref.artifact_id][
+                            1
+                        ],
+                        strict=True,
+                    )
+                    trigger = ClassificationResult.model_validate(
+                        parent_payloads[
+                            proposal.trigger_classification_ref.artifact_id  # type: ignore[union-attr]
+                        ][1],
+                        strict=True,
+                    )
+                    expected_trigger = f"IN_SCOPE_{proposal.target_kind}"
+                    previous_child = self.get(
+                        ArtifactId(root=trigger.source_task_ref.artifact_id)
+                    )
+                    expected_child_parents = {
+                        previous.source_task_ref.artifact_id,
+                        previous.classification_ref.artifact_id,
+                        proposal.supersedes_proposal_ref.artifact_id,
+                    }
+                    if (
+                        previous.source_task_ref.artifact_id
+                        != proposal.source_task_ref.artifact_id
+                        or trigger.classification != expected_trigger
+                        or trigger.classification == f"IN_SCOPE_{previous.target_kind}"
+                        or {
+                            item.root
+                            for item in previous_child.envelope.parent_artifact_ids
+                        }
+                        != expected_child_parents
+                    ):
+                        raise ValueError("reduction revision lineage is inconsistent")
+                return
+            if artifact_type == "ood_handoff":
+                handoff = OODHandoffSpec.model_validate(payload, strict=True)
+                classification = ClassificationResult.model_validate(
+                    parent_payloads[handoff.classification_ref.artifact_id][1],
+                    strict=True,
+                )
+                if classification.classification != "OOD" or self._reference_key(
+                    classification.source_task_ref
+                ) != self._reference_key(handoff.source_task_ref):
+                    raise ValueError("OOD handoff requires its matching OOD result")
+                return
+            if artifact_type == "task_contract":
+                parent_by_type = {parent.artifact_type: parent for parent in parents}
+                if set(parent_by_type) == {
+                    "classification_result",
+                    "reduction_proposal",
+                    "task_contract",
+                }:
+                    classification = ClassificationResult.model_validate(
+                        parent_payloads[
+                            parent_by_type["classification_result"].artifact_id.root
+                        ][1],
+                        strict=True,
+                    )
+                    proposal = ReductionProposal.model_validate(
+                        parent_payloads[
+                            parent_by_type["reduction_proposal"].artifact_id.root
+                        ][1],
+                        strict=True,
+                    )
+                    if (
+                        classification.classification != "REDUCIBLE"
+                        or proposal.source_task_ref.artifact_id
+                        != parent_by_type["task_contract"].artifact_id.root
+                        or proposal.classification_ref.artifact_id
+                        != parent_by_type["classification_result"].artifact_id.root
+                    ):
+                        raise ValueError(
+                            "reduced TaskContract parents do not match its proposal"
+                        )
+                return
+            if artifact_type == "validation_report":
+                ValidationReport.model_validate(payload, strict=True)
+                return
+            claim = ValidationClaim.model_validate(payload, strict=True)
+            reports = tuple(
+                (
+                    reference,
+                    ValidationReport.model_validate(
+                        parent_payloads[reference.artifact_id][1],
+                        strict=True,
+                    ),
+                )
+                for reference in claim.report_refs
+            )
+            validate_claim_report_chain(claim, reports)
+        except (KeyError, TypeError, ValueError) as error:
+            raise ArtifactParentContractError(
+                artifact_type,
+                ("valid T09 cross-artifact lineage",),
+                ("invalid T09 cross-artifact lineage",),
+            ) from error
 
     @staticmethod
     def _payload_values(payload: object, key: str) -> tuple[object, ...]:
@@ -2781,16 +3518,16 @@ class _ArtifactRepositoryCore:
     @staticmethod
     def _validate_parent_contract(
         artifact_type: str,
-        expected_types: tuple[str, ...],
+        expected_type_sets: tuple[tuple[str, ...], ...],
         actual_types: tuple[str, ...],
     ) -> None:
         canonical_actual = tuple(
             sorted(actual_types, key=lambda item: item.encode("utf-8"))
         )
-        if canonical_actual != expected_types:
+        if canonical_actual not in expected_type_sets:
             raise ArtifactParentContractError(
                 artifact_type,
-                expected_types,
+                tuple(repr(item) for item in expected_type_sets),
                 canonical_actual,
             )
 
@@ -2844,12 +3581,25 @@ class _ArtifactRepositoryCore:
                 prepared.expected_parent_references,
                 direct_parents,
             )
+            self._validate_t09_cross_artifact_contract(
+                prepared.artifact_type,
+                prepared.payload_bytes,
+                direct_parents,
+            )
             return
         exact_contract = cast(ExactParentContract, prepared.parent_contract)
         self._validate_parent_contract(
             prepared.artifact_type,
-            exact_contract.direct_parent_artifact_types,
+            (
+                exact_contract.direct_parent_artifact_types,
+                *exact_contract.alternative_direct_parent_artifact_type_sets,
+            ),
             tuple(parent.artifact_type for parent in direct_parents),
+        )
+        self._validate_t09_cross_artifact_contract(
+            prepared.artifact_type,
+            prepared.payload_bytes,
+            direct_parents,
         )
 
     def _verify(
@@ -2904,9 +3654,14 @@ class _ArtifactRepositoryCore:
             else:
                 self._validate_parent_contract(
                     stored.artifact_type,
-                    registered.direct_parent_artifact_types,
+                    registered.allowed_direct_parent_artifact_type_sets,
                     tuple(parent.artifact_type for parent in direct_parents),
                 )
+            self._validate_t09_cross_artifact_contract(
+                stored.artifact_type,
+                stored.payload_bytes,
+                direct_parents,
+            )
         except (
             ArtifactParentContractError,
             ArtifactSchemaError,
@@ -3948,6 +4703,157 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
         self._require_references(_event_artifact_references(event))
         for artifact_id in _event_unhashed_artifact_ids(event):
             self.get(ArtifactId(root=artifact_id))
+        if (
+            isinstance(event, StageGatePassed)
+            and event.gate_id == "CLASSIFICATION_BINDING"
+        ):
+            subjects = tuple(
+                self.get(ArtifactId(root=reference.artifact_id))
+                for reference in event.subject_artifact_references
+            )
+            classifications = tuple(
+                artifact
+                for artifact in subjects
+                if artifact.envelope.artifact_type == "classification_result"
+            )
+            if len(classifications) != 1:
+                raise TerminalProvenanceError(event.gate_report.artifact_id)
+            classification_payload = classifications[0].payload_document.model_dump(
+                mode="json"
+            )["payload"]
+            try:
+                classification = ClassificationResult.model_validate(
+                    classification_payload,
+                    strict=True,
+                )
+                source_key = self._reference_key(classification.source_task_ref)
+                subject_keys = {
+                    self._reference_key(reference)
+                    for reference in event.subject_artifact_references
+                }
+                records = self._load_run_event_records(event.run_id)
+                revoked = {
+                    item.event.supersedes_approval_event_id
+                    for item in records
+                    if isinstance(item.event, SignedApprovalEvent)
+                    and item.event.decision == "revoked"
+                }
+                approved = any(
+                    isinstance(item.event, SignedApprovalEvent)
+                    and item.event.decision == "approved"
+                    and item.event.event_id not in revoked
+                    and self._reference_key(item.event.artifact) == source_key
+                    for item in records
+                )
+                if source_key not in subject_keys or not approved:
+                    raise ValueError(
+                        "classification requires the current exactly approved task"
+                    )
+            except (TypeError, ValueError) as error:
+                raise TerminalProvenanceError(
+                    classifications[0].artifact_id.root
+                ) from error
+        if isinstance(event, ValidationClaimed):
+            claim_result = self.get(ArtifactId(root=event.claim.artifact_id))
+            report_results = tuple(
+                self.get(ArtifactId(root=reference.artifact_id))
+                for reference in event.reports
+            )
+            try:
+                claim = ValidationClaim.model_validate(
+                    claim_result.payload_document.model_dump(mode="json")["payload"],
+                    strict=True,
+                )
+                reports = tuple(
+                    (
+                        reference,
+                        ValidationReport.model_validate(
+                            result.payload_document.model_dump(mode="json")["payload"],
+                            strict=True,
+                        ),
+                    )
+                    for reference, result in zip(
+                        event.reports,
+                        report_results,
+                        strict=True,
+                    )
+                )
+                target_reports = tuple(
+                    report for _, report in reports if report.level == claim.level
+                )
+                if (
+                    claim_result.envelope.artifact_type != "validation_claim"
+                    or any(
+                        result.envelope.artifact_type != "validation_report"
+                        for result in report_results
+                    )
+                    or self._reference_key(claim.subject_ref)
+                    != self._reference_key(event.subject)
+                    or tuple(claim.scope) != tuple(event.validation_scope)
+                    or claim.level != event.validation_level
+                    or not any(
+                        report.validator_id == event.validator_id
+                        and report.validator_version == event.validator_version
+                        for report in target_reports
+                    )
+                ):
+                    raise ValueError("validation event does not bind its claim")
+                validate_claim_report_chain(claim, reports)
+            except (TypeError, ValueError) as error:
+                raise TerminalProvenanceError(event.claim.artifact_id) from error
+        if isinstance(event, SignedApprovalEvent) and event.decision == "approved":
+            candidate = self.get(ArtifactId(root=event.artifact.artifact_id))
+            if candidate.envelope.artifact_type == "task_contract":
+                if (
+                    candidate.envelope.payload_hash != event.artifact.payload_hash
+                    or len(event.input_report_artifact_ids) != 2
+                ):
+                    raise TerminalProvenanceError(event.artifact.artifact_id)
+                reports = {
+                    result.envelope.artifact_type: result
+                    for artifact_id in event.input_report_artifact_ids
+                    for result in (self.get(ArtifactId(root=artifact_id)),)
+                }
+                if set(reports) != {
+                    "task_contract_traceability_report",
+                    "text_critic_report",
+                }:
+                    raise TerminalProvenanceError(event.artifact.artifact_id)
+                try:
+                    contract_payload = candidate.payload_document.model_dump(
+                        mode="json"
+                    )["payload"]
+                    trace_payload = reports[
+                        "task_contract_traceability_report"
+                    ].payload_document.model_dump(mode="json")["payload"]
+                    critic_payload = reports[
+                        "text_critic_report"
+                    ].payload_document.model_dump(mode="json")["payload"]
+                    contract = TaskContract.model_validate(
+                        contract_payload, strict=True
+                    )
+                    trace = TaskContractTraceabilityReport.model_validate(
+                        trace_payload, strict=True
+                    )
+                    critic = TextCriticReport.model_validate(
+                        critic_payload, strict=True
+                    )
+                    if (
+                        trace.task_contract != event.artifact
+                        or critic.task_contract != event.artifact
+                        or critic.traceability_report.artifact_id
+                        != reports["task_contract_traceability_report"].artifact_id.root
+                        or critic.traceability_report.payload_hash
+                        != reports[
+                            "task_contract_traceability_report"
+                        ].envelope.payload_hash
+                    ):
+                        raise ValueError(
+                            "approval reports do not bind the exact candidate"
+                        )
+                    validate_task_contract_review_gate(contract, trace, critic)
+                except (TypeError, ValueError) as error:
+                    raise TerminalProvenanceError(event.artifact.artifact_id) from error
 
     def _put_lifecycle_model(
         self,

@@ -254,6 +254,7 @@ def test_projection_replays_approvals_and_terminal_audit_at_exact_head() -> None
 def test_projector_identity_covers_every_closed_causal_contract_family() -> None:
     preimage = lifecycle._run_projector_contract_preimage()
     contracts = cast(dict[str, object], preimage["causal_contracts"])
+    rules = cast(list[str], preimage["rules"])
 
     assert set(contracts) == {
         "approval",
@@ -284,6 +285,7 @@ def test_projector_identity_covers_every_closed_causal_contract_family() -> None
         "clarification_required",
         "TEXT_REVIEWED",
     ] in cast(list[list[str]], contracts["terminal"])
+    assert "projection-validation-level-max-v1" in rules
 
     perturbed = deepcopy(preimage)
     changed_contracts = cast(dict[str, object], perturbed["causal_contracts"])

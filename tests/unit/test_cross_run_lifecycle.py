@@ -618,6 +618,7 @@ def _replacement_receipt() -> dict[str, object]:
             "budget_snapshot": _artifact("9"),
             "waiting": None,
             "current_approval_snapshots": [],
+            "validation_levels": [],
             "post_terminal_audit_event_references": [],
             "terminal_event": {
                 "event_id": "019fe8f8-1400-7000-8000-000000000104",
@@ -639,6 +640,7 @@ def _replacement_receipt() -> dict[str, object]:
             "budget_snapshot": None,
             "waiting": None,
             "current_approval_snapshots": [],
+            "validation_levels": [],
             "post_terminal_audit_event_references": [],
             "terminal_event": None,
             "terminal_snapshot_head": None,
@@ -721,6 +723,7 @@ def _clarification_receipt() -> dict[str, object]:
             "budget_snapshot": _artifact("9"),
             "waiting": None,
             "current_approval_snapshots": [],
+            "validation_levels": [],
             "post_terminal_audit_event_references": [],
             "terminal_event": {
                 "event_id": "019fe8f8-1400-7000-8000-000000000090",
@@ -742,6 +745,7 @@ def _clarification_receipt() -> dict[str, object]:
             "budget_snapshot": None,
             "waiting": None,
             "current_approval_snapshots": [],
+            "validation_levels": [],
             "post_terminal_audit_event_references": [],
             "terminal_event": None,
             "terminal_snapshot_head": None,
