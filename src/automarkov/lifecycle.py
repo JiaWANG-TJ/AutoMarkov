@@ -924,6 +924,7 @@ class ValidationFailed(_UnsignedNonRootRunEvent):
         "unrecoverable_internal_error",
         "protocol_integrity_violation",
         "sealed_e2e_gate_failed",
+        "sealed_e2e_integrity_failed",
         "training_smoke_failed",
         "required_evaluation_result_missing",
         "required_package_artifact_missing",
@@ -2366,6 +2367,8 @@ class RunProjection(StrictFrozenModel):
     projector_hash: Sha256Value
     state: RunState
     event_head: EventHead
+    # v2 历史 projection 没有该字段；新 projector 始终写入，可信 resolver 仍要求非空。
+    run_manifest: ArtifactReference | None = None
     budget_snapshot: ArtifactReference | None
     waiting: WaitingBinding | None
     terminal_event: EventReference | None
@@ -2938,6 +2941,10 @@ def project_records(
             sequence_no=0,
             event_hash=ordered[0].event_hash,
         ),
+        run_manifest=ArtifactReference(
+            artifact_id=root.run_manifest_artifact_id,
+            payload_hash=root.run_manifest_payload_hash,
+        ),
         budget_snapshot=None,
         waiting=None,
         terminal_event=None,
@@ -3183,6 +3190,7 @@ def project_records(
                     sequence_no=event.sequence_no,
                     event_hash=record.event_hash,
                 ),
+                run_manifest=projection.run_manifest,
                 budget_snapshot=ArtifactReference(
                     artifact_id=event.budget_snapshot_artifact_id,
                     payload_hash=event.budget_snapshot_payload_hash,
@@ -3756,6 +3764,7 @@ class ExecutionAttestation(StrictFrozenModel):
     job_manifest: ArtifactReference
     process_terminal_record: ArtifactReference
     payload_outputs: FrozenSequence[ArtifactReference]
+    output_scan_report: ArtifactReference | None = None
     terminal_result: ArtifactReference | None
     network_policy_hash: Sha256Value
     mount_table_hash: Sha256Value
@@ -3900,7 +3909,7 @@ class TerminalResult(StrictFrozenModel):
                 approval.validity != "valid"
                 for approval in self.terminal_time_approvals
             )
-            or self.projector_hash != RUN_PROJECTOR_HASH
+            or self.projector_hash not in RUN_PROJECTOR_READ_HASHES
         ):
             raise ValueError("terminal result binding is invalid")
         return self
@@ -3947,7 +3956,7 @@ class RunAuditProjection(StrictFrozenModel):
         del payload["projection_id"]
         if (
             self.as_of_event_head.run_id.root != self.run_id
-            or self.projector_hash != RUN_PROJECTOR_HASH
+            or self.projector_hash not in RUN_PROJECTOR_READ_HASHES
             or approval_keys
             != tuple(
                 sorted(set(approval_keys), key=lambda item: item[0].encode("utf-8"))
@@ -4165,6 +4174,12 @@ def _run_projector_contract_preimage() -> dict[str, object]:
 RUN_PROJECTOR_HASH = (
     "sha256:"
     + sha256(canonical_json_bytes(_run_projector_contract_preimage())).hexdigest()
+)
+RUN_PROJECTOR_READ_HASHES = frozenset(
+    {
+        RUN_PROJECTOR_HASH,
+        "sha256:74c6eaa2ad592ec95664481a951152591b4243b070d4940158faaf1cf77ae710",
+    }
 )
 
 

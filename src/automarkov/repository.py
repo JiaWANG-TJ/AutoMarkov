@@ -9,7 +9,7 @@ from functools import cache
 from hashlib import sha256
 from pathlib import Path
 from threading import RLock
-from typing import Literal, TypeAlias, cast
+from typing import TYPE_CHECKING, Literal, TypeAlias, cast
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
@@ -75,8 +75,36 @@ from automarkov.evidence_contracts import (
     SearchEvidenceRequest,
     TavilyLeasePoolManifest,
 )
+from automarkov.fixed_commit_runner import (
+    SEALED_SUBJECT_ARTIFACT_CONTRACTS,
+    CapabilityDecisionLog,
+    EgressDecisionLog,
+    ExecutionCapabilityPolicy,
+    ExecutionMountPolicy,
+    ExecutionOutputContract,
+    ExecutionResourceUsage,
+    FixedCommitExecutionResult,
+    FixedCommitJobManifest,
+    FixedCommitResourceLimits,
+    MountAttestation,
+    NetworkDecisionLog,
+    OutputScannerPolicy,
+    OutputScanReport,
+    PhaseNetworkPolicy,
+    RunnerExecutionCheckpoint,
+    RunnerExecutionFailed,
+    RunnerInput,
+    RunnerOutputBinding,
+    RunnerReplayError,
+    RunnerRuntimeAttestation,
+    RunnerRuntimeEvidence,
+    RuntimeProfileArtifactPayload,
+    execution_attestation_signature_bytes,
+    execution_attestation_signing_bytes,
+)
 from automarkov.lifecycle import (
     RUN_PROJECTOR_HASH,
+    RUN_PROJECTOR_READ_HASHES,
     RUN_PROJECTOR_VERSION,
     TERMINAL_STATES,
     AppendRunEventsCommand,
@@ -98,6 +126,7 @@ from automarkov.lifecycle import (
     LifecycleCommand,
     LifecycleCommitReceipt,
     LifecycleCommitResult,
+    ProcessExecutionTerminalRecord,
     ReplacementRunCreated,
     RunAppendStep,
     RunAuditProjection,
@@ -113,6 +142,7 @@ from automarkov.lifecycle import (
     StateTransitioned,
     TerminalResult,
     ValidationClaimed,
+    ValidationFailed,
     WaitingRuntime,
     _event_hash,
     append_record,
@@ -141,14 +171,22 @@ from automarkov.public import (
     ArtifactLineageResult,
     ArtifactPutInput,
     ArtifactPutResult,
+    ArtifactRepository,
     ArtifactType,
     AuthenticatedCommandContext,
     CommandAuthority,
     PayloadSchemaVersion,
     validate_artifact_put_request,
 )
+from automarkov.sealed_evaluation import (
+    E2EGateEvaluationRequest,
+    E2EGateVerdict,
+    SealedWorkerTopology,
+)
 from automarkov.task_contracts import (
+    FixedCommitRunAuthorization,
     RunCreationPolicy,
+    RunManifest,
     RunManifestBootstrap,
     TaskApprovalPolicy,
     TaskContract,
@@ -162,6 +200,13 @@ from automarkov.validation_contracts import (
     ValidationReport,
     validate_claim_report_chain,
 )
+
+if TYPE_CHECKING:
+    from automarkov.sealed_evaluation import (
+        ArtifactLifecycleAtomicReceipt,
+        E2EGateCommitCommand,
+        E2EGateLifecyclePlanProvider,
+    )
 
 PAYLOAD_MEDIA_TYPE = "application/vnd.automarkov.canonical-payload+json"
 _ARTIFACT_TYPE_ADAPTER = TypeAdapter(ArtifactType)
@@ -192,7 +237,7 @@ _SIGNED_EVENT_TYPES = (
     ExecutionTopologySubstituted,
 )
 
-_SQLITE_SCHEMA_VERSION = 8
+_SQLITE_SCHEMA_VERSION = 10
 _SQLITE_SCHEMA_STATEMENTS = (
     """CREATE TABLE payload_blobs (
     payload_hash TEXT PRIMARY KEY,
@@ -257,6 +302,18 @@ _SQLITE_SCHEMA_STATEMENTS = (
     command_fingerprint TEXT NOT NULL,
     result_bytes BLOB NOT NULL
 ) STRICT""",
+    """CREATE TABLE e2e_gate_materializations (
+    command_fingerprint TEXT PRIMARY KEY,
+    command_bytes BLOB NOT NULL,
+    receipt_bytes BLOB NOT NULL
+) STRICT""",
+    """CREATE TABLE e2e_gate_claims (
+    claim_kind TEXT NOT NULL,
+    claim_key TEXT NOT NULL,
+    command_fingerprint TEXT NOT NULL
+        REFERENCES e2e_gate_materializations(command_fingerprint),
+    PRIMARY KEY (claim_kind, claim_key)
+) STRICT""",
     """CREATE TABLE run_terminal_results (
     run_id TEXT PRIMARY KEY,
     terminal_sequence_no INTEGER NOT NULL CHECK (terminal_sequence_no >= 0),
@@ -294,7 +351,99 @@ _SQLITE_SCHEMA_STATEMENTS = (
     signed_answer_bundle_artifact_id TEXT NOT NULL REFERENCES artifacts(artifact_id),
     continuation_policy_artifact_id TEXT NOT NULL REFERENCES artifacts(artifact_id)
 ) STRICT""",
+    """CREATE TABLE runner_executions (
+    job_id TEXT PRIMARY KEY,
+    process_execution_id TEXT NOT NULL UNIQUE,
+    fingerprint TEXT NOT NULL,
+    state TEXT NOT NULL CHECK (state IN ('executing', 'checkpointed', 'completed', 'failed')),
+    checkpoint_bytes BLOB,
+    result_bytes BLOB,
+    failure TEXT,
+    signing_key_id TEXT,
+    nonce_b64url TEXT,
+    UNIQUE (signing_key_id, nonce_b64url)
+) STRICT""",
 )
+_SQLITE_V8_TO_V10_TABLES = frozenset(
+    {"e2e_gate_materializations", "e2e_gate_claims", "runner_executions"}
+)
+_SQLITE_V8_EVENT_SCHEMA_IDS = {
+    (
+        "ValidationFailed",
+        "automarkov.validation-failed.v1",
+    ): "sha256:7d4562dd80b5ee9e0204850ef7e09eff7c659430edd6f43f2e7e82db52259728"
+}
+_SQLITE_V8_RUN_PROJECTOR_HASH = (
+    "sha256:74c6eaa2ad592ec95664481a951152591b4243b070d4940158faaf1cf77ae710"
+)
+_SQLITE_V8_ARTIFACT_PARENT_CONTRACTS = {
+    (
+        "process_execution_terminal_record",
+        "automarkov.process-execution-terminal-record.v1",
+    ): canonical_json_bytes(
+        {
+            "bindings": [
+                {
+                    "allowed_artifact_types": ["job_manifest"],
+                    "artifact_id_path": "job_manifest.artifact_id",
+                    "cardinality": "one",
+                    "payload_hash_path": "job_manifest.payload_hash",
+                },
+                {
+                    "allowed_artifact_types": ["payload_output"],
+                    "artifact_id_path": "payload_outputs.*.artifact_id",
+                    "cardinality": "many",
+                    "payload_hash_path": "payload_outputs.*.payload_hash",
+                },
+                {
+                    "allowed_artifact_types": ["resource_usage"],
+                    "artifact_id_path": "resource_usage.artifact_id",
+                    "cardinality": "one",
+                    "payload_hash_path": "resource_usage.payload_hash",
+                },
+            ],
+            "contract_kind": "payload_bound",
+        }
+    ),
+    ("terminal_result", "automarkov.terminal-result.v1"): canonical_json_bytes(
+        {
+            "bindings": [
+                {
+                    "allowed_artifact_types": ["job_manifest"],
+                    "artifact_id_path": "fixed_commit_job_manifest.artifact_id",
+                    "cardinality": "one",
+                    "payload_hash_path": "fixed_commit_job_manifest.payload_hash",
+                },
+                {
+                    "allowed_artifact_types": ["payload_output"],
+                    "artifact_id_path": "payload_outputs.*.artifact_id",
+                    "cardinality": "many",
+                    "payload_hash_path": "payload_outputs.*.payload_hash",
+                },
+                {
+                    "allowed_artifact_types": ["process_execution_terminal_record"],
+                    "artifact_id_path": (
+                        "process_execution_terminal_record.artifact_id"
+                    ),
+                    "cardinality": "one",
+                    "payload_hash_path": (
+                        "process_execution_terminal_record.payload_hash"
+                    ),
+                },
+            ],
+            "contract_kind": "payload_bound",
+        }
+    ),
+}
+
+
+def _schema_statement_table_name(statement: str) -> str | None:
+    prefix = "CREATE TABLE "
+    return (
+        statement[len(prefix) :].split(" ", 1)[0]
+        if statement.startswith(prefix)
+        else None
+    )
 
 
 def _sqlite_schema_rows(
@@ -315,6 +464,172 @@ def _expected_sqlite_schema_rows() -> tuple[tuple[object, ...], ...]:
         for statement in _SQLITE_SCHEMA_STATEMENTS:
             connection.execute(statement)
         return _sqlite_schema_rows(connection)
+
+
+@cache
+def _expected_sqlite_v8_schema_rows() -> tuple[tuple[object, ...], ...]:
+    with sqlite3.connect(":memory:") as connection:
+        for statement in _SQLITE_SCHEMA_STATEMENTS:
+            if _schema_statement_table_name(statement) not in _SQLITE_V8_TO_V10_TABLES:
+                connection.execute(statement)
+        return _sqlite_schema_rows(connection)
+
+
+def _e2e_command_bytes(command: E2EGateCommitCommand) -> bytes:
+    return canonical_json_bytes(
+        command.model_dump(mode="json", round_trip=True, warnings="error")
+    )
+
+
+def _e2e_atomic_receipt(
+    command: E2EGateCommitCommand,
+    lifecycle_result: LifecycleCommitResult,
+    runner_result: FixedCommitExecutionResult | None,
+) -> ArtifactLifecycleAtomicReceipt:
+    from automarkov.sealed_evaluation import (
+        ArtifactLifecycleAtomicReceipt,
+        _command_fingerprint,
+    )
+
+    if not isinstance(lifecycle_result, LifecycleCommitReceipt):
+        raise ArtifactIntegrityError("e2e-gate:lifecycle-receipt")
+    fingerprint = _command_fingerprint(command)
+    decision = command.decision
+    atomic_receipt_id = (
+        "sha256:"
+        + sha256(
+            canonical_json_bytes(
+                {
+                    "domain": "AutoMarkov-Artifact-Lifecycle-E2E-Receipt-v1",
+                    "e2e_command_fingerprint": fingerprint,
+                    "lifecycle_command_fingerprint": lifecycle_result.command_fingerprint,
+                    "lifecycle_after_head": lifecycle_result.after_head.model_dump(
+                        mode="json"
+                    ),
+                }
+            )
+        ).hexdigest()
+    )
+    return ArtifactLifecycleAtomicReceipt(
+        schema_version="automarkov.artifact-lifecycle-e2e-receipt.v1",
+        command_fingerprint=fingerprint,
+        atomic_receipt_id=atomic_receipt_id,
+        request_ref=command.request_ref,
+        verdict_ref=command.verdict_ref,
+        candidate_bundle=command.candidate_bundle,
+        topology_ref=command.topology_ref,
+        terminal_state=decision.next_state,
+        terminal_reason_code=(
+            "sealed_e2e_gate_failed"
+            if decision.next_state == "PARTIAL"
+            else (
+                "sealed_e2e_integrity_failed"
+                if decision.next_state == "FAILED"
+                else None
+            )
+        ),
+        outcome_e2e_valid=1 if decision.e2e_valid else 0,
+        training_outcome_missing=decision.training_outcome_missing,
+        lifecycle_command_fingerprint=lifecycle_result.command_fingerprint,
+        lifecycle_after_head_hash=lifecycle_result.after_head.event_hash,
+        process_execution_terminal_record=(
+            runner_result.process_terminal_record if runner_result is not None else None
+        ),
+        terminal_result=(
+            runner_result.terminal_result if runner_result is not None else None
+        ),
+        execution_attestation=(
+            runner_result.execution_attestation if runner_result is not None else None
+        ),
+        committed_at=command.committed_at,
+    )
+
+
+def _e2e_failed_command(command: E2EGateCommitCommand) -> E2EGateCommitCommand:
+    from automarkov.sealed_evaluation import E2EGateCommitCommand, SealedE2EGate
+
+    payload = command.model_dump(mode="json", round_trip=True, warnings="error")
+    payload["decision"] = SealedE2EGate._decision("FAILED").model_dump(mode="json")
+    return E2EGateCommitCommand.model_validate(payload, strict=True)
+
+
+def _require_e2e_command_artifacts(
+    repository: ArtifactRepository,
+    command: E2EGateCommitCommand,
+) -> None:
+    stored_by_role = {
+        role: repository.get(ArtifactId(root=reference.artifact_id))
+        for role, reference in (
+            ("run_manifest", command.run_manifest),
+            ("request", command.request_ref),
+            ("verdict", command.verdict_ref),
+            ("candidate", command.candidate_bundle),
+            ("topology", command.topology_ref),
+        )
+    }
+    expected_types = {
+        "run_manifest": "run_manifest",
+        "request": "e2e_gate_evaluation_request",
+        "verdict": "e2e_gate_verdict",
+        "topology": "sealed_worker_topology",
+    }
+    references = {
+        "run_manifest": command.run_manifest,
+        "request": command.request_ref,
+        "verdict": command.verdict_ref,
+        "candidate": command.candidate_bundle,
+        "topology": command.topology_ref,
+    }
+    for role, stored in stored_by_role.items():
+        reference = references[role]
+        payload_hash_may_be_invalid = (
+            command.decision.next_state == "FAILED"
+            and role in {"request", "verdict", "topology"}
+        )
+        if (
+            not payload_hash_may_be_invalid
+            and stored.envelope.payload_hash != reference.payload_hash
+        ) or (
+            role in expected_types
+            and stored.envelope.artifact_type != expected_types[role]
+        ):
+            raise ArtifactIntegrityError(f"e2e-gate:{role}-artifact-binding")
+    if command.decision.next_state == "FAILED":
+        return
+    request_payload = stored_by_role["request"].payload_document.model_dump(
+        mode="json"
+    )["payload"]
+    verdict_payload = stored_by_role["verdict"].payload_document.model_dump(
+        mode="json"
+    )["payload"]
+    topology_payload = stored_by_role["topology"].payload_document.model_dump(
+        mode="json"
+    )["payload"]
+    request = E2EGateEvaluationRequest.model_validate(request_payload, strict=True)
+    verdict = E2EGateVerdict.model_validate(verdict_payload, strict=True)
+    topology = SealedWorkerTopology.model_validate(topology_payload, strict=True)
+    if (
+        command.request_payload_hash != command.request_ref.payload_hash
+        or command.verdict_payload_hash != command.verdict_ref.payload_hash
+        or command.topology_payload_hash != command.topology_ref.payload_hash
+        or command.request_id != request.request_id
+        or command.verdict_id != verdict.verdict_id
+        or command.run_id != request.run_id
+        or command.run_manifest != request.run_manifest
+        or command.specified_event_head != request.specified_event_head
+        or command.candidate_bundle != request.candidate_bundle
+        or verdict.request_id != request.request_id
+        or verdict.request_payload_hash != command.request_ref.payload_hash
+        or verdict.run_id != request.run_id
+        or verdict.run_manifest != request.run_manifest
+        or verdict.candidate_bundle != request.candidate_bundle
+        or verdict.task_contract != request.task_contract
+        or verdict.decision_process_spec != request.decision_process_spec
+        or verdict.environment_binding != request.environment_binding
+        or canonical_json_bytes(topology.model_dump(mode="json"))
+        != canonical_json_bytes(topology_payload)
+    ):
+        raise ArtifactIntegrityError("e2e-gate:typed-artifact-graph")
 
 
 _PAYLOAD_SCHEMA_VERSION_ADAPTER = TypeAdapter(PayloadSchemaVersion)
@@ -369,7 +684,14 @@ class ParentBinding(StrictFrozenModel):
     def require_paired_path_shape(self) -> ParentBinding:
         id_segments = self.artifact_id_path.split(".")
         hash_segments = self.payload_hash_path.split(".")
-        if id_segments[-1] != "artifact_id" or hash_segments[-1] != "payload_hash":
+        standard_pair = (
+            id_segments[-1] == "artifact_id" and hash_segments[-1] == "payload_hash"
+        )
+        legacy_split_pair = (
+            id_segments[-1].endswith("_id")
+            and hash_segments[-1] == id_segments[-1].removesuffix("_id") + "_hash"
+        )
+        if not (standard_pair or legacy_split_pair):
             raise ValueError(
                 "parent binding paths must address artifact ID/hash fields"
             )
@@ -574,7 +896,7 @@ def _extract_payload_parent_references(
                 "optional payload parent binding permits at most one reference"
             )
 
-    if claimed_locations != _payload_artifact_reference_locations(payload):
+    if not _payload_artifact_reference_locations(payload).issubset(claimed_locations):
         raise ValueError("payload contains an undeclared artifact reference")
     parent_ids = tuple(reference.artifact_id.root for reference in references)
     if len(set(parent_ids)) != len(parent_ids):
@@ -960,8 +1282,335 @@ class ArtifactSchemaRegistry:
         return registered
 
 
+def _register_fixed_commit_schemas(registry: ArtifactSchemaRegistry) -> None:
+    for artifact_type, version, model in (
+        (
+            "runner_output_binding",
+            "automarkov.runner-output-binding.v2",
+            RunnerOutputBinding,
+        ),
+        (
+            "runner_runtime_evidence",
+            "automarkov.runner-runtime-evidence.v1",
+            RunnerRuntimeEvidence,
+        ),
+        (
+            "fixed_commit_resource_limits",
+            "automarkov.fixed-commit-resource-limits.v1",
+            FixedCommitResourceLimits,
+        ),
+        (
+            "phase_network_policy",
+            "automarkov.phase-network-policy.v1",
+            PhaseNetworkPolicy,
+        ),
+        (
+            "execution_mount_policy",
+            "automarkov.execution-mount-policy.v1",
+            ExecutionMountPolicy,
+        ),
+        (
+            "execution_capability_policy",
+            "automarkov.execution-capability-policy.v1",
+            ExecutionCapabilityPolicy,
+        ),
+        (
+            "execution_output_contract",
+            "automarkov.execution-output-contract.v1",
+            ExecutionOutputContract,
+        ),
+        (
+            "output_scanner_policy",
+            "automarkov.output-scanner-policy.v1",
+            OutputScannerPolicy,
+        ),
+    ):
+        registry.register(
+            artifact_type,
+            version,
+            model,
+            direct_parent_artifact_types=(),
+        )
+    registry.register(
+        "runtime_profile_manifest",
+        "automarkov.runtime-profile-manifest.v2",
+        RuntimeProfileArtifactPayload,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="build_attestation_id",
+                payload_hash_path="build_attestation_hash",
+                allowed_artifact_types=("runner_runtime_attestation",),
+                cardinality="optional",
+            ),
+            ParentBinding(
+                artifact_id_path="import_smoke_attestation_id",
+                payload_hash_path="import_smoke_attestation_hash",
+                allowed_artifact_types=("runner_runtime_attestation",),
+                cardinality="optional",
+            ),
+        ),
+    )
+    registry.register(
+        "runner_runtime_attestation",
+        "automarkov.runner-runtime-attestation.v1",
+        RunnerRuntimeAttestation,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="evidence_refs.*.artifact_id",
+                payload_hash_path="evidence_refs.*.payload_hash",
+                allowed_artifact_types=("runner_runtime_evidence",),
+                cardinality="many",
+            ),
+        ),
+    )
+    job_bindings = tuple(
+        sorted(
+            (
+                ParentBinding(
+                    artifact_id_path=f"{field}.artifact_id",
+                    payload_hash_path=f"{field}.payload_hash",
+                    allowed_artifact_types=(artifact_type,),
+                    cardinality="one",
+                )
+                for field, artifact_type in (
+                    ("capability_policy", "execution_capability_policy"),
+                    ("mount_policy", "execution_mount_policy"),
+                    ("network_policy", "phase_network_policy"),
+                    ("output_contract", "execution_output_contract"),
+                    ("profile_manifest", "runtime_profile_manifest"),
+                    ("resource_limits", "fixed_commit_resource_limits"),
+                    ("scanner_policy", "output_scanner_policy"),
+                )
+            ),
+            key=lambda binding: binding.artifact_id_path.encode("utf-8"),
+        )
+    ) + (
+        ParentBinding(
+            artifact_id_path="input_artifacts.*.artifact_id",
+            payload_hash_path="input_artifacts.*.payload_hash",
+            allowed_artifact_types=("runner_input",),
+            cardinality="many",
+        ),
+    )
+    registry.register(
+        "fixed_commit_job_manifest",
+        "automarkov.fixed-commit-job-manifest.v1",
+        FixedCommitJobManifest,
+        payload_parent_bindings=tuple(
+            sorted(job_bindings, key=lambda item: item.artifact_id_path.encode("utf-8"))
+        ),
+    )
+    for artifact_type, contract in SEALED_SUBJECT_ARTIFACT_CONTRACTS.items():
+        registry.register(
+            artifact_type,
+            contract.schema_version,
+            contract.model_type,
+            payload_parent_bindings=(
+                ParentBinding(
+                    artifact_id_path="job_manifest.artifact_id",
+                    payload_hash_path="job_manifest.payload_hash",
+                    allowed_artifact_types=("fixed_commit_job_manifest",),
+                    cardinality="one",
+                ),
+            ),
+        )
+    for artifact_type, version, model, fields in (
+        (
+            "execution_resource_usage",
+            "automarkov.execution-resource-usage.v1",
+            ExecutionResourceUsage,
+            (
+                ("job_manifest", "fixed_commit_job_manifest"),
+                ("limits_policy", "fixed_commit_resource_limits"),
+            ),
+        ),
+        (
+            "network_decision_log",
+            "automarkov.network-decision-log.v1",
+            NetworkDecisionLog,
+            (
+                ("job_manifest", "fixed_commit_job_manifest"),
+                ("network_policy", "phase_network_policy"),
+            ),
+        ),
+        (
+            "mount_attestation",
+            "automarkov.mount-attestation.v1",
+            MountAttestation,
+            (
+                ("job_manifest", "fixed_commit_job_manifest"),
+                ("mount_policy", "execution_mount_policy"),
+            ),
+        ),
+        (
+            "capability_decision_log",
+            "automarkov.capability-decision-log.v1",
+            CapabilityDecisionLog,
+            (
+                ("capability_policy", "execution_capability_policy"),
+                ("job_manifest", "fixed_commit_job_manifest"),
+            ),
+        ),
+        (
+            "egress_decision_log",
+            "automarkov.egress-decision-log.v1",
+            EgressDecisionLog,
+            (
+                ("job_manifest", "fixed_commit_job_manifest"),
+                ("network_policy", "phase_network_policy"),
+            ),
+        ),
+    ):
+        registry.register(
+            artifact_type,
+            version,
+            model,
+            payload_parent_bindings=tuple(
+                ParentBinding(
+                    artifact_id_path=f"{field}.artifact_id",
+                    payload_hash_path=f"{field}.payload_hash",
+                    allowed_artifact_types=(parent_type,),
+                    cardinality="one",
+                )
+                for field, parent_type in fields
+            ),
+        )
+    registry.register(
+        "output_scan_report",
+        "automarkov.output-scan-report.v1",
+        OutputScanReport,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="job_manifest.artifact_id",
+                payload_hash_path="job_manifest.payload_hash",
+                allowed_artifact_types=("fixed_commit_job_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="output_contract.artifact_id",
+                payload_hash_path="output_contract.payload_hash",
+                allowed_artifact_types=("execution_output_contract",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="scanned_outputs.*.artifact_id",
+                payload_hash_path="scanned_outputs.*.payload_hash",
+                allowed_artifact_types=("runner_output_binding",),
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="scanner_policy.artifact_id",
+                payload_hash_path="scanner_policy.payload_hash",
+                allowed_artifact_types=("output_scanner_policy",),
+                cardinality="one",
+            ),
+        ),
+    )
+    runner_output_types = tuple(
+        sorted(
+            (
+                "capability_decision_log",
+                "egress_decision_log",
+                "e2e_gate_verdict",
+                "mount_attestation",
+                "network_decision_log",
+                "output_scan_report",
+                "runner_output_binding",
+            )
+        )
+    )
+    registry.register(
+        "process_execution_terminal_record",
+        "automarkov.process-execution-terminal-record.v1",
+        ProcessExecutionTerminalRecord,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="job_manifest.artifact_id",
+                payload_hash_path="job_manifest.payload_hash",
+                allowed_artifact_types=("fixed_commit_job_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="payload_outputs.*.artifact_id",
+                payload_hash_path="payload_outputs.*.payload_hash",
+                allowed_artifact_types=runner_output_types,
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="resource_usage.artifact_id",
+                payload_hash_path="resource_usage.payload_hash",
+                allowed_artifact_types=("execution_resource_usage",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "execution_attestation",
+        "automarkov.execution-attestation.v1",
+        ExecutionAttestation,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="job_manifest.artifact_id",
+                payload_hash_path="job_manifest.payload_hash",
+                allowed_artifact_types=("fixed_commit_job_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="output_scan_report.artifact_id",
+                payload_hash_path="output_scan_report.payload_hash",
+                allowed_artifact_types=("output_scan_report",),
+                cardinality="optional",
+            ),
+            ParentBinding(
+                artifact_id_path="payload_outputs.*.artifact_id",
+                payload_hash_path="payload_outputs.*.payload_hash",
+                allowed_artifact_types=runner_output_types,
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="process_terminal_record.artifact_id",
+                payload_hash_path="process_terminal_record.payload_hash",
+                allowed_artifact_types=("process_execution_terminal_record",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="terminal_result.artifact_id",
+                payload_hash_path="terminal_result.payload_hash",
+                allowed_artifact_types=("terminal_result",),
+                cardinality="optional",
+            ),
+        ),
+    )
+    registry.register(
+        "terminal_result",
+        "automarkov.terminal-result.v1",
+        TerminalResult,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="fixed_commit_job_manifest.artifact_id",
+                payload_hash_path="fixed_commit_job_manifest.payload_hash",
+                allowed_artifact_types=("fixed_commit_job_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="payload_outputs.*.artifact_id",
+                payload_hash_path="payload_outputs.*.payload_hash",
+                allowed_artifact_types=runner_output_types,
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="process_execution_terminal_record.artifact_id",
+                payload_hash_path="process_execution_terminal_record.payload_hash",
+                allowed_artifact_types=("process_execution_terminal_record",),
+                cardinality="one",
+            ),
+        ),
+    )
+
+
 def _default_schema_registry() -> ArtifactSchemaRegistry:
     registry = ArtifactSchemaRegistry()
+    _register_fixed_commit_schemas(registry)
     registry.register(
         "task_request",
         "automarkov.task-request.v1",
@@ -1092,6 +1741,124 @@ def _default_schema_registry() -> ArtifactSchemaRegistry:
                 ),
                 allowed_artifact_types=("run_creation_policy",),
                 cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="task_request.artifact_id",
+                payload_hash_path="task_request.payload_hash",
+                allowed_artifact_types=("task_request",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "fixed_commit_run_authorization",
+        "automarkov.fixed-commit-run-authorization.v1",
+        FixedCommitRunAuthorization,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="capability_policy.artifact_id",
+                payload_hash_path="capability_policy.payload_hash",
+                allowed_artifact_types=("execution_capability_policy",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="input_artifacts.*.artifact_id",
+                payload_hash_path="input_artifacts.*.payload_hash",
+                allowed_artifact_types=("runner_input",),
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path="job_manifest.artifact_id",
+                payload_hash_path="job_manifest.payload_hash",
+                allowed_artifact_types=("fixed_commit_job_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="mount_policy.artifact_id",
+                payload_hash_path="mount_policy.payload_hash",
+                allowed_artifact_types=("execution_mount_policy",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="network_policy.artifact_id",
+                payload_hash_path="network_policy.payload_hash",
+                allowed_artifact_types=("phase_network_policy",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="output_contract.artifact_id",
+                payload_hash_path="output_contract.payload_hash",
+                allowed_artifact_types=("execution_output_contract",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="profile_manifest.artifact_id",
+                payload_hash_path="profile_manifest.payload_hash",
+                allowed_artifact_types=("runtime_profile_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="resource_limits.artifact_id",
+                payload_hash_path="resource_limits.payload_hash",
+                allowed_artifact_types=("fixed_commit_resource_limits",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="scanner_policy.artifact_id",
+                payload_hash_path="scanner_policy.payload_hash",
+                allowed_artifact_types=("output_scanner_policy",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "run_manifest",
+        "automarkov.run-manifest.v2",
+        RunManifest,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path=(
+                    "event_security_context.approval.policy_contract.artifact_id"
+                ),
+                payload_hash_path=(
+                    "event_security_context.approval.policy_contract.payload_hash"
+                ),
+                allowed_artifact_types=("task_approval_policy",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="event_security_context.creation_policy.artifact_id",
+                payload_hash_path=(
+                    "event_security_context.creation_policy.payload_hash"
+                ),
+                allowed_artifact_types=("run_creation_policy",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="fixed_commit_authorization.artifact_id",
+                payload_hash_path="fixed_commit_authorization.payload_hash",
+                allowed_artifact_types=("fixed_commit_run_authorization",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path=(
+                    "sealed_worker_authorizations.*.fixed_commit_authorization.artifact_id"
+                ),
+                payload_hash_path=(
+                    "sealed_worker_authorizations.*.fixed_commit_authorization.payload_hash"
+                ),
+                allowed_artifact_types=("fixed_commit_run_authorization",),
+                cardinality="many",
+            ),
+            ParentBinding(
+                artifact_id_path=(
+                    "sealed_worker_authorizations.*.job_manifest.artifact_id"
+                ),
+                payload_hash_path=(
+                    "sealed_worker_authorizations.*.job_manifest.payload_hash"
+                ),
+                allowed_artifact_types=("fixed_commit_job_manifest",),
+                cardinality="many",
             ),
             ParentBinding(
                 artifact_id_path="task_request.artifact_id",
@@ -1473,7 +2240,12 @@ def _default_schema_registry() -> ArtifactSchemaRegistry:
             ),
         ),
     )
-    validation_subject_types = registry.artifact_types()
+    validation_subject_types = tuple(
+        sorted(
+            (*registry.artifact_types(), "runner_input"),
+            key=lambda item: item.encode("utf-8"),
+        )
+    )
     registry.register(
         "validation_report",
         "automarkov.validation-report.v1",
@@ -1508,6 +2280,210 @@ def _default_schema_registry() -> ArtifactSchemaRegistry:
                 artifact_id_path="subject_ref.artifact_id",
                 payload_hash_path="subject_ref.payload_hash",
                 allowed_artifact_types=validation_subject_types,
+                cardinality="one",
+            ),
+        ),
+    )
+    e2e_subject_types = tuple(
+        sorted(
+            (*registry.artifact_types(), "runner_input"),
+            key=lambda item: item.encode("utf-8"),
+        )
+    )
+    registry.register(
+        "e2e_gate_evaluation_request",
+        "automarkov.e2e-gate-evaluation-request.v1",
+        E2EGateEvaluationRequest,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="candidate_bundle.artifact_id",
+                payload_hash_path="candidate_bundle.payload_hash",
+                allowed_artifact_types=e2e_subject_types,
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="candidate_validation_freeze.artifact_id",
+                payload_hash_path="candidate_validation_freeze.payload_hash",
+                allowed_artifact_types=e2e_subject_types,
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="decision_process_spec.artifact_id",
+                payload_hash_path="decision_process_spec.payload_hash",
+                allowed_artifact_types=e2e_subject_types,
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="environment_binding.artifact_id",
+                payload_hash_path="environment_binding.payload_hash",
+                allowed_artifact_types=e2e_subject_types,
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="run_manifest.artifact_id",
+                payload_hash_path="run_manifest.payload_hash",
+                allowed_artifact_types=("run_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="task_contract.artifact_id",
+                payload_hash_path="task_contract.payload_hash",
+                allowed_artifact_types=("task_contract",),
+                cardinality="one",
+            ),
+        ),
+    )
+    registry.register(
+        "e2e_gate_verdict",
+        "automarkov.e2e-gate-verdict.v1",
+        E2EGateVerdict,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="candidate_bundle.artifact_id",
+                payload_hash_path="candidate_bundle.payload_hash",
+                allowed_artifact_types=e2e_subject_types,
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="decision_process_spec.artifact_id",
+                payload_hash_path="decision_process_spec.payload_hash",
+                allowed_artifact_types=e2e_subject_types,
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="environment_binding.artifact_id",
+                payload_hash_path="environment_binding.payload_hash",
+                allowed_artifact_types=e2e_subject_types,
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="run_manifest.artifact_id",
+                payload_hash_path="run_manifest.payload_hash",
+                allowed_artifact_types=("run_manifest",),
+                cardinality="one",
+            ),
+            ParentBinding(
+                artifact_id_path="task_contract.artifact_id",
+                payload_hash_path="task_contract.payload_hash",
+                allowed_artifact_types=("task_contract",),
+                cardinality="one",
+            ),
+        ),
+    )
+    topology_bindings: list[ParentBinding] = []
+    topology_output_types = tuple(sorted({*e2e_subject_types, "e2e_gate_verdict"}))
+    for role in ("candidate", "gold", "comparator"):
+        topology_bindings.extend(
+            (
+                ParentBinding(
+                    artifact_id_path=f"{role}.job_manifest.artifact_id",
+                    payload_hash_path=f"{role}.job_manifest.payload_hash",
+                    allowed_artifact_types=("fixed_commit_job_manifest",),
+                    cardinality="one",
+                ),
+                ParentBinding(
+                    artifact_id_path=(
+                        f"{role}.execution_attestation.process_terminal_record.artifact_id"
+                    ),
+                    payload_hash_path=(
+                        f"{role}.execution_attestation.process_terminal_record.payload_hash"
+                    ),
+                    allowed_artifact_types=("process_execution_terminal_record",),
+                    cardinality="one",
+                ),
+                ParentBinding(
+                    artifact_id_path=(
+                        f"{role}.execution_attestation.payload_outputs.*.artifact_id"
+                    ),
+                    payload_hash_path=(
+                        f"{role}.execution_attestation.payload_outputs.*.payload_hash"
+                    ),
+                    allowed_artifact_types=("runner_output_binding",),
+                    cardinality="many",
+                ),
+                ParentBinding(
+                    artifact_id_path=f"{role}.evidence.request_ref.artifact_id",
+                    payload_hash_path=f"{role}.evidence.request_ref.payload_hash",
+                    allowed_artifact_types=("e2e_gate_evaluation_request",),
+                    cardinality="one",
+                ),
+                ParentBinding(
+                    artifact_id_path=(
+                        f"{role}.evidence.execution_attestation_ref.artifact_id"
+                    ),
+                    payload_hash_path=(
+                        f"{role}.evidence.execution_attestation_ref.payload_hash"
+                    ),
+                    allowed_artifact_types=("execution_attestation",),
+                    cardinality="one",
+                ),
+                ParentBinding(
+                    artifact_id_path=f"{role}.evidence.outputs.*.output_ref.artifact_id",
+                    payload_hash_path=f"{role}.evidence.outputs.*.output_ref.payload_hash",
+                    allowed_artifact_types=topology_output_types,
+                    cardinality="many",
+                ),
+                ParentBinding(
+                    artifact_id_path=f"{role}.mount_attestation.mount_policy.artifact_id",
+                    payload_hash_path=f"{role}.mount_attestation.mount_policy.payload_hash",
+                    allowed_artifact_types=("execution_mount_policy",),
+                    cardinality="one",
+                ),
+                ParentBinding(
+                    artifact_id_path=(
+                        f"{role}.capability_decision_log.capability_policy.artifact_id"
+                    ),
+                    payload_hash_path=(
+                        f"{role}.capability_decision_log.capability_policy.payload_hash"
+                    ),
+                    allowed_artifact_types=("execution_capability_policy",),
+                    cardinality="one",
+                ),
+                ParentBinding(
+                    artifact_id_path=f"{role}.egress_decision_log.network_policy.artifact_id",
+                    payload_hash_path=f"{role}.egress_decision_log.network_policy.payload_hash",
+                    allowed_artifact_types=("phase_network_policy",),
+                    cardinality="one",
+                ),
+            )
+        )
+        for field in (
+            "candidate_bundle",
+            "task_contract",
+            "decision_process_spec",
+            "environment_binding",
+        ):
+            topology_bindings.append(
+                ParentBinding(
+                    artifact_id_path=f"{role}.evidence.{field}.artifact_id",
+                    payload_hash_path=f"{role}.evidence.{field}.payload_hash",
+                    allowed_artifact_types=e2e_subject_types,
+                    cardinality="one",
+                )
+            )
+    registry.register(
+        "sealed_worker_topology",
+        "automarkov.sealed-worker-topology.v1",
+        SealedWorkerTopology,
+        payload_parent_bindings=tuple(
+            sorted(
+                topology_bindings,
+                key=lambda binding: (
+                    binding.artifact_id_path.encode("utf-8"),
+                    binding.payload_hash_path.encode("utf-8"),
+                ),
+            )
+        ),
+    )
+    registry.register(
+        "runner_input",
+        "automarkov.runner-input.v1",
+        RunnerInput,
+        payload_parent_bindings=(
+            ParentBinding(
+                artifact_id_path="source_artifact.artifact_id",
+                payload_hash_path="source_artifact.payload_hash",
+                allowed_artifact_types=registry.artifact_types(),
                 cardinality="one",
             ),
         ),
@@ -1925,6 +2901,36 @@ def _artifact_reference(result: ArtifactPutResult) -> ArtifactReference:
     return ArtifactReference(
         artifact_id=result.artifact_id.root,
         payload_hash=result.payload_hash.root,
+    )
+
+
+def _process_execution_parents(
+    process: ProcessExecutionTerminalRecord,
+) -> tuple[ArtifactReference, ...]:
+    return (
+        process.job_manifest,
+        *process.payload_outputs,
+        process.resource_usage,
+    )
+
+
+def _execution_attestation_parents(
+    attestation: ExecutionAttestation,
+) -> tuple[ArtifactReference, ...]:
+    return (
+        attestation.job_manifest,
+        attestation.process_terminal_record,
+        *attestation.payload_outputs,
+        *(
+            (attestation.output_scan_report,)
+            if attestation.output_scan_report is not None
+            else ()
+        ),
+        *(
+            (attestation.terminal_result,)
+            if attestation.terminal_result is not None
+            else ()
+        ),
     )
 
 
@@ -2408,6 +3414,388 @@ class _ArtifactRepositoryCore:
             raise TerminalProvenanceError(reference.artifact_id)
         return cast(dict[str, object], payload)
 
+    def _verify_e2e_lifecycle_materialization(
+        self,
+        command: E2EGateCommitCommand,
+        result: LifecycleCommitResult,
+    ) -> None:
+        if not isinstance(result, LifecycleCommitReceipt):
+            raise ArtifactIntegrityError("e2e-gate:lifecycle-receipt")
+        records = result.event_records
+        expected_request = command.request_ref
+        expected_verdict = command.verdict_ref
+        if command.decision.next_state == "FAILED":
+            expected_request = ArtifactReference(
+                artifact_id=command.request_ref.artifact_id,
+                payload_hash=self.get(
+                    ArtifactId(root=command.request_ref.artifact_id)
+                ).envelope.payload_hash,
+            )
+            expected_verdict = ArtifactReference(
+                artifact_id=command.verdict_ref.artifact_id,
+                payload_hash=self.get(
+                    ArtifactId(root=command.verdict_ref.artifact_id)
+                ).envelope.payload_hash,
+            )
+        subjects = tuple(
+            sorted(
+                (expected_request, expected_verdict, command.candidate_bundle),
+                key=lambda item: item.artifact_id.encode("utf-8"),
+            )
+        )
+        if (
+            result.run_id != command.run_id
+            or result.before_head is None
+            or result.before_head.sequence_no
+            != command.specified_event_head.sequence_no
+            or result.before_head.event_hash
+            != command.specified_event_head.event_hash.root
+            or result.run_view.run_manifest != command.run_manifest
+            or result.run_view.state.value != command.decision.next_state
+            or len(records) != 2
+            or not isinstance(records[1].event, StateTransitioned)
+        ):
+            raise ArtifactIntegrityError("e2e-gate:lifecycle-binding")
+        transition = cast(StateTransitioned, records[1].event)
+        if (
+            transition.from_state.value != "SEALED_E2E_VALIDATING"
+            or transition.to_state.value != command.decision.next_state
+            or transition.input_artifact_ids
+            != tuple(reference.artifact_id for reference in subjects)
+            or transition.gate_report_artifact_id != expected_verdict.artifact_id
+            or transition.gate_report_payload_hash != expected_verdict.payload_hash
+        ):
+            raise ArtifactIntegrityError("e2e-gate:transition-binding")
+        cause = records[0].event
+        if command.decision.next_state == "TRAINING_SMOKE_TESTING":
+            if (
+                not isinstance(cause, StageGatePassed)
+                or cause.gate_id != "SEALED_E2E"
+                or cause.reason_code != "sealed_e2e_passed"
+                or cause.gate_report != expected_verdict
+                or cause.subject_artifact_references != subjects
+                or transition.reason_code != "sealed_e2e_passed"
+                or result.process_execution_terminal_record is not None
+                or result.terminal_result is not None
+                or result.run_view.run_audit_projection is not None
+            ):
+                raise ArtifactIntegrityError("e2e-gate:success-receipt")
+            return
+        expected_reason = (
+            "sealed_e2e_gate_failed"
+            if command.decision.next_state == "PARTIAL"
+            else "sealed_e2e_integrity_failed"
+        )
+        process_ref = result.process_execution_terminal_record
+        terminal_ref = result.terminal_result
+        audit_ref = result.run_view.run_audit_projection
+        if (
+            not isinstance(cause, ValidationFailed)
+            or cause.validation_scope != "sealed_e2e"
+            or cause.failure_code != expected_reason
+            or cause.subject != command.candidate_bundle
+            or cause.report != expected_verdict
+            or transition.reason_code != expected_reason
+            or process_ref is None
+            or terminal_ref is None
+            or audit_ref is None
+        ):
+            raise ArtifactIntegrityError("e2e-gate:terminal-receipt")
+        process = ProcessExecutionTerminalRecord.model_validate(
+            self._artifact_payload(
+                process_ref,
+                artifact_type="process_execution_terminal_record",
+            ),
+            strict=True,
+        )
+        terminal = TerminalResult.model_validate(
+            self._artifact_payload(terminal_ref, artifact_type="terminal_result"),
+            strict=True,
+        )
+        audit = RunAuditProjection.model_validate(
+            self._artifact_payload(audit_ref, artifact_type="run_audit_projection"),
+            strict=True,
+        )
+        if (
+            command.process_execution_terminal_record != process_ref
+            or process.status != "success"
+            or process.exit_code != 0
+            or terminal.terminal_state != command.decision.next_state
+            or terminal.terminal_reason_code != expected_reason
+            or terminal.process_execution_terminal_record != process_ref
+            or terminal.payload_outputs != process.payload_outputs
+            or audit.terminal_result != terminal_ref
+            or audit.outcome_mask.e2e_valid != 0
+        ):
+            raise ArtifactIntegrityError("e2e-gate:terminal-outcome")
+        parent_sets = {
+            process_ref.artifact_id: {
+                reference.artifact_id
+                for reference in _process_execution_parents(process)
+            },
+            terminal_ref.artifact_id: {
+                process.job_manifest.artifact_id,
+                process_ref.artifact_id,
+                *(reference.artifact_id for reference in process.payload_outputs),
+            },
+            audit_ref.artifact_id: {terminal_ref.artifact_id},
+        }
+        for artifact_id, expected_parents in parent_sets.items():
+            stored = self.get(ArtifactId(root=artifact_id))
+            actual_parents = {
+                parent.root for parent in stored.envelope.parent_artifact_ids
+            }
+            if actual_parents != expected_parents:
+                raise ArtifactIntegrityError(f"e2e-gate:dag:{artifact_id}")
+
+    def _verify_e2e_replay_receipt(
+        self,
+        command: E2EGateCommitCommand,
+        receipt_bytes: bytes,
+        plan_provider: E2EGateLifecyclePlanProvider,
+        lifecycle_result: LifecycleCommitResult,
+    ) -> ArtifactLifecycleAtomicReceipt:
+        from automarkov.sealed_evaluation import ArtifactLifecycleAtomicReceipt
+
+        self._verify_e2e_lifecycle_materialization(command, lifecycle_result)
+        runner_result = plan_provider.finalize(command, lifecycle_result)
+        expected = _e2e_atomic_receipt(command, lifecycle_result, runner_result)
+        try:
+            stored = ArtifactLifecycleAtomicReceipt.model_validate_json(
+                receipt_bytes, strict=True
+            )
+        except (TypeError, ValueError) as error:
+            raise ArtifactIntegrityError("e2e-gate:replay-receipt") from error
+        if stored != expected:
+            raise ArtifactIntegrityError("e2e-gate:replay-receipt")
+        return stored
+
+    def _validate_runner_finalize(
+        self,
+        checkpoint_bytes: bytes,
+        attestation: ExecutionAttestation,
+        expected_terminal: ArtifactReference | None,
+    ) -> RunnerExecutionCheckpoint:
+        try:
+            checkpoint = RunnerExecutionCheckpoint.model_validate_json(
+                checkpoint_bytes, strict=True
+            )
+            process = ProcessExecutionTerminalRecord.model_validate(
+                self._artifact_payload(
+                    checkpoint.process_reference,
+                    artifact_type="process_execution_terminal_record",
+                ),
+                strict=True,
+            )
+            if process != checkpoint.process or (
+                attestation.experiment_id,
+                attestation.run_id,
+                attestation.job_id,
+                attestation.process_execution_id,
+                attestation.profile_id,
+                attestation.principal_id,
+                attestation.job_manifest,
+                attestation.process_terminal_record,
+                attestation.payload_outputs,
+                attestation.output_scan_report,
+                attestation.terminal_result,
+            ) != (
+                process.experiment_id,
+                process.run_id,
+                process.job_id,
+                process.process_execution_id,
+                process.profile_id,
+                process.principal_id,
+                process.job_manifest,
+                checkpoint.process_reference,
+                process.payload_outputs,
+                checkpoint.evidence.output_scan_report,
+                expected_terminal,
+            ):
+                raise ValueError("attestation does not match checkpoint")
+            records = self._load_run_event_records(process.run_id)
+            root_event = records[0].event if records else None
+            if not isinstance(root_event, RunCreated):
+                raise RunnerReplayError("runner execution has no trusted root")
+            run_manifest = RunManifest.model_validate(
+                self._artifact_payload(
+                    ArtifactReference(
+                        artifact_id=root_event.run_manifest_artifact_id,
+                        payload_hash=root_event.run_manifest_payload_hash,
+                    ),
+                    artifact_type="run_manifest",
+                ),
+                strict=True,
+            )
+            authorization_reference = run_manifest.fixed_commit_authorization
+            sealed_matches = tuple(
+                item.fixed_commit_authorization
+                for item in run_manifest.sealed_worker_authorizations
+                if item.job_manifest == process.job_manifest
+            )
+            if len(sealed_matches) > 1:
+                raise ValueError("runner job has multiple sealed authorizations")
+            if sealed_matches:
+                authorization_reference = sealed_matches[0]
+            authorization = FixedCommitRunAuthorization.model_validate(
+                self._artifact_payload(
+                    authorization_reference,
+                    artifact_type="fixed_commit_run_authorization",
+                ),
+                strict=True,
+            )
+            grant = authorization.runner_key_grant
+            issued_at = datetime.fromisoformat(attestation.issued_at)
+            if (
+                authorization.job_manifest != process.job_manifest
+                or attestation.network_policy_hash
+                != authorization.network_policy.payload_hash
+                or attestation.mount_table_hash != process.mount_attestation_hash
+                or attestation.capability_decision_log_hash
+                != process.capability_decision_hash
+                or attestation.egress_decision_log_hash != process.egress_log_hash
+                or grant
+                != run_manifest.event_security_context.signing_key(grant.signing_key_id)
+                or grant.principal_id != process.principal_id
+                or grant.signing_key_id != attestation.signing_key_id
+                or issued_at < datetime.fromisoformat(grant.not_before)
+                or issued_at >= datetime.fromisoformat(grant.not_after)
+                or grant.revoked_at is not None
+                and issued_at >= datetime.fromisoformat(grant.revoked_at)
+            ):
+                raise ValueError("attestation is not authorized by runner key grant")
+            Ed25519PublicKey.from_public_bytes(grant.public_key_bytes()).verify(
+                execution_attestation_signature_bytes(attestation),
+                execution_attestation_signing_bytes(attestation),
+            )
+            if expected_terminal is not None:
+                terminal = TerminalResult.model_validate(
+                    self._artifact_payload(
+                        expected_terminal,
+                        artifact_type="terminal_result",
+                    ),
+                    strict=True,
+                )
+                if (
+                    terminal.run_id,
+                    terminal.experiment_id,
+                    terminal.fixed_commit_job_manifest,
+                    terminal.process_execution_terminal_record,
+                    terminal.process_execution_id,
+                    terminal.payload_outputs,
+                ) != (
+                    process.run_id,
+                    process.experiment_id,
+                    process.job_manifest,
+                    checkpoint.process_reference,
+                    process.process_execution_id,
+                    process.payload_outputs,
+                ):
+                    raise ValueError("terminal result does not match checkpoint")
+            return checkpoint
+        except (
+            InvalidSignature,
+            KeyError,
+            TerminalProvenanceError,
+            UnknownArtifactError,
+            ValueError,
+        ) as error:
+            raise RunnerReplayError("persistent finalize conflicts") from error
+
+    def _terminal_for_runner_checkpoint(
+        self,
+        checkpoint_bytes: bytes,
+        candidate: ArtifactReference | None,
+    ) -> ArtifactReference | None:
+        if candidate is None:
+            return None
+        try:
+            checkpoint = RunnerExecutionCheckpoint.model_validate_json(
+                checkpoint_bytes, strict=True
+            )
+            terminal = TerminalResult.model_validate(
+                self._artifact_payload(candidate, artifact_type="terminal_result"),
+                strict=True,
+            )
+        except (TerminalProvenanceError, UnknownArtifactError, ValueError):
+            return None
+        return (
+            candidate
+            if (
+                terminal.process_execution_terminal_record
+                == checkpoint.process_reference
+                and terminal.process_execution_id
+                == checkpoint.process.process_execution_id
+            )
+            else None
+        )
+
+    def _validate_completed_runner_replay(
+        self,
+        result_bytes: bytes,
+        checkpoint: RunnerExecutionCheckpoint,
+        attestation: ExecutionAttestation,
+    ) -> FixedCommitExecutionResult:
+        try:
+            result = FixedCommitExecutionResult.model_validate_json(
+                result_bytes, strict=True
+            )
+            stored_attestation = ExecutionAttestation.model_validate(
+                self._artifact_payload(
+                    result.execution_attestation,
+                    artifact_type="execution_attestation",
+                ),
+                strict=True,
+            )
+            if stored_attestation != attestation or (
+                result.process_terminal_record,
+                result.terminal_result,
+            ) != (
+                checkpoint.process_reference,
+                attestation.terminal_result,
+            ):
+                raise ValueError("completed result does not match attestation")
+            return result
+        except (TerminalProvenanceError, UnknownArtifactError, ValueError) as error:
+            raise RunnerReplayError("persistent finalize conflicts") from error
+
+    def _validate_completed_runner_reservation(
+        self,
+        checkpoint_bytes: bytes,
+        result_bytes: bytes,
+    ) -> FixedCommitExecutionResult:
+        try:
+            checkpoint = RunnerExecutionCheckpoint.model_validate_json(
+                checkpoint_bytes, strict=True
+            )
+            result = FixedCommitExecutionResult.model_validate_json(
+                result_bytes, strict=True
+            )
+            attestation = ExecutionAttestation.model_validate(
+                self._artifact_payload(
+                    result.execution_attestation,
+                    artifact_type="execution_attestation",
+                ),
+                strict=True,
+            )
+            expected_terminal = self._terminal_for_runner_checkpoint(
+                checkpoint_bytes, result.terminal_result
+            )
+            if expected_terminal != result.terminal_result:
+                raise ValueError("completed result terminal binding is invalid")
+            checkpoint = self._validate_runner_finalize(
+                checkpoint_bytes,
+                attestation,
+                expected_terminal,
+            )
+            return self._validate_completed_runner_replay(
+                result_bytes,
+                checkpoint,
+                attestation,
+            )
+        except (TerminalProvenanceError, UnknownArtifactError, ValueError) as error:
+            raise RunnerReplayError("persistent completed replay is invalid") from error
+
     @staticmethod
     def _canonical_payload_object(payload_bytes: bytes) -> dict[str, object]:
         document = parse_canonical_document(payload_bytes)
@@ -2697,6 +4085,11 @@ class _ArtifactRepositoryCore:
             signature = base64.urlsafe_b64decode(signature_b64url + "==")
             unsigned = dict(payload)
             del unsigned["signature_b64url"]
+            if (
+                unsigned.get("schema_version") == "automarkov.execution-attestation.v1"
+                and unsigned.get("output_scan_report") is None
+            ):
+                unsigned.pop("output_scan_report", None)
             Ed25519PublicKey.from_public_bytes(key.public_key_bytes()).verify(
                 signature,
                 canonical_json_bytes(unsigned),
@@ -3434,7 +4827,8 @@ class _ArtifactRepositoryCore:
                 or terminal_snapshot.event_hash.root != terminal_head.event_hash
                 or audit.run_id != run_id
                 or audit.projector_version != RUN_PROJECTOR_VERSION
-                or audit.projector_hash != RUN_PROJECTOR_HASH
+                or audit.projector_hash not in RUN_PROJECTOR_READ_HASHES
+                or terminal.projector_hash != audit.projector_hash
                 or audit_snapshot.run_id.root != run_id
                 or audit_snapshot.sequence_no != audit_head.sequence_no
                 or audit_snapshot.event_hash.root != audit_head.event_hash
@@ -3734,6 +5128,348 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
         self._audit_projections: dict[str, dict[int, ArtifactReference]] = {}
         self._run_replacements: dict[str, tuple[object, ...]] = {}
         self._clarification_continuations: dict[str, tuple[object, ...]] = {}
+        self._runner_executions: dict[
+            str, tuple[str, str, str, bytes | None, bytes | None]
+        ] = {}
+        self._runner_process_owners: dict[str, str] = {}
+        self._runner_attestation_nonces: dict[tuple[str, str], str] = {}
+        self._e2e_gate_materializations: dict[str, tuple[bytes, bytes]] = {}
+        self._e2e_gate_claims: dict[tuple[str, str], str] = {}
+        self._pending_e2e_gate: E2EGateCommitCommand | None = None
+        self._pending_e2e_receipt: ArtifactLifecycleAtomicReceipt | None = None
+        self._pending_e2e_plan: E2EGateLifecyclePlanProvider | None = None
+
+    def _revalidate_e2e_replay(
+        self,
+        command_bytes: bytes,
+        receipt_bytes: bytes,
+        plan_provider: E2EGateLifecyclePlanProvider,
+    ) -> ArtifactLifecycleAtomicReceipt:
+        from automarkov.sealed_evaluation import E2EGateCommitCommand
+
+        command = E2EGateCommitCommand.model_validate_json(command_bytes, strict=True)
+        request, context = plan_provider.plan(command)
+        lifecycle_command = validate_lifecycle_command(request)
+        self._authenticate_command_context(lifecycle_command, context)
+        lifecycle_result = self._prior_lifecycle_result(
+            lifecycle_command.command_id,
+            lifecycle_command.idempotency_key,
+            _lifecycle_command_fingerprint(lifecycle_command),
+        )
+        if lifecycle_result is None:
+            raise ArtifactIntegrityError("e2e-gate:missing-lifecycle-replay")
+        return self._verify_e2e_replay_receipt(
+            command,
+            receipt_bytes,
+            plan_provider,
+            lifecycle_result,
+        )
+
+    def materialize_e2e_gate_atomically(
+        self,
+        command: E2EGateCommitCommand,
+        plan_provider: E2EGateLifecyclePlanProvider,
+    ) -> ArtifactLifecycleAtomicReceipt:
+        from automarkov.sealed_evaluation import (
+            E2EGateCommitCommand,
+            _command_claims,
+            _command_fingerprint,
+        )
+
+        command = E2EGateCommitCommand.model_validate_json(
+            _e2e_command_bytes(command), strict=True
+        )
+        with self._lock:
+            fingerprint = _command_fingerprint(command)
+            existing = self._e2e_gate_materializations.get(fingerprint)
+            if existing is not None:
+                return self._revalidate_e2e_replay(
+                    existing[0], existing[1], plan_provider
+                )
+            claims = _command_claims(command)
+            conflicts = tuple(
+                owner
+                for owner in (self._e2e_gate_claims.get(claim) for claim in claims)
+                if owner is not None and owner != fingerprint
+            )
+            if conflicts:
+                command = _e2e_failed_command(command)
+                fingerprint = _command_fingerprint(command)
+                prior = self._e2e_gate_materializations.get(fingerprint)
+                if prior is not None:
+                    return self._revalidate_e2e_replay(
+                        prior[0], prior[1], plan_provider
+                    )
+            _require_e2e_command_artifacts(self, command)
+            request, context = plan_provider.plan(command)
+            self._pending_e2e_gate = command
+            self._pending_e2e_receipt = None
+            self._pending_e2e_plan = plan_provider
+            try:
+                self.commit(request, context=context)
+                if self._pending_e2e_receipt is None:
+                    raise ArtifactIntegrityError("e2e-gate:missing-atomic-receipt")
+                return self._pending_e2e_receipt
+            finally:
+                self._pending_e2e_gate = None
+                self._pending_e2e_receipt = None
+                self._pending_e2e_plan = None
+
+    def _materialize_pending_e2e(self, lifecycle_result: LifecycleCommitResult) -> None:
+        from automarkov.sealed_evaluation import _command_claims, _command_fingerprint
+
+        command = self._pending_e2e_gate
+        if command is None or self._pending_e2e_plan is None:
+            return
+        self._verify_e2e_lifecycle_materialization(command, lifecycle_result)
+        if (
+            not isinstance(lifecycle_result, LifecycleCommitReceipt)
+            or lifecycle_result.run_id != command.run_id
+            or lifecycle_result.run_view.state.value != command.decision.next_state
+        ):
+            raise ArtifactIntegrityError("e2e-gate:lifecycle-state-mismatch")
+        fingerprint = _command_fingerprint(command)
+        runner_result = self._pending_e2e_plan.finalize(command, lifecycle_result)
+        receipt = _e2e_atomic_receipt(command, lifecycle_result, runner_result)
+        receipt_bytes = canonical_json_bytes(
+            receipt.model_dump(mode="json", round_trip=True, warnings="error")
+        )
+        self._e2e_gate_materializations[fingerprint] = (
+            _e2e_command_bytes(command),
+            receipt_bytes,
+        )
+        for claim in _command_claims(command):
+            self._e2e_gate_claims.setdefault(claim, fingerprint)
+        self._pending_e2e_receipt = receipt
+
+    def reserve_runner_execution(
+        self, job_id: str, process_execution_id: str, fingerprint: str
+    ) -> FixedCommitExecutionResult | RunnerExecutionCheckpoint | None:
+        with self._lock:
+            owner = self._runner_process_owners.get(process_execution_id)
+            if owner is not None and owner != job_id:
+                raise RunnerReplayError("process execution ID is already persistent")
+            row = self._runner_executions.get(job_id)
+            if row is None:
+                self._runner_process_owners[process_execution_id] = job_id
+                self._runner_executions[job_id] = (
+                    process_execution_id,
+                    fingerprint,
+                    "executing",
+                    None,
+                    None,
+                )
+                return None
+            stored_process, stored_fingerprint, state, checkpoint, result = row
+            if (
+                stored_process != process_execution_id
+                or stored_fingerprint != fingerprint
+            ):
+                raise RunnerReplayError("persistent job reservation conflicts")
+            if state == "completed" and result is not None:
+                if checkpoint is None:
+                    raise RunnerReplayError("persistent completed replay is invalid")
+                return self._validate_completed_runner_reservation(
+                    checkpoint,
+                    result,
+                )
+            if state == "checkpointed" and checkpoint is not None:
+                return RunnerExecutionCheckpoint.model_validate_json(
+                    checkpoint, strict=True
+                )
+            raise RunnerExecutionFailed(
+                "persistent execution has no recovery checkpoint"
+            )
+
+    def checkpoint_runner_execution(
+        self,
+        job_id: str,
+        fingerprint: str,
+        checkpoint: RunnerExecutionCheckpoint,
+    ) -> RunnerExecutionCheckpoint:
+        process = checkpoint.process
+        with self._lock:
+            row = self._runner_executions.get(job_id)
+            if row is None or row[1] != fingerprint:
+                raise RunnerReplayError("persistent checkpoint conflicts")
+            if process.job_id != job_id or process.process_execution_id != row[0]:
+                raise RunnerReplayError("persistent checkpoint conflicts")
+            if row[2] == "checkpointed" and row[3] is not None:
+                persisted = RunnerExecutionCheckpoint.model_validate_json(
+                    row[3], strict=True
+                )
+                if checkpoint != persisted:
+                    raise RunnerReplayError("persistent checkpoint conflicts")
+                return persisted
+            if row[2] != "executing" or row[3] is not None:
+                raise RunnerReplayError("persistent checkpoint state conflicts")
+            process_result = self._put_lifecycle_model(
+                "process_execution_terminal_record",
+                process,
+                parents=_process_execution_parents(process),
+                created_by=process.principal_id,
+                created_at=process.created_at,
+            )
+            persisted = checkpoint.model_copy(
+                update={"process_reference": _artifact_reference(process_result)}
+            )
+            self._runner_executions[job_id] = (
+                row[0],
+                fingerprint,
+                "checkpointed",
+                canonical_json_bytes(persisted.model_dump(mode="json")),
+                None,
+            )
+            return persisted
+
+    def resolve_runner_checkpoint(
+        self,
+        job_id: str,
+        process_execution_id: str,
+        fingerprint: str,
+        process_reference: ArtifactReference,
+    ) -> RunnerExecutionCheckpoint:
+        with self._lock:
+            row = self._runner_executions.get(job_id)
+            if (
+                row is None
+                or row[0] != process_execution_id
+                or row[1] != fingerprint
+                or row[2] not in {"checkpointed", "completed"}
+                or row[3] is None
+            ):
+                raise RunnerReplayError("persistent checkpoint is unavailable")
+            checkpoint = RunnerExecutionCheckpoint.model_validate_json(
+                row[3], strict=True
+            )
+            if checkpoint.process_reference != process_reference:
+                raise RunnerReplayError("persistent checkpoint identity conflicts")
+            stored = self.get(ArtifactId(root=process_reference.artifact_id))
+            expected_parents = {
+                reference.artifact_id
+                for reference in _process_execution_parents(checkpoint.process)
+            }
+            if (
+                stored.envelope.artifact_type != "process_execution_terminal_record"
+                or stored.envelope.payload_hash != process_reference.payload_hash
+                or {parent.root for parent in stored.envelope.parent_artifact_ids}
+                != expected_parents
+                or ProcessExecutionTerminalRecord.model_validate(
+                    stored.payload_document.model_dump(mode="json")["payload"],
+                    strict=True,
+                )
+                != checkpoint.process
+            ):
+                raise RunnerReplayError("persistent checkpoint artifact is invalid")
+            return checkpoint
+
+    def replay_runner_execution(
+        self, fingerprint: str
+    ) -> FixedCommitExecutionResult | None:
+        with self._lock:
+            matches = tuple(
+                row
+                for row in self._runner_executions.values()
+                if row[1] == fingerprint
+                and row[2] == "completed"
+                and row[4] is not None
+            )
+            if len(matches) > 1:
+                raise RunnerReplayError("runner fingerprint has multiple results")
+            return (
+                self._validate_completed_runner_reservation(
+                    cast(bytes, matches[0][3]),
+                    cast(bytes, matches[0][4]),
+                )
+                if matches
+                else None
+            )
+
+    def finalize_runner_execution(
+        self,
+        job_id: str,
+        fingerprint: str,
+        attestation: ExecutionAttestation,
+    ) -> FixedCommitExecutionResult:
+        with self._lock:
+            row = self._runner_executions.get(job_id)
+            if row is None or row[1] != fingerprint or row[3] is None:
+                raise RunnerReplayError("persistent finalize conflicts")
+            expected_terminal_row = self._terminal_results.get(
+                RunnerExecutionCheckpoint.model_validate_json(
+                    row[3], strict=True
+                ).process.run_id
+            )
+            candidate_terminal = (
+                expected_terminal_row[1] if expected_terminal_row is not None else None
+            )
+            expected_terminal = self._terminal_for_runner_checkpoint(
+                row[3], candidate_terminal
+            )
+            checkpoint = self._validate_runner_finalize(
+                row[3], attestation, expected_terminal
+            )
+            if row[2] == "completed" and row[4] is not None:
+                return self._validate_completed_runner_replay(
+                    row[4], checkpoint, attestation
+                )
+            if row[2] != "checkpointed" or row[4] is not None:
+                raise RunnerReplayError("persistent finalize state conflicts")
+            nonce = (attestation.signing_key_id, attestation.nonce_b64url)
+            attestation_bytes = canonical_json_bytes(
+                attestation.model_dump(mode="json")
+            )
+            attestation_fingerprint = sha256(attestation_bytes).hexdigest()
+            existing_nonce = self._runner_attestation_nonces.get(nonce)
+            if existing_nonce not in {None, attestation_fingerprint}:
+                raise RunnerReplayError("persistent attestation nonce was replayed")
+            attestation_result = self._put_lifecycle_model(
+                "execution_attestation",
+                attestation,
+                parents=_execution_attestation_parents(attestation),
+                created_by=attestation.principal_id,
+                created_at=attestation.issued_at,
+            )
+            reference = _artifact_reference(attestation_result)
+            result = FixedCommitExecutionResult(
+                schema_version="automarkov.fixed-commit-execution-result.v1",
+                process_terminal_record=attestation.process_terminal_record,
+                execution_attestation=reference,
+                terminal_result=attestation.terminal_result,
+            )
+            self._runner_attestation_nonces[nonce] = attestation_fingerprint
+            self._runner_executions[job_id] = (
+                row[0],
+                fingerprint,
+                "completed",
+                row[3],
+                canonical_json_bytes(result.model_dump(mode="json")),
+            )
+            return result
+
+    def fail_runner_execution(
+        self, job_id: str, fingerprint: str, failure: str
+    ) -> None:
+        with self._lock:
+            row = self._runner_executions[job_id]
+            if row[1] != fingerprint or row[2] not in {"executing", "checkpointed"}:
+                raise RunnerReplayError("persistent failure conflicts")
+            self._runner_executions[job_id] = (
+                row[0],
+                fingerprint,
+                "failed",
+                row[3],
+                failure.encode(),
+            )
+
+    def release_runner_execution(self, job_id: str, fingerprint: str) -> None:
+        with self._lock:
+            row = self._runner_executions[job_id]
+            if row[1] != fingerprint or row[2] not in {"executing", "checkpointed"}:
+                raise RunnerReplayError("persistent release conflicts")
+            if row[2] == "executing":
+                del self._runner_executions[job_id]
+                del self._runner_process_owners[row[0]]
 
     def _load_run_event_records(self, run_id: str) -> tuple[EventRecord, ...]:
         records = self._parse_verified_event_records(
@@ -3793,6 +5529,11 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
                     run_id: dict(versions)
                     for run_id, versions in self._audit_projections.items()
                 },
+                dict(self._e2e_gate_materializations),
+                dict(self._e2e_gate_claims),
+                dict(self._runner_executions),
+                dict(self._runner_process_owners),
+                dict(self._runner_attestation_nonces),
             )
             prior_result = self._prior_lifecycle_result(
                 command.command_id,
@@ -3877,7 +5618,9 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
                 )
                 if post_terminal:
                     self._post_terminal_commit_failpoint("after_receipt")
-                return _fresh_commit_receipt(result)
+                receipt = _fresh_commit_receipt(result)
+                self._materialize_pending_e2e(receipt)
+                return receipt
             except BaseException:
                 (
                     self._artifacts,
@@ -3889,6 +5632,11 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
                     self._lifecycle_idempotency,
                     self._terminal_results,
                     self._audit_projections,
+                    self._e2e_gate_materializations,
+                    self._e2e_gate_claims,
+                    self._runner_executions,
+                    self._runner_process_owners,
+                    self._runner_attestation_nonces,
                 ) = snapshots
                 raise
 
@@ -3996,21 +5744,11 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
                 parent_view = self._project_run_records(updated_parent_records)
                 child_view = self._project_run_records(updated_child_records)
                 process = command.process_terminal_record
-                self._require_references(
-                    (
-                        process.job_manifest,
-                        *process.payload_outputs,
-                        process.resource_usage,
-                    )
-                )
+                self._require_references(_process_execution_parents(process))
                 process_result = self._put_lifecycle_model(
                     "process_execution_terminal_record",
                     process,
-                    parents=(
-                        process.job_manifest,
-                        *process.payload_outputs,
-                        process.resource_usage,
-                    ),
+                    parents=_process_execution_parents(process),
                     created_by=process.principal_id,
                     created_at=process.created_at,
                 )
@@ -4059,12 +5797,7 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
                 attestation_result = self._put_lifecycle_model(
                     "execution_attestation",
                     attestation,
-                    parents=(
-                        attestation.job_manifest,
-                        attestation.process_terminal_record,
-                        *attestation.payload_outputs,
-                        terminal_reference,
-                    ),
+                    parents=_execution_attestation_parents(attestation),
                     created_by=attestation.principal_id,
                     created_at=attestation.issued_at,
                 )
@@ -4320,6 +6053,11 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
                     run_id: dict(versions)
                     for run_id, versions in self._audit_projections.items()
                 },
+                dict(self._e2e_gate_materializations),
+                dict(self._e2e_gate_claims),
+                dict(self._runner_executions),
+                dict(self._runner_process_owners),
+                dict(self._runner_attestation_nonces),
             )
             try:
                 existing = self._load_run_event_records(command.run_id)
@@ -4365,21 +6103,11 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
                     transition_result is None
                 ):  # pragma: no cover - schema 要求精确事件对。
                     raise AssertionError("terminal command contained no events")
-                self._require_references(
-                    (
-                        process.job_manifest,
-                        *process.payload_outputs,
-                        process.resource_usage,
-                    )
-                )
+                self._require_references(_process_execution_parents(process))
                 process_result = self._put_lifecycle_model(
                     "process_execution_terminal_record",
                     process,
-                    parents=(
-                        process.job_manifest,
-                        *process.payload_outputs,
-                        process.resource_usage,
-                    ),
+                    parents=_process_execution_parents(process),
                     created_by=process.principal_id,
                     created_at=process.created_at,
                 )
@@ -4470,6 +6198,7 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
                     result,
                 )
                 self._terminal_commit_failpoint("after_receipt")
+                self._materialize_pending_e2e(result)
                 return result
             except BaseException:
                 (
@@ -4482,6 +6211,11 @@ class InMemoryArtifactRepository(_ArtifactRepositoryCore):
                     self._lifecycle_idempotency,
                     self._terminal_results,
                     self._audit_projections,
+                    self._e2e_gate_materializations,
+                    self._e2e_gate_claims,
+                    self._runner_executions,
+                    self._runner_process_owners,
+                    self._runner_attestation_nonces,
                 ) = snapshots
                 raise
 
@@ -5060,6 +6794,9 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
         command_authority: CommandAuthority | None = None,
     ) -> None:
         super().__init__(schema_registry, event_authenticator, command_authority)
+        self._pending_e2e_gate: E2EGateCommitCommand | None = None
+        self._pending_e2e_receipt: ArtifactLifecycleAtomicReceipt | None = None
+        self._pending_e2e_plan: E2EGateLifecyclePlanProvider | None = None
         self._database_path = str(database_path)
         self._connection = sqlite3.connect(
             self._database_path,
@@ -5080,6 +6817,142 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
                 raise
             raise ArtifactIntegrityError(f"sqlite:{self._database_path}") from error
 
+    def _revalidate_e2e_replay(
+        self,
+        command_bytes: bytes,
+        receipt_bytes: bytes,
+        plan_provider: E2EGateLifecyclePlanProvider,
+    ) -> ArtifactLifecycleAtomicReceipt:
+        from automarkov.sealed_evaluation import E2EGateCommitCommand
+
+        command = E2EGateCommitCommand.model_validate_json(command_bytes, strict=True)
+        request, context = plan_provider.plan(command)
+        lifecycle_command = validate_lifecycle_command(request)
+        self._authenticate_command_context(lifecycle_command, context)
+        lifecycle_result = self._prior_sql_lifecycle_result(
+            lifecycle_command.command_id,
+            lifecycle_command.idempotency_key,
+            _lifecycle_command_fingerprint(lifecycle_command),
+        )
+        if lifecycle_result is None:
+            raise ArtifactIntegrityError("e2e-gate:missing-lifecycle-replay")
+        return self._verify_e2e_replay_receipt(
+            command,
+            receipt_bytes,
+            plan_provider,
+            lifecycle_result,
+        )
+
+    def materialize_e2e_gate_atomically(
+        self,
+        command: E2EGateCommitCommand,
+        plan_provider: E2EGateLifecyclePlanProvider,
+    ) -> ArtifactLifecycleAtomicReceipt:
+        from automarkov.sealed_evaluation import (
+            E2EGateCommitCommand,
+            _command_claims,
+            _command_fingerprint,
+        )
+
+        command = E2EGateCommitCommand.model_validate_json(
+            _e2e_command_bytes(command), strict=True
+        )
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                self._require_schema_integrity()
+                fingerprint = _command_fingerprint(command)
+                row = self._connection.execute(
+                    "SELECT command_bytes, receipt_bytes "
+                    "FROM e2e_gate_materializations WHERE command_fingerprint = ?",
+                    (fingerprint,),
+                ).fetchone()
+                if row is not None:
+                    receipt = self._revalidate_e2e_replay(
+                        bytes(row[0]), bytes(row[1]), plan_provider
+                    )
+                    self._connection.commit()
+                    return receipt
+                claims = _command_claims(command)
+                owners = tuple(
+                    self._connection.execute(
+                        "SELECT command_fingerprint FROM e2e_gate_claims "
+                        "WHERE claim_kind = ? AND claim_key = ?",
+                        claim,
+                    ).fetchone()
+                    for claim in claims
+                )
+                conflicts = tuple(
+                    cast(str, owner[0])
+                    for owner in owners
+                    if owner is not None and cast(str, owner[0]) != fingerprint
+                )
+                if conflicts:
+                    command = _e2e_failed_command(command)
+                    fingerprint = _command_fingerprint(command)
+                    replay = self._connection.execute(
+                        "SELECT command_bytes, receipt_bytes "
+                        "FROM e2e_gate_materializations "
+                        "WHERE command_fingerprint = ?",
+                        (fingerprint,),
+                    ).fetchone()
+                    if replay is not None:
+                        receipt = self._revalidate_e2e_replay(
+                            bytes(replay[0]), bytes(replay[1]), plan_provider
+                        )
+                        self._connection.commit()
+                        return receipt
+                _require_e2e_command_artifacts(self, command)
+                request, context = plan_provider.plan(command)
+                self._pending_e2e_gate = command
+                self._pending_e2e_receipt = None
+                self._pending_e2e_plan = plan_provider
+                self.commit(request, context=context)
+                if self._pending_e2e_receipt is None:
+                    raise ArtifactIntegrityError("e2e-gate:missing-atomic-receipt")
+                return self._pending_e2e_receipt
+            except BaseException:
+                if self._connection.in_transaction:
+                    self._connection.rollback()
+                raise
+            finally:
+                self._pending_e2e_gate = None
+                self._pending_e2e_receipt = None
+                self._pending_e2e_plan = None
+
+    def _materialize_pending_e2e_in_transaction(
+        self, lifecycle_result: LifecycleCommitResult
+    ) -> None:
+        from automarkov.sealed_evaluation import _command_claims, _command_fingerprint
+
+        command = self._pending_e2e_gate
+        if command is None or self._pending_e2e_plan is None:
+            return
+        self._verify_e2e_lifecycle_materialization(command, lifecycle_result)
+        if (
+            not isinstance(lifecycle_result, LifecycleCommitReceipt)
+            or lifecycle_result.run_id != command.run_id
+            or lifecycle_result.run_view.state.value != command.decision.next_state
+        ):
+            raise ArtifactIntegrityError("e2e-gate:lifecycle-state-mismatch")
+        fingerprint = _command_fingerprint(command)
+        runner_result = self._pending_e2e_plan.finalize(command, lifecycle_result)
+        receipt = _e2e_atomic_receipt(command, lifecycle_result, runner_result)
+        receipt_bytes = canonical_json_bytes(
+            receipt.model_dump(mode="json", round_trip=True, warnings="error")
+        )
+        self._connection.execute(
+            "INSERT INTO e2e_gate_materializations(command_fingerprint, "
+            "command_bytes, receipt_bytes) VALUES (?, ?, ?)",
+            (fingerprint, _e2e_command_bytes(command), receipt_bytes),
+        )
+        self._connection.executemany(
+            "INSERT OR IGNORE INTO e2e_gate_claims(claim_kind, claim_key, "
+            "command_fingerprint) VALUES (?, ?, ?)",
+            [(*claim, fingerprint) for claim in _command_claims(command)],
+        )
+        self._pending_e2e_receipt = receipt
+
     def _initialize_schema(self) -> None:
         self._connection.execute("BEGIN EXCLUSIVE")
         try:
@@ -5087,6 +6960,24 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
             if not actual_rows:
                 for statement in _SQLITE_SCHEMA_STATEMENTS:
                     self._connection.execute(statement)
+                self._connection.execute(
+                    f"PRAGMA user_version = {_SQLITE_SCHEMA_VERSION}"
+                )
+                actual_rows = _sqlite_schema_rows(self._connection)
+            elif (
+                int(self._connection.execute("PRAGMA user_version").fetchone()[0]) == 8
+            ):
+                if actual_rows != _expected_sqlite_v8_schema_rows():
+                    raise ArtifactIntegrityError(f"sqlite:{self._database_path}")
+                for statement in _SQLITE_SCHEMA_STATEMENTS:
+                    if (
+                        _schema_statement_table_name(statement)
+                        in _SQLITE_V8_TO_V10_TABLES
+                    ):
+                        self._connection.execute(statement)
+                self._migrate_sqlite_v8_event_schema_contracts()
+                self._migrate_sqlite_v8_artifact_schema_contracts()
+                self._migrate_sqlite_v8_lifecycle_receipts()
                 self._connection.execute(
                     f"PRAGMA user_version = {_SQLITE_SCHEMA_VERSION}"
                 )
@@ -5101,6 +6992,518 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
         except BaseException:
             self._connection.rollback()
             raise
+
+    def _migrate_sqlite_v8_event_schema_contracts(self) -> None:
+        current_contracts = {
+            (event_type, schema_version): schema_id
+            for event_type, schema_version, schema_id in self._event_schema_contracts
+        }
+        if not _SQLITE_V8_EVENT_SCHEMA_IDS.keys() <= current_contracts.keys():
+            raise ArtifactIntegrityError(f"event-schema:{self._database_path}")
+        expected_v8_contracts = tuple(
+            (
+                event_type,
+                schema_version,
+                _SQLITE_V8_EVENT_SCHEMA_IDS.get(
+                    (event_type, schema_version), schema_id
+                ),
+            )
+            for event_type, schema_version, schema_id in self._event_schema_contracts
+        )
+        rows = self._connection.execute(
+            "SELECT event_type, schema_version, schema_id "
+            "FROM event_schema_contracts ORDER BY event_type, schema_version"
+        ).fetchall()
+        actual_contracts = tuple(tuple(str(value) for value in row) for row in rows)
+        if actual_contracts != expected_v8_contracts:
+            raise ArtifactIntegrityError(f"event-schema:{self._database_path}")
+        for (
+            event_type,
+            schema_version,
+        ), legacy_schema_id in _SQLITE_V8_EVENT_SCHEMA_IDS.items():
+            updated = self._connection.execute(
+                "UPDATE event_schema_contracts SET schema_id = ? "
+                "WHERE event_type = ? AND schema_version = ? AND schema_id = ?",
+                (
+                    current_contracts[(event_type, schema_version)],
+                    event_type,
+                    schema_version,
+                    legacy_schema_id,
+                ),
+            )
+            if updated.rowcount != 1:
+                raise ArtifactIntegrityError(f"event-schema:{self._database_path}")
+
+    def _migrate_sqlite_v8_artifact_schema_contracts(self) -> None:
+        for (
+            artifact_type,
+            schema_version,
+        ), legacy_parent_contract in _SQLITE_V8_ARTIFACT_PARENT_CONTRACTS.items():
+            existing = self._read_schema_contract(
+                artifact_type,
+                schema_version,
+                f"artifact-schema:{self._database_path}",
+            )
+            if existing is None:
+                continue
+            try:
+                registered = self._schemas.resolve(
+                    artifact_type,
+                    {"schema_version": schema_version},
+                )
+            except ArtifactSchemaError as error:
+                raise ArtifactIntegrityError(
+                    f"artifact-schema:{self._database_path}"
+                ) from error
+            current_parent_contract = _parent_contract_bytes(registered.parent_contract)
+            if existing != (registered.codec.schema_id, legacy_parent_contract):
+                raise ArtifactIntegrityError(f"artifact-schema:{self._database_path}")
+            updated = self._connection.execute(
+                "UPDATE artifact_schema_contracts "
+                "SET direct_parent_artifact_types = ? "
+                "WHERE artifact_type = ? AND schema_version = ? "
+                "AND schema_id = ? AND direct_parent_artifact_types = ?",
+                (
+                    current_parent_contract,
+                    artifact_type,
+                    schema_version,
+                    registered.codec.schema_id,
+                    legacy_parent_contract,
+                ),
+            )
+            if updated.rowcount != 1:
+                raise ArtifactIntegrityError(f"artifact-schema:{self._database_path}")
+
+    def _migrate_sqlite_v8_lifecycle_receipts(self) -> None:
+        manifest_references: dict[str, dict[str, str]] = {}
+
+        def run_manifest_reference(run_id: str) -> dict[str, str]:
+            cached = manifest_references.get(run_id)
+            if cached is not None:
+                return cached
+            row = self._connection.execute(
+                "SELECT record_bytes FROM run_events "
+                "WHERE run_id = ? AND sequence_no = 0",
+                (run_id,),
+            ).fetchone()
+            if row is None:
+                raise ArtifactIntegrityError(f"sqlite:{self._database_path}")
+            raw_record = bytes(row[0])
+            if len(raw_record) > MAX_JSON_PAYLOAD_BYTES:
+                raise ArtifactIntegrityError(f"sqlite:{self._database_path}")
+            event = parse_event_record(raw_record).event
+            artifact_id = getattr(event, "run_manifest_artifact_id", None)
+            payload_hash = getattr(event, "run_manifest_payload_hash", None)
+            if type(artifact_id) is not str or type(payload_hash) is not str:
+                raise ArtifactIntegrityError(f"sqlite:{self._database_path}")
+            reference = {"artifact_id": artifact_id, "payload_hash": payload_hash}
+            manifest_references[run_id] = reference
+            return reference
+
+        def migrate_view(view: object, run_id: object) -> bool:
+            if type(view) is not dict or type(run_id) is not str:
+                raise ArtifactIntegrityError(f"sqlite:{self._database_path}")
+            migrated_view = cast(dict[str, object], view)
+            changed = False
+            if "run_manifest" not in migrated_view:
+                migrated_view["run_manifest"] = run_manifest_reference(run_id)
+                changed = True
+            if (
+                migrated_view.get("projector_version") != RUN_PROJECTOR_VERSION
+                or migrated_view.get("projector_hash") != _SQLITE_V8_RUN_PROJECTOR_HASH
+            ):
+                raise ArtifactIntegrityError(f"lifecycle-receipt:{self._database_path}")
+            migrated_view["projector_hash"] = RUN_PROJECTOR_HASH
+            changed = True
+            return changed
+
+        rows = self._connection.execute(
+            "SELECT rowid, result_bytes FROM lifecycle_commands ORDER BY rowid"
+        ).fetchall()
+        for rowid, raw_result in rows:
+            result_bytes = bytes(raw_result)
+            if len(result_bytes) > MAX_JSON_PAYLOAD_BYTES:
+                raise ArtifactIntegrityError(f"sqlite:{self._database_path}")
+            result = parse_json_payload(result_bytes)
+            if type(result) is not dict:
+                raise ArtifactIntegrityError(f"sqlite:{self._database_path}")
+            payload = cast(dict[str, object], result)
+            changed = False
+            if (
+                payload.get("schema_version")
+                == "automarkov.lifecycle-commit-receipt.v1"
+            ):
+                view = payload.get("run_view")
+                run_id = payload.get("run_id")
+                changed = migrate_view(view, run_id)
+            elif payload.get("schema_version") == (
+                "automarkov.cross-run-lifecycle-commit-receipt.v1"
+            ):
+                for view_field, run_field in (
+                    ("parent_run_view", "parent_run_id"),
+                    ("child_run_view", "child_run_id"),
+                ):
+                    view = payload.get(view_field)
+                    run_id = payload.get(run_field)
+                    changed = migrate_view(view, run_id) or changed
+            if changed:
+                migrated = canonical_json_bytes(payload)
+                TypeAdapter(LifecycleCommitResult).validate_json(migrated, strict=True)
+                self._connection.execute(
+                    "UPDATE lifecycle_commands SET result_bytes = ? WHERE rowid = ?",
+                    (migrated, int(rowid)),
+                )
+        projection_hashes = {
+            str(row[0])
+            for row in self._connection.execute(
+                "SELECT DISTINCT projector_hash FROM run_audit_projections"
+            ).fetchall()
+        }
+        if projection_hashes - {_SQLITE_V8_RUN_PROJECTOR_HASH}:
+            raise ArtifactIntegrityError(f"run-audit:{self._database_path}")
+        self._connection.execute(
+            "UPDATE run_audit_projections SET projector_hash = ? "
+            "WHERE projector_hash = ?",
+            (RUN_PROJECTOR_HASH, _SQLITE_V8_RUN_PROJECTOR_HASH),
+        )
+        self._migrate_execution_attestation_schema_contract()
+
+    def _migrate_execution_attestation_schema_contract(self) -> None:
+        schema_id = _default_schema_registry.resolve(
+            "execution_attestation",
+            {"schema_version": "automarkov.execution-attestation.v1"},
+        ).codec.schema_id
+        new_contract = _parent_contract_bytes(
+            _default_schema_registry.resolve(
+                "execution_attestation",
+                {"schema_version": "automarkov.execution-attestation.v1"},
+            ).parent_contract,
+        )
+        current = self._read_schema_contract(
+            "execution_attestation",
+            "automarkov.execution-attestation.v1",
+            "migrate-attestation-contract",
+        )
+        if current is None:
+            return
+        current_schema_id, stored_contract = current
+        if current_schema_id != schema_id or stored_contract != new_contract:
+            self._connection.execute(
+                "UPDATE artifact_schema_contracts "
+                "SET schema_id = ?, direct_parent_artifact_types = ? "
+                "WHERE artifact_type = 'execution_attestation' "
+                "AND schema_version = 'automarkov.execution-attestation.v1'",
+                (schema_id, new_contract),
+            )
+
+    def reserve_runner_execution(
+        self, job_id: str, process_execution_id: str, fingerprint: str
+    ) -> FixedCommitExecutionResult | RunnerExecutionCheckpoint | None:
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                row = self._connection.execute(
+                    "SELECT process_execution_id, fingerprint, state, "
+                    "checkpoint_bytes, result_bytes, failure FROM runner_executions "
+                    "WHERE job_id = ?",
+                    (job_id,),
+                ).fetchone()
+                if row is None:
+                    try:
+                        self._connection.execute(
+                            "INSERT INTO runner_executions(job_id, process_execution_id, "
+                            "fingerprint, state) VALUES (?, ?, ?, 'executing')",
+                            (job_id, process_execution_id, fingerprint),
+                        )
+                    except sqlite3.IntegrityError as error:
+                        raise RunnerReplayError(
+                            "process execution ID is already persistent"
+                        ) from error
+                    self._connection.commit()
+                    return None
+                if row[0] != process_execution_id or row[1] != fingerprint:
+                    raise RunnerReplayError("persistent job reservation conflicts")
+                self._connection.commit()
+                if row[2] == "completed" and row[4] is not None:
+                    if row[3] is None:
+                        raise RunnerReplayError(
+                            "persistent completed replay is invalid"
+                        )
+                    return self._validate_completed_runner_reservation(
+                        bytes(row[3]),
+                        bytes(row[4]),
+                    )
+                if row[2] == "checkpointed" and row[3] is not None:
+                    return RunnerExecutionCheckpoint.model_validate_json(
+                        bytes(row[3]), strict=True
+                    )
+                if row[2] == "executing" and row[3] is None:
+                    # 崩溃后的 abandoned reservation——无 lease、无 container
+                    # identity。不得重新执行同一 process_execution_id（违反
+                    # exact-once 合同），必须 fail closed。
+                    raise RunnerExecutionFailed(
+                        "abandoned execution reservation — cannot retry "
+                        "without a persisted owner/lease/container identity"
+                    )
+                raise RunnerExecutionFailed(
+                    str(row[5] or "missing recovery checkpoint")
+                )
+            except BaseException:
+                if self._connection.in_transaction:
+                    self._connection.rollback()
+                raise
+
+    def checkpoint_runner_execution(
+        self,
+        job_id: str,
+        fingerprint: str,
+        checkpoint: RunnerExecutionCheckpoint,
+    ) -> RunnerExecutionCheckpoint:
+        process = checkpoint.process
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                row = self._connection.execute(
+                    "SELECT fingerprint, state, checkpoint_bytes, "
+                    "process_execution_id FROM "
+                    "runner_executions WHERE job_id = ?",
+                    (job_id,),
+                ).fetchone()
+                if row is None or row[0] != fingerprint:
+                    raise RunnerReplayError("persistent checkpoint conflicts")
+                if process.job_id != job_id or process.process_execution_id != row[3]:
+                    raise RunnerReplayError("persistent checkpoint conflicts")
+                if row[1] == "checkpointed" and row[2] is not None:
+                    persisted = RunnerExecutionCheckpoint.model_validate_json(
+                        bytes(row[2]), strict=True
+                    )
+                    if checkpoint != persisted:
+                        raise RunnerReplayError("persistent checkpoint conflicts")
+                    self._connection.commit()
+                    return persisted
+                if row[1] != "executing" or row[2] is not None:
+                    raise RunnerReplayError("persistent checkpoint state conflicts")
+                process_result = self._put_lifecycle_model_in_transaction(
+                    "process_execution_terminal_record",
+                    process,
+                    parents=_process_execution_parents(process),
+                    created_by=process.principal_id,
+                    created_at=process.created_at,
+                )
+                persisted = checkpoint.model_copy(
+                    update={"process_reference": _artifact_reference(process_result)}
+                )
+                self._connection.execute(
+                    "UPDATE runner_executions SET state = 'checkpointed', "
+                    "checkpoint_bytes = ? WHERE job_id = ? AND fingerprint = ?",
+                    (
+                        canonical_json_bytes(persisted.model_dump(mode="json")),
+                        job_id,
+                        fingerprint,
+                    ),
+                )
+                self._connection.commit()
+                return persisted
+            except BaseException:
+                self._connection.rollback()
+                raise
+
+    def resolve_runner_checkpoint(
+        self,
+        job_id: str,
+        process_execution_id: str,
+        fingerprint: str,
+        process_reference: ArtifactReference,
+    ) -> RunnerExecutionCheckpoint:
+        with self._lock:
+            row = self._connection.execute(
+                "SELECT process_execution_id, fingerprint, state, checkpoint_bytes "
+                "FROM runner_executions WHERE job_id = ?",
+                (job_id,),
+            ).fetchone()
+            if (
+                row is None
+                or row[0] != process_execution_id
+                or row[1] != fingerprint
+                or row[2] not in {"checkpointed", "completed"}
+                or row[3] is None
+            ):
+                raise RunnerReplayError("persistent checkpoint is unavailable")
+            checkpoint = RunnerExecutionCheckpoint.model_validate_json(
+                bytes(row[3]), strict=True
+            )
+            if checkpoint.process_reference != process_reference:
+                raise RunnerReplayError("persistent checkpoint identity conflicts")
+            stored = self.get(ArtifactId(root=process_reference.artifact_id))
+            expected_parents = {
+                reference.artifact_id
+                for reference in _process_execution_parents(checkpoint.process)
+            }
+            if (
+                stored.envelope.artifact_type != "process_execution_terminal_record"
+                or stored.envelope.payload_hash != process_reference.payload_hash
+                or {parent.root for parent in stored.envelope.parent_artifact_ids}
+                != expected_parents
+                or ProcessExecutionTerminalRecord.model_validate(
+                    stored.payload_document.model_dump(mode="json")["payload"],
+                    strict=True,
+                )
+                != checkpoint.process
+            ):
+                raise RunnerReplayError("persistent checkpoint artifact is invalid")
+            return checkpoint
+
+    def replay_runner_execution(
+        self, fingerprint: str
+    ) -> FixedCommitExecutionResult | None:
+        with self._lock:
+            rows = tuple(
+                self._connection.execute(
+                    "SELECT checkpoint_bytes, result_bytes FROM runner_executions "
+                    "WHERE fingerprint = ? AND state = 'completed' "
+                    "AND checkpoint_bytes IS NOT NULL AND result_bytes IS NOT NULL",
+                    (fingerprint,),
+                ).fetchall()
+            )
+            if len(rows) > 1:
+                raise RunnerReplayError("runner fingerprint has multiple results")
+            return (
+                self._validate_completed_runner_reservation(
+                    bytes(rows[0][0]),
+                    bytes(rows[0][1]),
+                )
+                if rows
+                else None
+            )
+
+    def finalize_runner_execution(
+        self,
+        job_id: str,
+        fingerprint: str,
+        attestation: ExecutionAttestation,
+    ) -> FixedCommitExecutionResult:
+        with self._lock:
+            owns_transaction = not self._connection.in_transaction
+            if owns_transaction:
+                self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                row = self._connection.execute(
+                    "SELECT checkpoint_bytes, state, result_bytes FROM "
+                    "runner_executions WHERE job_id = ? AND fingerprint = ?",
+                    (job_id, fingerprint),
+                ).fetchone()
+                if row is None or row[0] is None:
+                    raise RunnerReplayError("persistent finalize conflicts")
+                checkpoint = RunnerExecutionCheckpoint.model_validate_json(
+                    bytes(row[0]), strict=True
+                )
+                terminal_row = self._connection.execute(
+                    "SELECT artifact_id, payload_hash FROM run_terminal_results "
+                    "WHERE run_id = ?",
+                    (checkpoint.process.run_id,),
+                ).fetchone()
+                candidate_terminal = (
+                    ArtifactReference(
+                        artifact_id=str(terminal_row[0]),
+                        payload_hash=str(terminal_row[1]),
+                    )
+                    if terminal_row is not None
+                    else None
+                )
+                expected_terminal = self._terminal_for_runner_checkpoint(
+                    bytes(row[0]), candidate_terminal
+                )
+                checkpoint = self._validate_runner_finalize(
+                    bytes(row[0]), attestation, expected_terminal
+                )
+                if row[1] == "completed" and row[2] is not None:
+                    result = self._validate_completed_runner_replay(
+                        bytes(row[2]), checkpoint, attestation
+                    )
+                    if owns_transaction:
+                        self._connection.commit()
+                    return result
+                if row[1] != "checkpointed" or row[2] is not None:
+                    raise RunnerReplayError("persistent finalize state conflicts")
+                attestation_result = self._put_lifecycle_model_in_transaction(
+                    "execution_attestation",
+                    attestation,
+                    parents=_execution_attestation_parents(attestation),
+                    created_by=attestation.principal_id,
+                    created_at=attestation.issued_at,
+                )
+                reference = _artifact_reference(attestation_result)
+                result = FixedCommitExecutionResult(
+                    schema_version="automarkov.fixed-commit-execution-result.v1",
+                    process_terminal_record=attestation.process_terminal_record,
+                    execution_attestation=reference,
+                    terminal_result=attestation.terminal_result,
+                )
+                try:
+                    self._connection.execute(
+                        "UPDATE runner_executions SET state = 'completed', "
+                        "result_bytes = ?, signing_key_id = ?, nonce_b64url = ? "
+                        "WHERE job_id = ? AND fingerprint = ?",
+                        (
+                            canonical_json_bytes(result.model_dump(mode="json")),
+                            attestation.signing_key_id,
+                            attestation.nonce_b64url,
+                            job_id,
+                            fingerprint,
+                        ),
+                    )
+                except sqlite3.IntegrityError as error:
+                    raise RunnerReplayError(
+                        "persistent attestation nonce was replayed"
+                    ) from error
+                if owns_transaction:
+                    self._connection.commit()
+                return result
+            except BaseException:
+                if self._connection.in_transaction:
+                    self._connection.rollback()
+                raise
+
+    def fail_runner_execution(
+        self, job_id: str, fingerprint: str, failure: str
+    ) -> None:
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                changed = self._connection.execute(
+                    "UPDATE runner_executions SET state = 'failed', failure = ? "
+                    "WHERE job_id = ? AND fingerprint = ? "
+                    "AND state IN ('executing', 'checkpointed')",
+                    (failure, job_id, fingerprint),
+                ).rowcount
+                if changed != 1:
+                    raise RunnerReplayError("persistent failure conflicts")
+                self._connection.commit()
+            except BaseException:
+                self._connection.rollback()
+                raise
+
+    def release_runner_execution(self, job_id: str, fingerprint: str) -> None:
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                row = self._connection.execute(
+                    "SELECT state FROM runner_executions "
+                    "WHERE job_id = ? AND fingerprint = ?",
+                    (job_id, fingerprint),
+                ).fetchone()
+                if row is None or str(row[0]) not in {"executing", "checkpointed"}:
+                    raise RunnerReplayError("persistent release conflicts")
+                if str(row[0]) == "executing":
+                    self._connection.execute(
+                        "DELETE FROM runner_executions "
+                        "WHERE job_id = ? AND fingerprint = ?",
+                        (job_id, fingerprint),
+                    )
+                self._connection.commit()
+            except BaseException:
+                self._connection.rollback()
+                raise
 
     def commit(
         self,
@@ -5117,7 +7520,8 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
             return self._commit_clarification_child(command, context)
         fingerprint = _lifecycle_command_fingerprint(command)
         with self._lock:
-            self._connection.execute("BEGIN IMMEDIATE")
+            if not self._connection.in_transaction:
+                self._connection.execute("BEGIN IMMEDIATE")
             try:
                 self._require_schema_integrity()
                 self._authenticate_command_context(command, context)
@@ -5282,8 +7686,12 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
                 )
                 if audit_reference is not None:
                     self._post_terminal_commit_failpoint("after_receipt")
+                persisted_result = LifecycleCommitReceipt.model_validate_json(
+                    result_bytes
+                )
+                self._materialize_pending_e2e_in_transaction(persisted_result)
                 self._connection.commit()
-                return LifecycleCommitReceipt.model_validate_json(result_bytes)
+                return persisted_result
             except BaseException:
                 self._connection.rollback()
                 raise
@@ -5376,7 +7784,8 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
     ) -> CrossRunLifecycleCommitReceipt:
         fingerprint = _lifecycle_command_fingerprint(command)
         with self._lock:
-            self._connection.execute("BEGIN IMMEDIATE")
+            if not self._connection.in_transaction:
+                self._connection.execute("BEGIN IMMEDIATE")
             try:
                 self._require_schema_integrity()
                 self._authenticate_command_context(command, context)
@@ -5441,11 +7850,7 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
                 process_result = self._put_lifecycle_model_in_transaction(
                     "process_execution_terminal_record",
                     process,
-                    parents=(
-                        process.job_manifest,
-                        *process.payload_outputs,
-                        process.resource_usage,
-                    ),
+                    parents=_process_execution_parents(process),
                     created_by=process.principal_id,
                     created_at=process.created_at,
                 )
@@ -5494,12 +7899,7 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
                 attestation_result = self._put_lifecycle_model_in_transaction(
                     "execution_attestation",
                     attestation,
-                    parents=(
-                        attestation.job_manifest,
-                        attestation.process_terminal_record,
-                        *attestation.payload_outputs,
-                        terminal_reference,
-                    ),
+                    parents=_execution_attestation_parents(attestation),
                     created_by=attestation.principal_id,
                     created_at=attestation.issued_at,
                 )
@@ -5625,7 +8025,8 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
     ) -> CrossRunLifecycleCommitReceipt:
         fingerprint = _lifecycle_command_fingerprint(command)
         with self._lock:
-            self._connection.execute("BEGIN IMMEDIATE")
+            if not self._connection.in_transaction:
+                self._connection.execute("BEGIN IMMEDIATE")
             try:
                 self._require_schema_integrity()
                 self._authenticate_command_context(command, context)
@@ -5735,7 +8136,8 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
             raise TerminalProvenanceError(command.run_id)
         fingerprint = _lifecycle_command_fingerprint(command)
         with self._lock:
-            self._connection.execute("BEGIN IMMEDIATE")
+            if not self._connection.in_transaction:
+                self._connection.execute("BEGIN IMMEDIATE")
             try:
                 self._require_schema_integrity()
                 self._authenticate_command_context(command, context)
@@ -5830,11 +8232,7 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
                 process_result = self._put_lifecycle_model_in_transaction(
                     "process_execution_terminal_record",
                     process,
-                    parents=(
-                        process.job_manifest,
-                        *process.payload_outputs,
-                        process.resource_usage,
-                    ),
+                    parents=_process_execution_parents(process),
                     created_by=process.principal_id,
                     created_at=process.created_at,
                 )
@@ -5973,8 +8371,12 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
                     ),
                 )
                 self._terminal_commit_failpoint("after_receipt")
+                persisted_result = LifecycleCommitReceipt.model_validate_json(
+                    result_bytes
+                )
+                self._materialize_pending_e2e_in_transaction(persisted_result)
                 self._connection.commit()
-                return LifecycleCommitReceipt.model_validate_json(result_bytes)
+                return persisted_result
             except BaseException:
                 self._connection.rollback()
                 raise

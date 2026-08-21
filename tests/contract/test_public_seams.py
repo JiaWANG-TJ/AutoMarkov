@@ -22,7 +22,7 @@ from automarkov.adapters import (
 from automarkov.canonical import MAX_CANONICAL_DOCUMENT_BYTES
 from automarkov.domain import ArtifactId, RunId, Sha256Digest, VerifiedEventHead
 from automarkov.errors import ArtifactSchemaError
-from automarkov.lifecycle import LifecycleCommitResult, RunProjection
+from automarkov.lifecycle import ArtifactReference, LifecycleCommitResult, RunProjection
 from automarkov.public import (
     ArtifactBytesResult,
     ArtifactPutRequest,
@@ -33,6 +33,7 @@ from automarkov.public import (
     EnvironmentHandle,
     EvidenceGateway,
     ExecutionSandbox,
+    FixedCommitJobRequest,
     LlmProbeResult,
     LocalLlmRuntime,
     RemoteEnv,
@@ -56,6 +57,7 @@ def _artifact_put_request() -> dict[str, object]:
 def test_adapter_exports_preserve_t01_and_add_the_sqlite_repository() -> None:
     expected = {
         "AttachedLocalLlmRuntime",
+        "FixedCommitExecutionSandbox",
         "InMemoryArtifactRepository",
         "InMemoryCompiler",
         "InMemoryEnvironmentBinding",
@@ -217,6 +219,40 @@ def test_public_contract_models_are_strict_frozen_and_closed(
 
     with pytest.raises(ValidationError):
         setattr(model, mutable_field, replacement)
+
+
+def test_fixed_commit_job_request_binds_verified_head_and_exact_manifest_reference() -> (
+    None
+):
+    request = FixedCommitJobRequest(
+        schema_version="automarkov.fixed-commit-job-request.v2",
+        specified_event_head=VerifiedEventHead(
+            run_id=RunId(root="run_public_fixed_commit"),
+            sequence_no=1,
+            event_hash=Sha256Digest(root="sha256:" + "c" * 64),
+        ),
+        job_manifest=ArtifactReference(
+            artifact_id="artifact_" + "d" * 64,
+            payload_hash="sha256:" + "d" * 64,
+        ),
+    )
+
+    assert request.specified_event_head is not None
+    assert request.job_manifest is not None
+    assert request.specified_event_head.sequence_no == 1
+    assert request.job_manifest.payload_hash == "sha256:" + "d" * 64
+    assert FixedCommitJobRequest(
+        schema_version="automarkov.fixed-commit-job-request.v1",
+        job_manifest_artifact_id=ArtifactId(root="artifact_" + "e" * 64),
+    ).job_manifest_artifact_id == ArtifactId(root="artifact_" + "e" * 64)
+
+    with pytest.raises(ValidationError):
+        FixedCommitJobRequest.model_validate(
+            {
+                "schema_version": "automarkov.fixed-commit-job-request.v2",
+                "job_manifest_artifact_id": "artifact_" + "d" * 64,
+            }
+        )
 
 
 def test_artifact_put_fails_closed_for_an_unregistered_payload_schema() -> None:

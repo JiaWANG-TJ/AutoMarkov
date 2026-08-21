@@ -11,7 +11,14 @@ from typing import (
     runtime_checkable,
 )
 
-from pydantic import AfterValidator, Field, TypeAdapter, ValidationInfo, field_validator
+from pydantic import (
+    AfterValidator,
+    Field,
+    TypeAdapter,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from automarkov.canonical import (
     MAX_CANONICAL_DOCUMENT_BYTES,
@@ -37,7 +44,7 @@ from automarkov.evidence_contracts import (
     ExtractEvidenceRequest,
     SearchEvidenceRequest,
 )
-from automarkov.lifecycle import LifecycleCommitResult, RunProjection
+from automarkov.lifecycle import ArtifactReference, LifecycleCommitResult, RunProjection
 from automarkov.llm_contracts import (
     LlmCompletionRequest,
     LlmCompletionResult,
@@ -387,13 +394,64 @@ class SandboxTestRequest(StrictFrozenModel):
 
 
 class FixedCommitJobRequest(StrictFrozenModel):
-    schema_version: Literal["automarkov.fixed-commit-job-request.v1"]
-    job_manifest_artifact_id: ArtifactId
+    schema_version: Literal[
+        "automarkov.fixed-commit-job-request.v1",
+        "automarkov.fixed-commit-job-request.v2",
+    ]
+    job_manifest_artifact_id: ArtifactId | None = None
+    specified_event_head: VerifiedEventHead | None = None
+    job_manifest: ArtifactReference | None = None
+
+    @model_validator(mode="after")
+    def validate_versioned_reference_binding(self) -> FixedCommitJobRequest:
+        legacy_version = self.schema_version.endswith(".v1")
+        if legacy_version:
+            if self.job_manifest_artifact_id is None:
+                raise ValueError("v1 requires job_manifest_artifact_id")
+            if self.specified_event_head is not None or self.job_manifest is not None:
+                raise ValueError("v1 forbids v2 reference-binding fields")
+            return self
+        if self.job_manifest_artifact_id is not None:
+            raise ValueError("v2 forbids job_manifest_artifact_id")
+        if self.specified_event_head is None or self.job_manifest is None:
+            raise ValueError("v2 requires specified_event_head and job_manifest")
+        return self
 
 
 class ExecutionResult(StrictFrozenModel):
-    schema_version: Literal["automarkov.execution-result.v1"]
+    schema_version: Literal[
+        "automarkov.execution-result.v1",
+        "automarkov.execution-result.v2",
+    ]
     terminal_record_artifact_id: ArtifactId
+    process_terminal_record: ArtifactReference | None = None
+    execution_attestation: ArtifactReference | None = None
+    terminal_result: ArtifactReference | None = None
+
+    @model_validator(mode="after")
+    def validate_versioned_fixed_commit_references(self) -> ExecutionResult:
+        exact_references = (
+            self.process_terminal_record,
+            self.execution_attestation,
+            self.terminal_result,
+        )
+        legacy_version = self.schema_version.endswith(".v1")
+        if legacy_version:
+            if any(reference is not None for reference in exact_references):
+                raise ValueError("v1 forbids v2 fixed-commit references")
+            return self
+        if self.process_terminal_record is None or self.execution_attestation is None:
+            raise ValueError(
+                "v2 requires process_terminal_record and execution_attestation"
+            )
+        if (
+            self.process_terminal_record.artifact_id
+            != self.terminal_record_artifact_id.root
+        ):
+            raise ValueError(
+                "terminal_record_artifact_id must match process_terminal_record"
+            )
+        return self
 
 
 class RuntimeProfileRef(StrictFrozenModel):

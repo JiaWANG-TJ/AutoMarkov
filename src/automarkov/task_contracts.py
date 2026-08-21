@@ -17,6 +17,7 @@ from automarkov.domain import StrictFrozenModel, validate_strict_frozen_payload
 from automarkov.lifecycle import (
     ArtifactReference,
     CanonicalTimestamp,
+    ManifestEventSigningKey,
     NonEmptyId,
     PrincipalIdValue,
     RunEventSecurityContext,
@@ -890,4 +891,152 @@ class RunManifestBootstrap(StrictFrozenModel):
     def require_bootstrap_root(self) -> Self:
         if self.root_ordinal != 0:
             raise ValueError("bootstrap manifest root ordinal must be zero")
+        return self
+
+
+class FixedCommitRunAuthorization(StrictFrozenModel):
+    """由 root RunManifest 冻结的 fixed-commit launch 授权。"""
+
+    schema_version: Literal["automarkov.fixed-commit-run-authorization.v1"]
+    job_manifest: ArtifactReference
+    repository_url: str
+    source_commit: str
+    profile_manifest: ArtifactReference
+    profile_id: str
+    image_digest: Sha256Value
+    input_artifacts: FrozenSequence[ArtifactReference]
+    resource_limits: ArtifactReference
+    network_policy: ArtifactReference
+    mount_policy: ArtifactReference
+    capability_policy: ArtifactReference
+    output_contract: ArtifactReference
+    scanner_policy: ArtifactReference
+    suite_id: NonEmptyId
+    variant_id: NonEmptyId
+    track_id: NonEmptyId
+    method_id: NonEmptyId
+    pair_id: NonEmptyId
+    generation_seed: SafeCanonicalInt
+    rl_seed: SafeCanonicalInt
+    phase: NonEmptyId
+    argv: FrozenSequence[str]
+    working_directory: str
+    from_phase: NonEmptyId
+    to_phase: NonEmptyId
+    launch_deadline: CanonicalTimestamp
+    runner_key_grant: ManifestEventSigningKey
+
+
+class SealedWorkerRunAuthorization(StrictFrozenModel):
+    worker_kind: Literal["candidate", "gold", "comparator"]
+    principal_id: PrincipalIdValue
+    job_manifest: ArtifactReference
+    fixed_commit_authorization: ArtifactReference
+
+
+class SealedE2ESigningAuthority(StrictFrozenModel):
+    """由 root manifest 冻结的 sealed E2E 签名角色。"""
+
+    principal_kind: Literal[
+        "candidate_worker",
+        "comparator",
+        "coordinator",
+        "evaluator",
+        "gold_worker",
+    ]
+    principal_id: PrincipalIdValue
+    signing_key_id: NonEmptyId
+
+
+class RunManifest(StrictFrozenModel):
+    """完整运行图 manifest；bootstrap v1 保持兼容。"""
+
+    schema_version: Literal["automarkov.run-manifest.v2"]
+    manifest_kind: Literal["frozen_run"]
+    run_id: RunIdValue
+    experiment_id: NonEmptyId
+    root_ordinal: SafeCanonicalInt
+    task_request: ArtifactReference
+    event_security_context: RunEventSecurityContext
+    fixed_commit_authorization: ArtifactReference
+    sealed_e2e_signing_authorities: FrozenSequence[SealedE2ESigningAuthority]
+    sealed_worker_authorizations: FrozenSequence[SealedWorkerRunAuthorization]
+    created_at: CanonicalTimestamp
+
+    @model_validator(mode="after")
+    def require_root_identity(self) -> Self:
+        worker_kinds = tuple(
+            authorization.worker_kind
+            for authorization in self.sealed_worker_authorizations
+        )
+        principals = tuple(
+            authorization.principal_id
+            for authorization in self.sealed_worker_authorizations
+        )
+        jobs = tuple(
+            (
+                authorization.job_manifest.artifact_id,
+                authorization.job_manifest.payload_hash,
+            )
+            for authorization in self.sealed_worker_authorizations
+        )
+        authorizations = tuple(
+            (
+                authorization.fixed_commit_authorization.artifact_id,
+                authorization.fixed_commit_authorization.payload_hash,
+            )
+            for authorization in self.sealed_worker_authorizations
+        )
+        authority_kinds = tuple(
+            authority.principal_kind
+            for authority in self.sealed_e2e_signing_authorities
+        )
+        authority_principals = tuple(
+            authority.principal_id for authority in self.sealed_e2e_signing_authorities
+        )
+        authority_keys = tuple(
+            authority.signing_key_id
+            for authority in self.sealed_e2e_signing_authorities
+        )
+        manifest_signing_keys = {
+            key.signing_key_id: key for key in self.event_security_context.signing_keys
+        }
+        worker_principals = {
+            authorization.worker_kind: authorization.principal_id
+            for authorization in self.sealed_worker_authorizations
+        }
+        authority_principal_by_kind = {
+            authority.principal_kind: authority.principal_id
+            for authority in self.sealed_e2e_signing_authorities
+        }
+        if (
+            self.root_ordinal != 0
+            or authority_kinds
+            != (
+                "candidate_worker",
+                "comparator",
+                "coordinator",
+                "evaluator",
+                "gold_worker",
+            )
+            or len(authority_principals) != len(set(authority_principals))
+            or len(authority_keys) != len(set(authority_keys))
+            or any(
+                manifest_signing_keys.get(authority.signing_key_id) is None
+                or manifest_signing_keys[authority.signing_key_id].principal_id
+                != authority.principal_id
+                for authority in self.sealed_e2e_signing_authorities
+            )
+            or worker_kinds != ("candidate", "comparator", "gold")
+            or worker_principals.get("candidate")
+            != authority_principal_by_kind.get("candidate_worker")
+            or worker_principals.get("comparator")
+            != authority_principal_by_kind.get("comparator")
+            or worker_principals.get("gold")
+            != authority_principal_by_kind.get("gold_worker")
+            or len(principals) != len(set(principals))
+            or len(jobs) != len(set(jobs))
+            or len(authorizations) != len(set(authorizations))
+        ):
+            raise ValueError("frozen root manifest ordinal must be zero")
         return self
