@@ -7169,12 +7169,12 @@ class SqliteArtifactRepository(_ArtifactRepositoryCore):
         self._migrate_execution_attestation_schema_contract()
 
     def _migrate_execution_attestation_schema_contract(self) -> None:
-        schema_id = _default_schema_registry.resolve(
+        schema_id = self._schemas.resolve(
             "execution_attestation",
             {"schema_version": "automarkov.execution-attestation.v1"},
         ).codec.schema_id
         new_contract = _parent_contract_bytes(
-            _default_schema_registry.resolve(
+            self._schemas.resolve(
                 "execution_attestation",
                 {"schema_version": "automarkov.execution-attestation.v1"},
             ).parent_contract,
