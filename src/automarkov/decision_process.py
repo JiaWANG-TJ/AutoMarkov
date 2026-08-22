@@ -709,27 +709,32 @@ def decision_process_json_schema() -> dict[str, object]:
 
 def _cartpole_raw_fixture() -> dict[str, Any]:
     evidence = ["gymnasium-v1.2.2-cartpole"]
-    float_domain = lambda minimum, maximum: {
-        "kind": "scalar",
-        "element_dtype": "float",
-        "bounds": {
-            "binding_kind": "explicit",
-            "minimum": minimum,
-            "maximum": maximum,
-            "minimum_inclusive": True,
-            "maximum_inclusive": True,
-        },
-    }
-    symbolic_float_domain = lambda symbol_id, expression: {
-        "kind": "scalar",
-        "element_dtype": "float",
-        "bounds": {
-            "binding_kind": "symbolic",
-            "symbol_id": symbol_id,
-            "binding_expression": expression,
-            "evidence_ids": evidence,
-        },
-    }
+
+    def float_domain(minimum: float, maximum: float) -> dict[str, Any]:
+        return {
+            "kind": "scalar",
+            "element_dtype": "float",
+            "bounds": {
+                "binding_kind": "explicit",
+                "minimum": minimum,
+                "maximum": maximum,
+                "minimum_inclusive": True,
+                "maximum_inclusive": True,
+            },
+        }
+
+    def symbolic_float_domain(symbol_id: str, expression: str) -> dict[str, Any]:
+        return {
+            "kind": "scalar",
+            "element_dtype": "float",
+            "bounds": {
+                "binding_kind": "symbolic",
+                "symbol_id": symbol_id,
+                "binding_expression": expression,
+                "evidence_ids": evidence,
+            },
+        }
+
     return {
         "schema_version": DECISION_PROCESS_SCHEMA_VERSION,
         "kind": "MDP",

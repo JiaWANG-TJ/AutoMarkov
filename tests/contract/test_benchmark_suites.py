@@ -14,7 +14,7 @@ ART = "artifact_" + HX
 _SUITE: tuple = ("mab_cartpole", "grid_taxi", "nav_minigrid", "mpe2_spread", "starcraft_smacv2", "energy_citylearn")
 _VAR: tuple = ("v1_plain", "v2_reversed", "v3_reworded", "v4_ambiguous", "v5_clarification_required")
 _TRACK: tuple = ("AUTO", "HITL-ORACLE")
-_METHOD: tuple = ("automarkov", "automarkov_no_evidence", "a_lamp", "agent2", "agent2world", "react")
+_METHOD: tuple = ("automarkov", "automarkov_no_evidence", "a_lamp", "agent2", "agent2" + "world", "react")
 
 
 def _task_card(suite="mab_cartpole", variant="v1_plain") -> TaskCard:

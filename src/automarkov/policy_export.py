@@ -124,14 +124,18 @@ class PolicyEvaluationSeedBinding(StrictFrozenModel):
                 or self.export_manifest is not None
                 or self.tensor_artifact is not None
             ):
-                raise ValueError("training_failure branch must have empty export fields")
+                raise ValueError(
+                    "training_failure branch must have empty export fields"
+                )
         elif self.branch == "export_failure":
             if self.export_manifest is not None or self.tensor_artifact is not None:
                 raise ValueError(
                     "export_failure branch must have empty manifest/tensor fields"
                 )
             if self.export_terminal_record is None:
-                raise ValueError("export_failure branch must bind export terminal record")
+                raise ValueError(
+                    "export_failure branch must bind export terminal record"
+                )
         return self
 
 
@@ -168,9 +172,7 @@ class PolicyEvaluationRequest(StrictFrozenModel):
     def require_exact_ten_seeds(self) -> Self:
         seeds = tuple(b.seed for b in self.seed_bindings)
         if seeds != CANONICAL_TEN_SEEDS:
-            raise ValueError(
-                "seed bindings must be exactly 1001 through 1010 in order"
-            )
+            raise ValueError("seed bindings must be exactly 1001 through 1010 in order")
         return self
 
     @property
@@ -201,7 +203,9 @@ class PolicyEvaluationOutcome(StrictFrozenModel):
                     "non-success branches must have GoldPolicyEvaluationValid=0, Q_gate=0"
                 )
             if self.normalized_return is not None:
-                raise ValueError("non-success branches must not report normalized_return")
+                raise ValueError(
+                    "non-success branches must not report normalized_return"
+                )
         return self
 
 

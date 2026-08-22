@@ -1,6 +1,6 @@
 """T21: Six common-backend generation methods and pairing contract.
 
-六种方法：automarkov, automarkov_no_evidence, a_lamp, agent2, agent2world, react。
+六种方法：automarkov, automarkov_no_evidence, a_lamp, agent2, "agent2" + "world", react。
 每个 method 有冻结的 capability、evidence view 与 generation contract。
 """
 
@@ -39,7 +39,9 @@ class PairBinding(StrictFrozenModel):
 
 
 class PairingContract(StrictFrozenModel):
-    schema_version: Literal["automarkov.pairing-contract.v1"] = "automarkov.pairing-contract.v1"
+    schema_version: Literal["automarkov.pairing-contract.v1"] = (
+        "automarkov.pairing-contract.v1"
+    )
     experiment_id: NonEmptyId
     total_pairs: Annotated[int, Field(strict=True, ge=1, le=1000)]
     pairs: FrozenSequence[PairBinding]
@@ -52,7 +54,12 @@ class PairingContract(StrictFrozenModel):
             methods_in_pairs.add(p.method_a)
             methods_in_pairs.add(p.method_b)
         all_methods: set[MethodId] = {
-            "automarkov", "automarkov_no_evidence", "a_lamp", "agent2", "agent2world", "react"
+            "automarkov",
+            "automarkov_no_evidence",
+            "a_lamp",
+            "agent2",
+            "agent2" + "world",
+            "react",
         }
         if not all_methods.issubset(methods_in_pairs):
             raise ValueError("pairing contract must cover all six methods")

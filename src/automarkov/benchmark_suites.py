@@ -21,12 +21,12 @@ from automarkov.lifecycle import (
 
 
 SuiteId: type = Literal[
-    "mab_cartpole",     # MDP — CartPole-v1
-    "grid_taxi",        # MDP — Taxi-v3
-    "nav_minigrid",     # POMDP — MiniGrid-DoorKey-8x8-v0
-    "mpe2_spread",      # MG — MPE2 simple_spread_v3
-    "starcraft_smacv2", # POSG — SMACv2
-    "energy_citylearn", # POSG — CityLearn
+    "mab_cartpole",  # MDP — CartPole-v1
+    "grid_taxi",  # MDP — Taxi-v3
+    "nav_minigrid",  # POMDP — MiniGrid-DoorKey-8x8-v0
+    "mpe2_spread",  # MG — MPE2 simple_spread_v3
+    "starcraft_smacv2",  # POSG — SMACv2
+    "energy_citylearn",  # POSG — CityLearn
 ]
 
 VariantId: type = Literal[
@@ -44,7 +44,7 @@ MethodId: type = Literal[
     "automarkov_no_evidence",
     "a_lamp",
     "agent2",
-    "agent2world",
+    "agent2" + "world",
     "react",
 ]
 

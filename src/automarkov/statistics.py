@@ -42,6 +42,7 @@ class StrataPartition(StrictFrozenModel):
             raise ValueError("strata partition must contain exactly 24 strata")
         # Each suite contributes exactly 4 variants
         from collections import Counter
+
         suite_counts = Counter(s.suite_id for s in self.strata)
         if any(c != 4 for c in suite_counts.values()) or len(suite_counts) != 6:
             raise ValueError("strata must be exactly six suites × four variants")

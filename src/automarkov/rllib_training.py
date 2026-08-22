@@ -41,7 +41,9 @@ class TrainingPolicyKind(StrictFrozenModel):
 class CtdePolicySpec(StrictFrozenModel):
     """CTDE 策略规格：actor 输入 / critic-only 字段的严格边界。"""
 
-    schema_version: Literal["automarkov.ctde-policy-spec.v1"] = "automarkov.ctde-policy-spec.v1"
+    schema_version: Literal["automarkov.ctde-policy-spec.v1"] = (
+        "automarkov.ctde-policy-spec.v1"
+    )
     agent_ids: FrozenSequence[NonEmptyId]
     parameter_sharing: bool = Field(strict=True)
     actor_observation_fields: FrozenSequence[
@@ -82,13 +84,13 @@ class CtdePolicySpec(StrictFrozenModel):
 class TrainingBudget(StrictFrozenModel):
     """冻结的训练预算上限。"""
 
-    schema_version: Literal["automarkov.training-budget.v1"] = "automarkov.training-budget.v1"
+    schema_version: Literal["automarkov.training-budget.v1"] = (
+        "automarkov.training-budget.v1"
+    )
     max_episodes: Annotated[int, Field(strict=True, gt=0, le=10_000_000)]
     max_env_steps: Annotated[int, Field(strict=True, gt=0, le=10**9)]
     max_wall_time_seconds: Annotated[float, Field(strict=True, gt=0.0, le=86400.0 * 30)]
-    checkpoint_frequency_episodes: Annotated[
-        int, Field(strict=True, gt=0, le=100_000)
-    ]
+    checkpoint_frequency_episodes: Annotated[int, Field(strict=True, gt=0, le=100_000)]
     eval_frequency_episodes: Annotated[int, Field(strict=True, gt=0, le=100_000)]
     eval_episodes: Annotated[int, Field(strict=True, ge=1, le=1000)]
 
@@ -96,15 +98,15 @@ class TrainingBudget(StrictFrozenModel):
 class SeedContract(StrictFrozenModel):
     """冻结的 RL seed 分配与配对合同。"""
 
-    schema_version: Literal["automarkov.seed-contract.v1"] = "automarkov.seed-contract.v1"
+    schema_version: Literal["automarkov.seed-contract.v1"] = (
+        "automarkov.seed-contract.v1"
+    )
     base_seed: Annotated[int, Field(strict=True, ge=0, le=2**31 - 1)]
     seed_count: Annotated[int, Field(strict=True, ge=1, le=100)]
     environment_seeds: FrozenSequence[
         Annotated[int, Field(strict=True, ge=0, le=2**31 - 1)]
     ]
-    policy_seeds: FrozenSequence[
-        Annotated[int, Field(strict=True, ge=0, le=2**31 - 1)]
-    ]
+    policy_seeds: FrozenSequence[Annotated[int, Field(strict=True, ge=0, le=2**31 - 1)]]
     evaluation_seeds: FrozenSequence[
         Annotated[int, Field(strict=True, ge=0, le=2**31 - 1)]
     ]
@@ -157,7 +159,9 @@ class RllibAlgorithmConfig(StrictFrozenModel):
     不包含易变 runtime object 或 mutable Python state。
     """
 
-    schema_version: Literal["automarkov.rllib-algorithm-config.v1"] = "automarkov.rllib-algorithm-config.v1"
+    schema_version: Literal["automarkov.rllib-algorithm-config.v1"] = (
+        "automarkov.rllib-algorithm-config.v1"
+    )
     experiment_id: NonEmptyId
     run_id: NonEmptyId
     job_id: NonEmptyId
@@ -177,9 +181,7 @@ class RllibAlgorithmConfig(StrictFrozenModel):
     @model_validator(mode="after")
     def require_minibatch_divisible(self) -> Self:
         if self.train_batch_size % self.sgd_minibatch_size != 0:
-            raise ValueError(
-                "train_batch_size must be divisible by sgd_minibatch_size"
-            )
+            raise ValueError("train_batch_size must be divisible by sgd_minibatch_size")
         return self
 
 
@@ -191,7 +193,9 @@ class TrainingJobManifest(StrictFrozenModel):
 
     绑定 environment、profile、budget、seeds 与配置。"""
 
-    schema_version: Literal["automarkov.training-job-manifest.v1"] = "automarkov.training-job-manifest.v1"
+    schema_version: Literal["automarkov.training-job-manifest.v1"] = (
+        "automarkov.training-job-manifest.v1"
+    )
     job_id: NonEmptyId
     experiment_id: NonEmptyId
     run_id: NonEmptyId
@@ -211,13 +215,16 @@ class TrainingJobManifest(StrictFrozenModel):
     @model_validator(mode="after")
     def require_ctde_for_multi_agent(self) -> Self:
         if len(self.policy_kind.architecture) > 0:
-            is_multi = len(
-                getattr(
-                    getattr(self, "ctde_spec", None) or {},
-                    "agent_ids",
-                    (),
+            is_multi = (
+                len(
+                    getattr(
+                        getattr(self, "ctde_spec", None) or {},
+                        "agent_ids",
+                        (),
+                    )
                 )
-            ) > 0
+                > 0
+            )
             if is_multi and self.ctde_spec is None:
                 raise ValueError("CTDE spec required for multi-agent training")
             if not is_multi and self.ctde_spec is not None:
@@ -248,7 +255,9 @@ class RllibCpuSmokeContract(StrictFrozenModel):
 
     smoke 通过后才允许进入真实训练。"""
 
-    schema_version: Literal["automarkov.rllib-cpu-smoke-contract.v1"] = "automarkov.rllib-cpu-smoke-contract.v1"
+    schema_version: Literal["automarkov.rllib-cpu-smoke-contract.v1"] = (
+        "automarkov.rllib-cpu-smoke-contract.v1"
+    )
     job_manifest: ArtifactReference
     assertions: FrozenSequence[RllibSmokeAssertion]
     minimum_required_assertions: Annotated[int, Field(strict=True, ge=1, le=256)]
@@ -269,7 +278,9 @@ class RllibCpuSmokeContract(StrictFrozenModel):
 class RllibCpuSmokeAttempt(StrictFrozenModel):
     """单次 CPU smoke 尝试的不可变记录。"""
 
-    schema_version: Literal["automarkov.rllib-cpu-smoke-attempt.v1"] = "automarkov.rllib-cpu-smoke-attempt.v1"
+    schema_version: Literal["automarkov.rllib-cpu-smoke-attempt.v1"] = (
+        "automarkov.rllib-cpu-smoke-attempt.v1"
+    )
     attempt_id: NonEmptyId
     smoke_contract: ArtifactReference
     assertion_results: FrozenSequence[
@@ -281,9 +292,10 @@ class RllibCpuSmokeAttempt(StrictFrozenModel):
 
     @property
     def hash(self) -> str:
-        return "sha256:" + sha256(
-            canonical_json_bytes(self.model_dump(mode="json"))
-        ).hexdigest()
+        return (
+            "sha256:"
+            + sha256(canonical_json_bytes(self.model_dump(mode="json"))).hexdigest()
+        )
 
 
 # ── 信息边界分析合同 ────────────────────────────────────────────
@@ -302,7 +314,9 @@ class InformationLeakReport(StrictFrozenModel):
 class InformationBoundaryAudit(StrictFrozenModel):
     """CTDE 信息边界审计的不可变结论。"""
 
-    schema_version: Literal["automarkov.information-boundary-audit.v1"] = "automarkov.information-boundary-audit.v1"
+    schema_version: Literal["automarkov.information-boundary-audit.v1"] = (
+        "automarkov.information-boundary-audit.v1"
+    )
     training_job: ArtifactReference
     ctde_spec: CtdePolicySpec
     leaks: FrozenSequence[InformationLeakReport]
@@ -314,11 +328,11 @@ class InformationBoundaryAudit(StrictFrozenModel):
 
     @property
     def violation_count(self) -> int:
-        return sum(1 for l in self.leaks if l.severity == "violation")
+        return sum(1 for leak in self.leaks if leak.severity == "violation")
 
     @property
     def warning_count(self) -> int:
-        return sum(1 for l in self.leaks if l.severity == "warning")
+        return sum(1 for leak in self.leaks if leak.severity == "warning")
 
 
 # ── 训练结果合同 ────────────────────────────────────────────────
@@ -343,15 +357,15 @@ class TrainingEpisodeMetric(StrictFrozenModel):
 class TrainingResultSummary(StrictFrozenModel):
     """训练运行的完整不可变结果摘要。"""
 
-    schema_version: Literal["automarkov.training-result-summary.v1"] = "automarkov.training-result-summary.v1"
+    schema_version: Literal["automarkov.training-result-summary.v1"] = (
+        "automarkov.training-result-summary.v1"
+    )
     job_manifest: ArtifactReference
     total_episodes: int = Field(strict=True, ge=0)
     total_env_steps: int = Field(strict=True, ge=0)
     wall_time_seconds: float = Field(strict=True, ge=0.0)
     budget_exhausted: bool = Field(strict=True)
-    budget_kind: Literal[
-        "episodes", "env_steps", "wall_time"
-    ] | None = None
+    budget_kind: Literal["episodes", "env_steps", "wall_time"] | None = None
     metrics: FrozenSequence[TrainingEpisodeMetric]
     final_episode_reward_mean: float = Field(strict=True)
     checkpoint_count: int = Field(strict=True, ge=0)
@@ -374,9 +388,7 @@ class TrainingPlanCoordinator(Protocol):
         self, manifest: TrainingJobManifest
     ) -> InformationBoundaryAudit: ...
 
-    def cpu_smoke(
-        self, manifest: TrainingJobManifest
-    ) -> RllibCpuSmokeAttempt: ...
+    def cpu_smoke(self, manifest: TrainingJobManifest) -> RllibCpuSmokeAttempt: ...
 
 
 # ── 导出 ────────────────────────────────────────────────────────

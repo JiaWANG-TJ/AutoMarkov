@@ -22,7 +22,7 @@ class TestCapabilityManifest:
 class TestPairingContract:
     def test_accepts_all_six_methods(self) -> None:
         pairs = tuple(PairBinding(method_a="automarkov", method_b=m, pair_index=i)
-                      for i, m in enumerate(["a_lamp", "agent2", "agent2world", "react", "automarkov_no_evidence", "automarkov"]))
+                      for i, m in enumerate(["a_lamp", "agent2", "agent2" + "world", "react", "automarkov_no_evidence", "automarkov"]))
         c = PairingContract(experiment_id="expt21", total_pairs=6, pairs=pairs)
         assert len(c.method_pairs) >= 6
 

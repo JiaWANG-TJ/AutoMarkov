@@ -12,7 +12,7 @@ from pydantic import Field, model_validator
 
 from automarkov.canonical import FrozenSequence
 from automarkov.domain import StrictFrozenModel
-from automarkov.lifecycle import ArtifactReference, NonEmptyId, Sha256Value
+from automarkov.lifecycle import NonEmptyId, Sha256Value
 from automarkov.benchmark_suites import SuiteId, VariantId
 
 
@@ -31,7 +31,9 @@ class AblationBinding(StrictFrozenModel):
 
 
 class AblationLedger(StrictFrozenModel):
-    schema_version: Literal["automarkov.ablation-ledger.v1"] = "automarkov.ablation-ledger.v1"
+    schema_version: Literal["automarkov.ablation-ledger.v1"] = (
+        "automarkov.ablation-ledger.v1"
+    )
     experiment_id: NonEmptyId
     bindings: FrozenSequence[AblationBinding]
 
@@ -56,7 +58,6 @@ class Mpe2InfoStructureLedger(StrictFrozenModel):
 
     @model_validator(mode="after")  # type: ignore[misc]
     def require_both_conditions(self) -> "Mpe2InfoStructureLedger":
-        from pydantic import model_validator as _mv
         conditions = {b.condition for b in self.bindings}
         if conditions != {"native_local_posg", "full_state_mg"}:
             raise ValueError("MPE2 ledger must contain both info structure conditions")
@@ -64,7 +65,9 @@ class Mpe2InfoStructureLedger(StrictFrozenModel):
 
 
 class AblationManifest(StrictFrozenModel):
-    schema_version: Literal["automarkov.ablation-manifest.v1"] = "automarkov.ablation-manifest.v1"
+    schema_version: Literal["automarkov.ablation-manifest.v1"] = (
+        "automarkov.ablation-manifest.v1"
+    )
     experiment_id: NonEmptyId
     component_ablations: AblationLedger
     mpe2_info_structure: Mpe2InfoStructureLedger

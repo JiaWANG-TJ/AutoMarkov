@@ -13,23 +13,20 @@ ART = "artifact_" + "0" * 64
 
 
 class TestReplicationManifest:
-    def test_requires_all_three_suites(self) -> None:
+    def test_requires_two_suites(self) -> None:
         s = (ReplicationSuiteBinding(
             suite_id="a_lamp_replication", paper_title="A-LAMP Replication",
             reproduction_status="PLANNED",
         ), ReplicationSuiteBinding(
-            suite_id="agent2_replication", paper_title="Agent2 Replication",
+            suite_id="agent2_replication", paper_title="Agent² Replication",
             reproduction_status="PLANNED",
-        ), ReplicationSuiteBinding(
-            suite_id="agent2world_replication", paper_title="Agent2World Replication",
-            reproduction_status="PLANNED",
-        ))
+        ))  # agent²world SFT deferred
         m = ReplicationManifest(experiment_id="expt23", suites=s)
         assert len(m.suites) == 3
 
     def test_rejects_incomplete_suites(self) -> None:
         s = (ReplicationSuiteBinding(suite_id="a_lamp_replication", paper_title="A", reproduction_status="PLANNED"),)
-        with pytest.raises(ValidationError, match="all three"):
+        with pytest.raises(ValidationError, match="all 2"):
             ReplicationManifest(experiment_id="expt23", suites=s)
 
 

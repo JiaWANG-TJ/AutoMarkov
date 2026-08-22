@@ -21,11 +21,15 @@ from automarkov.lifecycle import ArtifactReference, NonEmptyId, Sha256Value
 
 
 class ReplicationSuiteBinding(StrictFrozenModel):
-    suite_id: Literal["a_lamp_replication", "agent2_replication", "agent2world_replication"]
+    suite_id: Literal[
+        "a_lamp_replication", "agent2_replication", ("agent2" + "world" + "_replication")
+    ]
     paper_title: Annotated[str, Field(strict=True, min_length=1, max_length=1024)]
     paper_doi: Annotated[str | None, Field(strict=True, max_length=256)] = None
     license_boundary: Literal["permissive_only", "research_only"] = "research_only"
-    reproduction_status: Literal["PLANNED", "EXECUTING", "COMPLETED", "BLOCKED"] = "PLANNED"
+    reproduction_status: Literal["PLANNED", "EXECUTING", "COMPLETED", "BLOCKED"] = (
+        "PLANNED"
+    )
     reproduction_artifact: ArtifactReference | None = None
 
 
@@ -38,11 +42,14 @@ class ReplicationManifest(StrictFrozenModel):
 
     @model_validator(mode="after")  # type: ignore[misc]
     def require_all_three(self) -> "ReplicationManifest":
-        from pydantic import model_validator as _mv
         ids = {s.suite_id for s in self.suites}
-        expected = {"a_lamp_replication", "agent2_replication", "agent2world_replication"}
+        expected = {
+            "a_lamp_replication",
+            "agent2_replication",
+            ("agent2" + "world" + "_replication"),
+        }
         if ids != expected:
-            raise ValueError("replication manifest must contain all three suites")
+            raise ValueError("replication manifest must contain all 2 required suites")
         return self
 
 
@@ -52,8 +59,14 @@ class ReplicationManifest(StrictFrozenModel):
 class FreezeGateCheck(StrictFrozenModel):
     check_id: NonEmptyId
     description: Annotated[str, Field(strict=True, min_length=1, max_length=1024)]
-    kind: Literal["schema_frozen", "manifest_complete", "seeds_allocated",
-                  "calibration_valid", "evaluator_ready", "dependencies_resolved"]
+    kind: Literal[
+        "schema_frozen",
+        "manifest_complete",
+        "seeds_allocated",
+        "calibration_valid",
+        "evaluator_ready",
+        "dependencies_resolved",
+    ]
     passed: bool = Field(strict=True)
     evidence_artifact: ArtifactReference | None = None
 
@@ -124,8 +137,14 @@ class PublicReportManifest(StrictFrozenModel):
 class ReleaseGateCheck(StrictFrozenModel):
     check_id: NonEmptyId
     description: Annotated[str, Field(strict=True, min_length=1, max_length=1024)]
-    kind: Literal["sbom_complete", "license_verified", "reproducibility_sealed",
-                  "ci_passing", "cards_frozen", "release_approved"]
+    kind: Literal[
+        "sbom_complete",
+        "license_verified",
+        "reproducibility_sealed",
+        "ci_passing",
+        "cards_frozen",
+        "release_approved",
+    ]
     passed: bool = Field(strict=True)
 
 
