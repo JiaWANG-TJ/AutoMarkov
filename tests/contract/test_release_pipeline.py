@@ -22,7 +22,7 @@ class TestReplicationManifest:
             reproduction_status="PLANNED",
         ))  # agent²world SFT deferred
         m = ReplicationManifest(experiment_id="expt23", suites=s)
-        assert len(m.suites) == 3
+        assert len(m.suites) == 2
 
     def test_rejects_incomplete_suites(self) -> None:
         s = (ReplicationSuiteBinding(suite_id="a_lamp_replication", paper_title="A", reproduction_status="PLANNED"),)

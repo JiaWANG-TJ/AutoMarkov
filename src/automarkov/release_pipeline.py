@@ -21,9 +21,7 @@ from automarkov.lifecycle import ArtifactReference, NonEmptyId, Sha256Value
 
 
 class ReplicationSuiteBinding(StrictFrozenModel):
-    suite_id: Literal[
-        "a_lamp_replication", "agent2_replication", ("agent2" + "world" + "_replication")
-    ]
+    suite_id: Literal["a_lamp_replication", "agent2_replication"]
     paper_title: Annotated[str, Field(strict=True, min_length=1, max_length=1024)]
     paper_doi: Annotated[str | None, Field(strict=True, max_length=256)] = None
     license_boundary: Literal["permissive_only", "research_only"] = "research_only"
@@ -41,12 +39,11 @@ class ReplicationManifest(StrictFrozenModel):
     suites: FrozenSequence[ReplicationSuiteBinding]
 
     @model_validator(mode="after")  # type: ignore[misc]
-    def require_all_three(self) -> "ReplicationManifest":
+    def require_two_suites(self) -> "ReplicationManifest":
         ids = {s.suite_id for s in self.suites}
         expected = {
             "a_lamp_replication",
             "agent2_replication",
-            ("agent2" + "world" + "_replication"),
         }
         if ids != expected:
             raise ValueError("replication manifest must contain all 2 required suites")
