@@ -8,7 +8,6 @@ from typing import Literal
 import pytest
 from pydantic import ValidationError
 
-from automarkov.canonical import canonical_json_bytes
 from automarkov.clarification import (
     ClarificationContinuationPolicy,
     ClarificationGap,
@@ -20,7 +19,8 @@ from automarkov.clarification import (
     recompute_terminal_artifact_dag,
     terminal_artifact_dag_hash,
 )
-from automarkov.domain import RunId, Sha256Digest, StrictFrozenModel, VerifiedEventHead
+from automarkov.domain.canonical import canonical_json_bytes
+from automarkov.domain.models import RunId, Sha256Digest, StrictFrozenModel, VerifiedEventHead
 from automarkov.lifecycle import (
     RUN_PROJECTOR_HASH,
     RUN_PROJECTOR_VERSION,

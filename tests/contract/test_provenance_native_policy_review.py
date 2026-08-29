@@ -9,8 +9,8 @@ from typing import cast
 
 import pytest
 
-from automarkov.canonical import canonical_json_bytes
-from automarkov.provenance import ProvenanceVerificationReport, verify_provenance
+from automarkov.domain.canonical import canonical_json_bytes
+from automarkov.security.provenance import ProvenanceVerificationReport, verify_provenance
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _COPY_IGNORE = shutil.ignore_patterns(

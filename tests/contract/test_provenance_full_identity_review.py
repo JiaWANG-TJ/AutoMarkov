@@ -7,7 +7,7 @@ from typing import cast
 
 import pytest
 
-from automarkov.provenance import (
+from automarkov.security.provenance import (
     ProvenanceVerificationReport,
     load_runtime_profiles,
     load_upstream_manifests,

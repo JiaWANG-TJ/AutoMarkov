@@ -7,13 +7,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 from typing import cast
 
-from automarkov.canonical import (
-    MAX_JSON_PAYLOAD_BYTES,
-    canonical_json_bytes,
-    parse_json_payload,
-)
-from automarkov.domain import Sha256Digest
-from automarkov.remote_env_contracts import (
+from automarkov.contracts.remote_env import (
     BoxSpace,
     DescribeResultPayload,
     DictSpace,
@@ -27,6 +21,12 @@ from automarkov.remote_env_contracts import (
     TensorDtype,
     TupleSpace,
 )
+from automarkov.domain.canonical import (
+    MAX_JSON_PAYLOAD_BYTES,
+    canonical_json_bytes,
+    parse_json_payload,
+)
+from automarkov.domain.models import Sha256Digest
 
 _FRAME_DOMAIN = b"AutoMarkov-RemoteEnv-Frame-v1\n"
 _TRANSITION_DOMAIN = b"AutoMarkov-RemoteEnv-Transition-v1\n"

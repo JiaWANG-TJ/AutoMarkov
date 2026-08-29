@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from automarkov.adapters import InMemoryCompiler
-from automarkov.domain import (
+from automarkov.domain.models import (
     RunId,
     Sha256Digest,
     TaskRequest,

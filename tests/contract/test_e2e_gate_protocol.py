@@ -9,8 +9,8 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from automarkov.canonical import canonical_json_bytes
-from automarkov.domain import StrictFrozenModel, VerifiedEventHead
+from automarkov.domain.canonical import canonical_json_bytes
+from automarkov.domain.models import StrictFrozenModel, VerifiedEventHead
 from automarkov.fixed_commit_runner import (
     CapabilityDecisionLog,
     EgressDecisionLog,

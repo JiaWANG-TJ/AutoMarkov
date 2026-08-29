@@ -7,8 +7,8 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import TypeAdapter
 
-from automarkov.canonical import canonical_json_bytes
-from automarkov.errors import EventSchemaError, InvalidRunTransitionError
+from automarkov.domain.canonical import canonical_json_bytes
+from automarkov.domain.errors import EventSchemaError, InvalidRunTransitionError
 from automarkov.lifecycle import (
     RUN_PROJECTOR_HASH,
     RUN_PROJECTOR_VERSION,

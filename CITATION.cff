@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+title: AutoMarkov
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Jia
+    family-names: Wang
+    affiliation: Tongji University
+    orcid: ""
+version: 0.1.0
+date-released: ""
+repository-code: "https://github.com/<org>/AutoMarkov"
+license: MIT
+keywords:
+  - sequential decision processes
+  - MDP
+  - POMDP
+  - Markov game
+  - POSG
+  - Gymnasium
+  - PettingZoo
+  - reinforcement learning
+  - LLM

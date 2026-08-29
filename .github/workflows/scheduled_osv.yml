@@ -1,0 +1,29 @@
+# AutoMarkov – scheduled dependency / OSV vulnerability scan
+name: scheduled_osv
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # every Monday 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  osv-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral_sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: Install core dependencies
+        run: uv sync --locked
+      - name: Export lockfile to requirements.txt
+        run: uv export --format requirements-txt --locked --no-hashes > /tmp/requirements-lock.txt
+      - name: Run OSV vulnerability scan
+        uses: google/osv-scanner-action@6e4298ebc4db23e847df9b2e2de2939d6f066c67
+        with:
+          lockfile: /tmp/requirements-lock.txt

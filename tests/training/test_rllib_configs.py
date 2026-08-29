@@ -8,6 +8,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
+from automarkov.lifecycle import ArtifactReference
 from automarkov.rllib_training import (
     CtdePolicySpec,
     PpoHyperparameters,
@@ -17,7 +18,6 @@ from automarkov.rllib_training import (
     TrainingJobManifest,
     TrainingPolicyKind,
 )
-
 
 # ── helpers ─────────────────────────────────────────────────────
 
@@ -112,12 +112,9 @@ def _training_manifest(
         experiment_id="expt18",
         run_id="runt18smoke",
         environment_id="taxiv3",
-        environment_artifact={"artifact_id": env_id, "payload_hash": env_hash},
+        environment_artifact=ArtifactReference(artifact_id=env_id, payload_hash=env_hash),
         profile_id="profiletrainer",
-        profile_manifest_artifact={
-            "artifact_id": profile_id,
-            "payload_hash": profile_hash,
-        },
+        profile_manifest_artifact=ArtifactReference(artifact_id=profile_id, payload_hash=profile_hash),
         policy_kind=policy or _feedforward_ppo(),
         ctde_spec=ctde,
         algorithm_config=_config(policy=policy or _feedforward_ppo()),

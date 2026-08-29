@@ -16,10 +16,10 @@ from typing import Annotated, Literal, TypeAlias
 
 from pydantic import Field, model_validator
 
-from automarkov.canonical import SafeCanonicalInt, canonical_json_bytes
-from automarkov.domain import StrictFrozenModel
+from automarkov.domain.canonical import SafeCanonicalInt, canonical_json_bytes
+from automarkov.domain.models import StrictFrozenModel
 from automarkov.lifecycle import ArtifactReference, ProcessExecutionTerminalRecord
-from automarkov.provenance import load_runtime_profiles
+from automarkov.security.provenance import load_runtime_profiles
 
 PROFILE_MANIFEST_HASH = (
     "sha256:d655179755175ee164710a92dbf3b6220b80fff919a6ea67483b59b1de389428"

@@ -9,6 +9,12 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
 
+from automarkov.contracts.remote_env import (
+    RemoteEnvCertificateIdentity,
+    RemoteEnvFrameHeader,
+    RemoteEnvHandshake,
+    RemoteEnvSessionTranscript,
+)
 from automarkov.remote_env import (
     RemoteEnvGrantVerifier,
     parse_remote_env_certificate_identity,
@@ -17,12 +23,6 @@ from automarkov.remote_env import (
     sign_remote_env_grant,
     verify_remote_env_handshake,
     verify_remote_env_leaf_certificate,
-)
-from automarkov.remote_env_contracts import (
-    RemoteEnvCertificateIdentity,
-    RemoteEnvFrameHeader,
-    RemoteEnvHandshake,
-    RemoteEnvSessionTranscript,
 )
 
 _DIGEST = "sha256:" + "1" * 64

@@ -5,10 +5,7 @@ from urllib.parse import urlsplit
 import pytest
 from pydantic import ValidationError
 
-from automarkov.canonical import canonical_json_bytes
-from automarkov.domain import ArtifactId
-from automarkov.errors import ArtifactParentContractError
-from automarkov.evidence_contracts import (
+from automarkov.contracts.evidence import (
     TAVILY_SLOT_IDS,
     AblationExecutionPlanRef,
     CrawlEvidenceRequest,
@@ -20,6 +17,9 @@ from automarkov.evidence_contracts import (
     SearchEvidenceRequest,
     TavilyLeasePoolManifest,
 )
+from automarkov.domain.canonical import canonical_json_bytes
+from automarkov.domain.errors import ArtifactParentContractError
+from automarkov.domain.models import ArtifactId
 from automarkov.lifecycle import ArtifactReference
 from automarkov.public import CommandAuthority, CommandPrincipalBinding
 from automarkov.repository import InMemoryArtifactRepository

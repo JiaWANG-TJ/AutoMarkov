@@ -5,7 +5,7 @@ from inspect import signature
 import pytest
 from pydantic import ValidationError
 
-from automarkov.classification_contracts import (
+from automarkov.contracts.classification import (
     OpenSpielRoute,
     evaluate_ood_runtime_readiness,
     validate_ood_handoff_payload,

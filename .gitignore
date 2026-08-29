@@ -22,6 +22,8 @@ build/
 # 运行时与实验工件
 artifacts/**
 !artifacts/.gitignore
+# 含会话 locator 的本地 vLLM 保活脚本不得进入发布树
+keep_alive_vllm.py
 checkpoints/
 private/
 .cache/

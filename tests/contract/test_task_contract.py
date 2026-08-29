@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from automarkov.task_contracts import (
+from automarkov.contracts.task import (
     TaskContractTraceabilityReport,
     TextCriticReport,
     task_contract_claim_paths,

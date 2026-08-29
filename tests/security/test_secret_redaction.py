@@ -4,7 +4,7 @@ from dataclasses import replace
 
 import pytest
 
-from automarkov.evidence_contracts import EvidenceBudgetManifest, SearchEvidenceRequest
+from automarkov.contracts.evidence import EvidenceBudgetManifest, SearchEvidenceRequest
 from automarkov.public import CommandAuthority, CommandPrincipalBinding
 from automarkov.tavily_gateway import (
     EvidenceGatewayAuthenticationError,

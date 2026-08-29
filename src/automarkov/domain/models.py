@@ -18,7 +18,7 @@ from pydantic import (
     model_validator,
 )
 
-from automarkov.canonical import (
+from automarkov.domain.canonical import (
     FrozenSequence,
     FrozenStringMapping,
     canonical_json_bytes,

@@ -20,28 +20,11 @@ from pydantic import (
     model_validator,
 )
 
-from automarkov.canonical import (
-    FrozenSequence,
-    canonical_json_bytes,
-)
-from automarkov.domain import StrictFrozenModel
-from automarkov.environment_contracts import (
+from automarkov.contracts.environment import (
     RuntimeImageStatus,
     RuntimeProfileResolution,
 )
-from automarkov.lifecycle import (
-    ArtifactReference,
-    CanonicalTimestamp,
-    ExecutionAttestation,
-    NonEmptyId,
-    Sha256Value,
-)
-from automarkov.provenance import RuntimeProfileId, RuntimeProfileManifest
-from automarkov.remote_env import (
-    RemoteEnvRuntimeUnavailable,
-    TlsSocketRemoteEnv,
-)
-from automarkov.remote_env_contracts import (
+from automarkov.contracts.remote_env import (
     BoxSpace,
     DictEntry,
     DictSpace,
@@ -51,6 +34,23 @@ from automarkov.remote_env_contracts import (
     ScenarioEpisodeSeedContract,
     SeedContract,
 )
+from automarkov.domain.canonical import (
+    FrozenSequence,
+    canonical_json_bytes,
+)
+from automarkov.domain.models import StrictFrozenModel
+from automarkov.lifecycle import (
+    ArtifactReference,
+    CanonicalTimestamp,
+    ExecutionAttestation,
+    NonEmptyId,
+    Sha256Value,
+)
+from automarkov.remote_env import (
+    RemoteEnvRuntimeUnavailable,
+    TlsSocketRemoteEnv,
+)
+from automarkov.security.provenance import RuntimeProfileId, RuntimeProfileManifest
 
 _MINIGRID_MISSION = "go to the matching object at the end of the hallway"
 

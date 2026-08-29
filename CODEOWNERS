@@ -1,0 +1,35 @@
+# AutoMarkov code ownership
+#
+# Each line is a file pattern followed by one or more owners.
+# See https://docs.github.com/en/repositories/managing-your_repositorys_settings/managing-code-owners-for-your-repository
+
+# Security and sandbox boundaries
+src/automarkov/environment_sandbox.py    @jiawang
+src/automarkov/sealed_evaluation.py    @jiawang
+src/automarkov/validation_contracts.py  @jiawang
+src/automarkov/evidence_access.py      @jiawang
+src/automarkov/evidence_contracts.py    @jiawang
+
+# Runtime integrations
+src/automarkov/local_llm_runtime.py         @jiawang
+src/automarkov/environment_implementation.py @jiawang
+src/automarkov/remote_env.py            @jiawang
+src/automarkov/remote_env_codec.py       @jiawang
+src/automarkov/remote_env_contracts.py    @jiawang
+
+# Contract and formal specification layer
+src/automarkov/classification_contracts.py @jiawang
+src/automarkov/task_contracts.py        @jiawang
+src/automarkov/llm_contracts.py          @jiawang
+src/automarkov/environment_contracts.py   @jiawang
+src/automarkov/multi_agent_suite_contracts.py @jiawang
+
+# Training and RL integration
+src/automarkov/rllib_training.py           @jiawang
+src/automarkov/swanlab_adapter.py        @jiawang
+src/automarkov/benchmark_suites.py         @jiawang
+
+# Statistics and evaluation
+src/automarkov/statistics.py              @jiawang
+src/automarkov/ablation_ledger.py         @jiawang
+src/automarkov/generation_methods.py      @jiawang

@@ -1,23 +1,31 @@
 """T20: Benchmark suites contract tests — TaskCard, BenchmarkManifest, GoldScoreCalibration."""
 
 from __future__ import annotations
+
 import pytest
 from pydantic import ValidationError
-from automarkov.benchmark_suites import (
-    BenchmarkCellBinding, BenchmarkManifest, GoldScoreCalibration, TaskCard,
+
+from automarkov.contracts.benchmark import (
+    BenchmarkCellBinding,
+    BenchmarkManifest,
+    GoldScoreCalibration,
+    SuiteId,
+    TaskCard,
+    VariantId,
 )
+from automarkov.lifecycle import ArtifactReference
 
 HX = "0" * 64
 HASH = "sha256:" + HX
 ART = "artifact_" + HX
 
-_SUITE: tuple = ("mab_cartpole", "grid_taxi", "nav_minigrid", "mpe2_spread", "starcraft_smacv2", "energy_citylearn")
-_VAR: tuple = ("v1_plain", "v2_reversed", "v3_reworded", "v4_ambiguous", "v5_clarification_required")
+_SUITE: tuple = ("taxi_mdp", "memory_pomdp", "mpe2_full_state_mg", "smacv2_posg", "metadrive_pomdp", "citylearn_posg")
+_VAR: tuple = ("v1_canonical", "v2_paraphrased", "v3_reordered_longform", "v4_evidence_split", "v5_clarification_required")
 _TRACK: tuple = ("AUTO", "HITL-ORACLE")
-_METHOD: tuple = ("automarkov", "automarkov_no_evidence", "a_lamp", "agent2", "agent2" + "world", "react")
+_METHOD: tuple = ("automarkov", "single_llm", "alamp_paper_spec", "agent2_paper_spec", "agent2world_clean_controlled", "react_executor")
 
 
-def _task_card(suite="mab_cartpole", variant="v1_plain") -> TaskCard:
+def _task_card(suite: SuiteId = "taxi_mdp", variant: VariantId = "v1_canonical") -> TaskCard:
     return TaskCard(
         suite_id=suite, variant_id=variant, description="test task",
         required_implementation="gymnasium.classic_control",
@@ -43,12 +51,12 @@ def _full_grid() -> tuple[BenchmarkCellBinding, ...]:
 class TestTaskCard:
     def test_accepts_valid(self) -> None:
         c = _task_card()
-        assert c.suite_id == "mab_cartpole"
+        assert c.suite_id == "taxi_mdp"
 
     def test_rejects_empty_description(self) -> None:
         with pytest.raises(ValidationError):
             TaskCard(
-                suite_id="mab_cartpole", variant_id="v1_plain",
+                suite_id="taxi_mdp", variant_id="v1_canonical",
                 description="",
                 required_implementation="gymnasium.classic_control",
                 source_access="public_repository",
@@ -58,7 +66,7 @@ class TestTaskCard:
 
     def test_rejects_invalid_suite(self) -> None:
         with pytest.raises(ValidationError):
-            _task_card(suite="invalid")
+            _task_card(suite="invalid")  # type: ignore[arg-type]
 
 
 class TestBenchmarkManifest:
@@ -89,10 +97,10 @@ class TestBenchmarkManifest:
 class TestGoldScoreCalibration:
     def test_accepts_valid(self) -> None:
         c = GoldScoreCalibration(
-            suite_id="mab_cartpole", variant_id="v1_plain",
+            suite_id="taxi_mdp", variant_id="v1_canonical",
             calibration_condition="full",
             random_return=0.0, reference_return=500.0,
             evaluator_valid=True, evaluated_seeds=10,
-            calibration_artifact={"artifact_id": ART, "payload_hash": HASH},
+            calibration_artifact=ArtifactReference(artifact_id=ART, payload_hash=HASH),
         )
         assert c.evaluator_valid

@@ -11,20 +11,20 @@ from pydantic import TypeAdapter, ValidationError
 
 from automarkov.adapters import InMemoryCompiler
 from automarkov.api import compile_task
-from automarkov.domain import (
+from automarkov.domain.errors import (
+    CapabilityDeferredError,
+    EventSchemaError,
+    RunIdCollisionError,
+    RunProjectionHeadError,
+    UnknownRunError,
+)
+from automarkov.domain.models import (
     RequestBudget,
     RunId,
     Sha256Digest,
     TaskRequest,
     VerifiedEventHead,
     validate_task_request_payload,
-)
-from automarkov.errors import (
-    CapabilityDeferredError,
-    EventSchemaError,
-    RunIdCollisionError,
-    RunProjectionHeadError,
-    UnknownRunError,
 )
 
 

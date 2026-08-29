@@ -25,7 +25,7 @@ from pydantic.json_schema import JsonSchemaValue
 from typing_extensions import TypedDict
 
 from automarkov.adapters import InMemoryArtifactRepository, SqliteArtifactRepository
-from automarkov.canonical import (
+from automarkov.domain.canonical import (
     CanonicalJsonValue,
     FrozenSequence,
     FrozenStringMapping,
@@ -35,8 +35,8 @@ from automarkov.canonical import (
     canonical_json_bytes,
     parse_canonical_document,
 )
-from automarkov.domain import StrictFrozenModel
-from automarkov.errors import ArtifactIntegrityError, ArtifactParentContractError
+from automarkov.domain.errors import ArtifactIntegrityError, ArtifactParentContractError
+from automarkov.domain.models import StrictFrozenModel
 from automarkov.lifecycle import ArtifactIdValue, Sha256Value
 from automarkov.repository import ArtifactSchemaRegistry, ParentBinding
 

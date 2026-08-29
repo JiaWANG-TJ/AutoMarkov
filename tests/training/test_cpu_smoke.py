@@ -6,9 +6,12 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 import pytest
 from pydantic import ValidationError
 
+from automarkov.lifecycle import ArtifactReference
 from automarkov.rllib_training import (
     RllibCpuSmokeAttempt,
     RllibCpuSmokeContract,
@@ -53,10 +56,10 @@ def _assertions() -> tuple[RllibSmokeAssertion, ...]:
 
 def _smoke_contract() -> RllibCpuSmokeContract:
     return RllibCpuSmokeContract(
-        job_manifest={
-            "artifact_id": "artifact_" + "a" * 64,
-            "payload_hash": "sha256:" + "e" * 64,
-        },
+        job_manifest=ArtifactReference(
+            artifact_id="artifact_" + "a" * 64,
+            payload_hash="sha256:" + "e" * 64,
+        ),
         assertions=_assertions(),
         minimum_required_assertions=5,
         timeout_seconds=300.0,
@@ -66,12 +69,17 @@ def _smoke_contract() -> RllibCpuSmokeContract:
 def _all_passed_attempt() -> RllibCpuSmokeAttempt:
     return RllibCpuSmokeAttempt(
         attempt_id="smoke_attempt_passed",
-        smoke_contract={
-            "artifact_id": "artifact_" + "a" * 64,
-            "payload_hash": "sha256:" + "f" * 64,
-        },
-        assertion_results=tuple(
-            (a.assertion_id, "passed") for a in _assertions()
+        smoke_contract=ArtifactReference(
+            artifact_id="artifact_" + "a" * 64,
+            payload_hash="sha256:" + "f" * 64,
+        ),
+        assertion_results=(
+            ("env_runner_sample", "passed"),
+            ("module_forward", "passed"),
+            ("checkpoint_roundtrip", "passed"),
+            ("action_space_valid", "passed"),
+            ("reward_finite", "passed"),
+            ("termination_reachable", "passed"),
         ),
         started_at="2026-08-21T12:00:00Z",
         finished_at="2026-08-21T12:05:00Z",
@@ -136,10 +144,10 @@ class TestRllibCpuSmokeContract:
     def test_rejects_insufficient_assertions(self) -> None:
         with pytest.raises(ValidationError):
             RllibCpuSmokeContract(
-                job_manifest={
-                    "artifact_id": "artifact_" + "a" * 64,
-                    "payload_hash": "sha256:" + "f" * 64,
-                },
+                job_manifest=ArtifactReference(
+                    artifact_id="artifact_" + "a" * 64,
+                    payload_hash="sha256:" + "f" * 64,
+                ),
                 assertions=_assertions()[:1],
                 minimum_required_assertions=2,
                 timeout_seconds=60.0,
@@ -148,10 +156,10 @@ class TestRllibCpuSmokeContract:
     def test_rejects_duplicate_assertion_ids(self) -> None:
         with pytest.raises(ValidationError, match="unique"):
             RllibCpuSmokeContract(
-                job_manifest={
-                    "artifact_id": "artifact_" + "a" * 64,
-                    "payload_hash": "sha256:" + "f" * 64,
-                },
+                job_manifest=ArtifactReference(
+                    artifact_id="artifact_" + "a" * 64,
+                    payload_hash="sha256:" + "f" * 64,
+                ),
                 assertions=(
                     RllibSmokeAssertion(
                         assertion_id="dup",
@@ -171,10 +179,10 @@ class TestRllibCpuSmokeContract:
     def test_rejects_zero_timeout(self) -> None:
         with pytest.raises(ValidationError):
             RllibCpuSmokeContract(
-                job_manifest={
-                    "artifact_id": "artifact_" + "a" * 64,
-                    "payload_hash": "sha256:" + "f" * 64,
-                },
+                job_manifest=ArtifactReference(
+                    artifact_id="artifact_" + "a" * 64,
+                    payload_hash="sha256:" + "f" * 64,
+                ),
                 assertions=_assertions()[:2],
                 minimum_required_assertions=2,
                 timeout_seconds=0.0,
@@ -198,18 +206,28 @@ class TestRllibCpuSmokeAttempt:
         assert all(r[1] == "passed" for r in a.assertion_results)
 
     def test_failed_attempt_with_failure(self) -> None:
-        results = tuple(
-            (aid, "passed" if i != 2 else "failed")
-            for i, aid in enumerate(
-                [a.assertion_id for a in _assertions()]
-            )
+        ids = [a.assertion_id for a in _assertions()]
+        results: tuple[
+            tuple[str, Literal["passed", "failed", "skipped"]],
+            tuple[str, Literal["passed", "failed", "skipped"]],
+            tuple[str, Literal["passed", "failed", "skipped"]],
+            tuple[str, Literal["passed", "failed", "skipped"]],
+            tuple[str, Literal["passed", "failed", "skipped"]],
+            tuple[str, Literal["passed", "failed", "skipped"]],
+        ] = (
+            (ids[0], "passed"),
+            (ids[1], "passed"),
+            (ids[2], "failed"),
+            (ids[3], "passed"),
+            (ids[4], "passed"),
+            (ids[5], "passed"),
         )
         attempt = RllibCpuSmokeAttempt(
             attempt_id="smoke_attempt_failed",
-            smoke_contract={
-                "artifact_id": "artifact_" + "a" * 64,
-                "payload_hash": "sha256:" + "f" * 64,
-            },
+            smoke_contract=ArtifactReference(
+                artifact_id="artifact_" + "a" * 64,
+                payload_hash="sha256:" + "f" * 64,
+            ),
             assertion_results=results,
             started_at="2026-08-21T12:00:00Z",
             finished_at="2026-08-21T12:05:00Z",
@@ -227,12 +245,17 @@ class TestRllibCpuSmokeAttempt:
         passed = _all_passed_attempt()
         failed = RllibCpuSmokeAttempt(
             attempt_id="smoke_attempt_failed",
-            smoke_contract={
-                "artifact_id": "artifact_" + "a" * 64,
-                "payload_hash": "sha256:" + "f" * 64,
-            },
-            assertion_results=tuple(
-                (a.assertion_id, "failed") for a in _assertions()
+            smoke_contract=ArtifactReference(
+                artifact_id="artifact_" + "a" * 64,
+                payload_hash="sha256:" + "f" * 64,
+            ),
+            assertion_results=(
+                ("env_runner_sample", "failed"),
+                ("module_forward", "failed"),
+                ("checkpoint_roundtrip", "failed"),
+                ("action_space_valid", "failed"),
+                ("reward_finite", "failed"),
+                ("termination_reachable", "failed"),
             ),
             started_at="2026-08-21T12:00:00Z",
             finished_at="2026-08-21T12:05:00Z",

@@ -6,14 +6,14 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from automarkov.contracts.remote_env import (
+    RemoteEnvCertificateIdentity,
+    RemoteEnvFrameHeader,
+)
 from automarkov.remote_env import (
     REMOTE_ENV_GRANT_SCHEMA_HASH,
     RemoteEnvGrantVerifier,
     sign_remote_env_grant,
-)
-from automarkov.remote_env_contracts import (
-    RemoteEnvCertificateIdentity,
-    RemoteEnvFrameHeader,
 )
 
 _DIGEST = "sha256:" + "1" * 64

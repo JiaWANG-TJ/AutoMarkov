@@ -8,7 +8,13 @@ from typing import Annotated, Any, Literal, Self, TypeAlias, cast
 
 from pydantic import Field, TypeAdapter, model_validator
 
-from automarkov.canonical import (
+from automarkov.contracts.task import (
+    AgentMessageSender,
+    HistoryAccessSpec,
+    MessageProcessSpec,
+    VariableSpec,
+)
+from automarkov.domain.canonical import (
     CanonicalJsonValue,
     CanonicalPayloadCodec,
     ConfidenceCanonicalFloat,
@@ -25,13 +31,7 @@ from automarkov.canonical import (
     parse_json_payload,
     validate_and_measure_raw_json_tree,
 )
-from automarkov.domain import StrictFrozenModel
-from automarkov.task_contracts import (
-    AgentMessageSender,
-    HistoryAccessSpec,
-    MessageProcessSpec,
-    VariableSpec,
-)
+from automarkov.domain.models import StrictFrozenModel
 
 DECISION_PROCESS_SCHEMA_VERSION = "automarkov.decision-process-spec.v1"
 

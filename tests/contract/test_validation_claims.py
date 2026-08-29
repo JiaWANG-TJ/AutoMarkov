@@ -5,13 +5,13 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from automarkov.repository import InMemoryArtifactRepository, SqliteArtifactRepository
-from automarkov.validation_contracts import (
+from automarkov.contracts.validation import (
     ValidationClaim,
     validate_claim_report_chain,
     validate_validation_claim_payload,
     validate_validation_report_payload,
 )
+from automarkov.repository import InMemoryArtifactRepository, SqliteArtifactRepository
 
 
 def _ref(digit: str) -> dict[str, str]:

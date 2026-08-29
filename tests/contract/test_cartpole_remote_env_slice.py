@@ -6,6 +6,11 @@ from datetime import UTC, datetime
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from automarkov.contracts.remote_env import (
+    RemoteEnvCertificateIdentity,
+    RemoteEnvEnvelope,
+    RemoteEnvFrameHeader,
+)
 from automarkov.public import RemoteEnv
 from automarkov.remote_env import (
     CartPoleRemoteEnvWorker,
@@ -18,11 +23,6 @@ from automarkov.remote_env_codec import (
     decode_remote_env_frame,
     encode_remote_env_frame,
     remote_env_transition_hash,
-)
-from automarkov.remote_env_contracts import (
-    RemoteEnvCertificateIdentity,
-    RemoteEnvEnvelope,
-    RemoteEnvFrameHeader,
 )
 
 _DIGEST = "sha256:" + "1" * 64

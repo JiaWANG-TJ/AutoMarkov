@@ -11,8 +11,7 @@ from automarkov.adapters import (
     InMemoryEnvironmentBinding,
     ScriptedExecutionSandbox,
 )
-from automarkov.domain import ArtifactId
-from automarkov.environment_contracts import (
+from automarkov.contracts.environment import (
     EnvironmentBindingArtifact,
     EnvironmentCandidateBundle,
     ImplementationPlan,
@@ -22,6 +21,7 @@ from automarkov.environment_contracts import (
     environment_binding_parent_references,
     implementation_plan_parent_references,
 )
+from automarkov.domain.models import ArtifactId
 from automarkov.lifecycle import ArtifactReference
 from automarkov.public import (
     EnvironmentRef,

@@ -23,6 +23,14 @@ ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "pilots/cartpole_cpu_smoke.v1.json"
 
 
+@pytest.fixture(autouse=True)
+def _skip_profile_preflight(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stub out runtime profile preflight for orchestration tests."""
+    import automarkov.pilots as _pilots_mod
+
+    monkeypatch.setattr(_pilots_mod, "_profile_preflight", lambda *_: None)
+
+
 def _executor(
     request: object, manifest: object, workspace: Path, root: Path
 ) -> PilotExecutionResult:

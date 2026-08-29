@@ -7,7 +7,8 @@ from types import MappingProxyType
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from automarkov.domain import (
+from automarkov.domain.errors import EvidenceCapabilityDeniedError
+from automarkov.domain.models import (
     EvidenceCapabilityGrant,
     EvidenceStoreRef,
     EvidenceTier,
@@ -15,7 +16,6 @@ from automarkov.domain import (
     PrincipalKind,
     validate_strict_frozen_payload,
 )
-from automarkov.errors import EvidenceCapabilityDeniedError
 
 
 class EvidenceAccessController:

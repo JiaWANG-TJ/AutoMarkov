@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from automarkov.classification_contracts import validate_reduction_proposal_payload
+from automarkov.contracts.classification import validate_reduction_proposal_payload
 
 
 def _ref(digit: str) -> dict[str, str]:

@@ -6,9 +6,9 @@ from typing import Literal
 import pytest
 
 from automarkov.adapters import InMemoryArtifactRepository
-from automarkov.classification_contracts import ClassificationResult, ReductionProposal
-from automarkov.domain import StrictFrozenModel
-from automarkov.errors import ArtifactParentContractError
+from automarkov.contracts.classification import ClassificationResult, ReductionProposal
+from automarkov.domain.errors import ArtifactParentContractError
+from automarkov.domain.models import StrictFrozenModel
 from automarkov.repository import ArtifactSchemaRegistry, ParentBinding
 
 

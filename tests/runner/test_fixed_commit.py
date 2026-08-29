@@ -11,8 +11,8 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
-from automarkov.canonical import canonical_json_bytes
-from automarkov.domain import RunId, Sha256Digest, VerifiedEventHead
+from automarkov.domain.canonical import canonical_json_bytes
+from automarkov.domain.models import RunId, Sha256Digest, VerifiedEventHead
 from automarkov.fixed_commit_runner import (
     RUNNER_RESULT_PAYLOAD_SCHEMA_HASH,
     SEALED_SUBJECT_ARTIFACT_CONTRACTS,
@@ -55,8 +55,8 @@ from automarkov.lifecycle import (
     ProcessExecutionTerminalRecord,
     TerminalResult,
 )
-from automarkov.provenance import RuntimeProfileManifest
 from automarkov.repository import _default_schema_registry
+from automarkov.security.provenance import RuntimeProfileManifest
 
 _REF = {
     "artifact_id": "artifact_" + "1" * 64,

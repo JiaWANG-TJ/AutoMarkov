@@ -10,7 +10,6 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import TypeAdapter, ValidationError
 
-from automarkov.canonical import canonical_json_bytes
 from automarkov.clarification import (
     ClarificationEvaluationRequest,
     ClarificationEvaluationVerdict,
@@ -25,6 +24,7 @@ from automarkov.clarification import (
     validate_clarification_outcome_binding,
     verify_clarification_signature,
 )
+from automarkov.domain.canonical import canonical_json_bytes
 
 _PRIVATE_KEY = Ed25519PrivateKey.from_private_bytes(b"\x71" * 32)
 _ISSUED_AT = "2026-08-12T12:00:00Z"

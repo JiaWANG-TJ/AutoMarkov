@@ -6,8 +6,8 @@ from typing import Any, cast
 import pytest
 from pydantic import ValidationError
 
-from automarkov.canonical import canonical_json_bytes, parse_canonical_document
 from automarkov.decision_process import (
+    MDPSpec,
     MGSpec,
     POMDPSpec,
     POSGSpec,
@@ -16,6 +16,7 @@ from automarkov.decision_process import (
     load_official_gymnasium_spec,
     validate_decision_process_payload,
 )
+from automarkov.domain.canonical import canonical_json_bytes, parse_canonical_document
 
 
 def _mdp() -> dict[str, Any]:
@@ -222,3 +223,103 @@ def test_canonical_union_rejects_exact_float_map_tampering() -> None:
 
     with pytest.raises(ValueError, match="exact-float map"):
         decision_process_codec.decode(canonical_json_bytes(document))
+
+
+# ── Negative / defensive tests ──────────────────────────────────────
+
+
+def _mutate(raw: dict[str, Any], **kw: object) -> dict[str, Any]:
+    clone = cast(dict[str, Any], deepcopy(raw))
+    clone.update(kw)
+    return clone
+
+
+class TestMDPNegativeInvariants:
+    """Deceptive counter-examples that must be rejected by MDP contracts."""
+
+    def test_empty_state_variables(self) -> None:
+        raw = _mutate(_mdp(), state_variables=[])
+        with pytest.raises(ValidationError, match="nonempty"):
+            validate_decision_process_payload(raw)
+
+    def test_duplicate_state_variable_names(self) -> None:
+        raw = _mdp()
+        dup_var = raw["state_variables"][0].copy()
+        raw["state_variables"] = [dup_var, dup_var]
+        with pytest.raises(ValidationError, match="unique"):
+            validate_decision_process_payload(raw)
+
+    def test_empty_actions_by_agent(self) -> None:
+        raw = _mutate(_mdp(), actions_by_agent={})
+        with pytest.raises(ValidationError, match="action mapping"):
+            validate_decision_process_payload(raw)
+
+    def test_unknown_kind_is_rejected(self) -> None:
+        with pytest.raises(ValidationError):
+            validate_decision_process_payload({"kind": "NOVEL_MDP", "schema_version": "v0"})
+
+
+class TestPOMDPNegativeInvariants:
+    """POMDP-specific negative contract tests."""
+
+    def test_duplicate_observation_names(self) -> None:
+        raw = _pomdp()
+        raw["observation_space"] = [_variable("dup"), _variable("dup")]
+        with pytest.raises(ValidationError, match="nonempty and unique"):
+            validate_decision_process_payload(raw)
+
+    def test_missing_message_recipient(self) -> None:
+        raw = _pomdp()
+        raw["message_processes_by_recipient"] = {}
+        with pytest.raises(ValidationError):
+            validate_decision_process_payload(raw)
+
+
+class TestMultiAgentNegativeInvariants:
+    """MG/POSG negative contract tests."""
+
+    def test_duplicate_agent_ids(self) -> None:
+        raw = _mg()
+        raw["agent_ids"] = ["agent_a", "agent_a"]
+        with pytest.raises(ValidationError, match="unique"):
+            validate_decision_process_payload(raw)
+
+    def test_mg_inverted_player_bounds(self) -> None:
+        raw = _mg()
+        raw["actions_by_agent"]["agent_a"] = [_variable("act_a")]
+        raw["actions_by_agent"]["agent_b"] = [_variable("act_b")]
+        raw["full_state_access_by_agent"]["agent_a"] = [
+            v["name"] for v in raw["state_variables"]
+        ]
+        raw["full_state_access_by_agent"]["agent_b"] = [
+            v["name"] for v in raw["state_variables"]
+        ]
+        raw["rewards_by_agent"]["agent_a"] = {
+            "mode": "deterministic", "expression": "1.0"
+        }
+        raw["rewards_by_agent"]["agent_b"] = {
+            "mode": "deterministic", "expression": "1.0"
+        }
+        raw["agent_ids"] = ["only_one"]
+        with pytest.raises(ValidationError):
+            validate_decision_process_payload(raw)
+
+
+class TestDiscountBoundary:
+    """Boundary value tests for discount parameter."""
+
+    def test_zero_discount_mdp_is_valid(self) -> None:
+        raw = _mdp()
+        raw["discount"] = 0.0
+        result = validate_decision_process_payload(raw)
+        assert isinstance(result, MDPSpec)
+
+    def test_unit_discount_rejected_as_max(self) -> None:
+        raw = _mdp()
+        raw["objectives"] = [{"kind": "M",
+                            "aggregation": "discounted_sum",
+                            "expression": "x", "weight": 1.0}]
+        raw["discount"] = 1.0
+        raw["horizon"] = "infinite"
+        with pytest.raises(ValidationError):
+            validate_decision_process_payload(raw)

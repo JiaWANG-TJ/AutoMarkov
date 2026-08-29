@@ -10,12 +10,12 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
-from automarkov.canonical import canonical_json_bytes
-from automarkov.environment_contracts import RuntimeProfileResolution
+from automarkov.contracts.environment import RuntimeProfileResolution
+from automarkov.contracts.remote_env import DiscreteSpace
+from automarkov.domain.canonical import canonical_json_bytes
 from automarkov.lifecycle import ArtifactReference, ExecutionAttestation
-from automarkov.provenance import RuntimeProfileManifest
 from automarkov.remote_env import RemoteEnvRuntimeUnavailable
-from automarkov.remote_env_contracts import DiscreteSpace
+from automarkov.security.provenance import RuntimeProfileManifest
 from automarkov.suite_adapters import (
     SINGLE_AGENT_SUITE_ADAPTER,
     IntegerResetSeedContract,
@@ -125,6 +125,7 @@ def _runner_factory(environment: _GeneratedTaxi) -> TaxiRunnerBoundFactory:
         "job_manifest": job_manifest.model_dump(mode="json"),
         "process_terminal_record": _ref("taxi-process", "2").model_dump(mode="json"),
         "payload_outputs": [item.model_dump(mode="json") for item in outputs],
+        "output_scan_report": None,
         "terminal_result": None,
         "network_policy_hash": "sha256:" + "3" * 64,
         "mount_table_hash": "sha256:" + "4" * 64,

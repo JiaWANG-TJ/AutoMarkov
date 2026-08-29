@@ -29,7 +29,7 @@
 
 ### 0.3 完成状态词汇
 
-本文只使用以下状态，禁止用模糊的“基本完成”“差不多可用”：
+本文判定工作包完成度时只使用以下状态，禁止用模糊的“基本完成”“差不多可用”。实验规划中的`READY`、`BLOCKED_DESIGN`、`RUN/N/A`、terminal failure taxonomy等是已冻结的domain enum，不得被误当为工作包完成度：
 
 | 状态 | 可证明含义 | 不代表 |
 |---|---|---|
@@ -43,10 +43,24 @@
 | `RELEASE_READY` | clean build、CI、扫描、redaction、cards、复现报告均通过 | owner 已授权发布 |
 | `BLOCKED` | 缺少外部 authority、asset、credential、预算或已登记决定 | 失败可被实现者绕过 |
 | `DEFERRED` | 明确不属于当前交付并保留恢复条件 | 已完成或失败 |
+| `WAITING_RUNTIME` / `WAITING_ASSET` | 只有依赖对应runtime/asset的branch暂时不可继续；精确记录dependency和resume state | 全局`BLOCKED`、无关确定性检查停止或gate已关闭 |
+| `PARTIAL_METHOD_IMPLEMENTATION` | 至少一个非blocked `R17A[s]`已经capability/budget/cache/transcript验证，但R17B六suite总门未关闭 | six-suite method completeness、R18或confirmatory readiness |
 
 ### 0.4 使用方法
 
 每个 Coding Agent 只领取一个无未完成 blocker 的工作包。开始前读取该包列出的输入，先运行“最小红测试”，只修改列出的 seam 和直接测试；完成后运行该包验证，不提前执行后续包。工作包关闭必须同时满足：代码、测试、运行工件、Git/manifest identity 和允许声明五项证据。
+
+### 0.5 每个工作包的强制开发流程
+
+1. 每个project-development任务都先调用`grill-with-docs`，读取当前spec、CONTEXT、适用ADR、ticket和本文工作包，确认domain language、scope和hard-to-reverse decisions；只有难以逆转且有真实权衡的决定写ADR。
+2. 单一可运行设计问题必须先`handoff`到独立上下文，调用`prototype`取得证据，再`handoff`回原设计上下文；prototype不进入production或实验结果。
+3. 多session工作在同一设计上下文依次调用`to-spec`和`to-tickets`，发布带显式blockers的GitHub tickets后，每个ticket在新上下文按blocker顺序实施；single-session工作才直接调用`implement`。
+4. `implement`按一个red-green slice调用TDD；每次只运行当前seam和直接integration的必要测试。
+5. slice完成后执行Standards/Spec双轴code review，修复actionable findings。
+6. 外层operator再运行恰好一个native review target；同一review进程不得递归review。
+7. Git/issue/PR/release写入仍需owner权限，工作流完成不自动授权外部状态变更。
+
+若某个要求的workflow skill在执行环境不可用，agent必须报告缺失的skill/阶段和影响，不得用“已手工等价完成”掩盖门禁。
 
 ---
 
@@ -54,17 +68,19 @@
 
 ### 1.1 仓库与 tracker
 
-- Git branch 为 `main`，本地 HEAD 与 `origin/main` 同为 `4bbc601e499d8db52a7e1f937cf0a7d9f7a90789`。
-- 当前无 tracked worktree 修改；`.codegraph/` 是未跟踪的用户索引，不属于发布证据。
+- 本文问题审计的代码baseline是`4bbc601e499d8db52a7e1f937cf0a7d9f7a90789`。
+- 文档编写期间出现未经本对话owner批准记录的外部Git写入：`main`和`origin/main`前移至doc-only child `3cea996309c6bc3bfe5b29dd83b82f5131ca4366`，新增本文初版和`.codegraph/.gitignore`。该commit不改变生产代码，但构成governance deviation；禁止擅自回滚，等待D17处置。
+- 当前worktree在`3cea996`上继续修改本文，并新增未提交的上游研究笔记；这些bytes尚无approved commit/push证据。
 - GitHub Issues `T01`–`T27` 均被关闭，但 T18–T27 的多项验收命令、路径和运行工件不存在。
 - 当前仓库没有 PR 记录能证明 T18–T27 经独立 Standards/Spec review 后合入。
-- 最新 HEAD 对应的 GitHub Actions `provenance-contract` 失败；从 `e272be4` 至 `4bbc601` 已连续七次 push workflow 失败。
+- 最新HEAD `3cea996`对应的GitHub Actions `provenance-contract`仍失败；从`e272be4`起已连续八次push workflow失败。
 
 ### 1.2 新鲜验证结果
 
 | 检查 | 2026-08-25 结果 | 当前允许声明 |
 |---|---|---|
-| `uv run --locked automarkov verify-provenance --repository-root .` | exit 1；6 个 restricted ingress/frozen source identity errors | provenance invalid |
+| baseline `4bbc601` provenance | exit 1；6 个 restricted ingress/frozen source identity errors | provenance invalid |
+| HEAD `3cea996` CI provenance | exit 1；10 errors；新增doc名称token ingress和tracked `.codegraph/.gitignore`错误 | provenance invalid；doc commit没有修复baseline |
 | `uv run --locked ruff check .` | 22 errors | lint invalid |
 | `uv run --locked pyright` | 88 errors | type invalid |
 | `uv run --locked pytest -q` | 在约 15 分钟、47% 时停止；已出现重复 provenance baseline setup errors | 不得声明 full suite green |
@@ -132,6 +148,7 @@
 | P1-12 | checkpoint path和签名合同不闭合 | relative path未拒绝`../`/absolute；export/request只验证signature字符串形状 | path traversal、伪签名、clock/replay/substitution | R07 |
 | P1-13 | smoke/audit pass可自报 | CPU smoke、information audit可同时携带失败evidence和`passed=true` | 错误训练进入下一gate | R07/R09 |
 | P1-14 | profile build状态没有生产升级路径 | verifier对`built`声明fail closed，缺build/import attestation生成和specified-head resolver | FixedCommitRunner无法取得可执行profile | R05A |
+| P1-15 | 本次文档编写期间发生未授权Git commit/push | 外部进程创建并推送`3cea996`，无本对话事前branch/author/message/scope批准 | governance/delivery deviation；R00只记录，不等待处置；写入型R01和交付受阻 | D17/R01/交付 |
 
 ### 2.3 P2：完成前必须处理的工程债
 
@@ -202,26 +219,40 @@ TaskRequest
 ```text
 R00 -> R01-doc
   |       |
-  +-> R02 -> R03 -> R04 -> R05 -> R05A -> R06 -> R12 -> R07
-                                |       |       |       |
-                                |       |       |       +-> R13
-                                |       |       |       +-> R14
-                                |       |       |       +-> R15
-                                |       |       |       +-> R16A
-                                |       |       |       +-> R16B
-                                |       |       |
-                                |       +-> R08 +-> R09 -> R10 -> R11
-                                |
+  +-> R02 -> R03 -> R04 -> R05 -> R06
+                                +-> R05A-BUILD
+                                +-> R05A-ATTACH
+                                +-> R08 -> R09 -> R10 -> R11
                                 +-> R19 -> R20
 
-R13/R14/R15/R16A/R16B + R19/R20 -> R17 -> R18 -> R24 -> R25
-R08 + R19 + R25 -> R21
-R12-R16B + R19 + R24 -> R22
-R09 + R20 + R21 + R22 + R24 + R25 -> R23
+R06 + R05A-BUILD -> R12-DET
+R12-DET -> R07-CORE
+R12-DET + R05A-ATTACH -> R12-E2E (= R12 closed)
+R07-CORE + R12-E2E -> R07-TAXI-E2E (= R07 closed)
+R07-CORE + R12-DET + R05A-BUILD -> R13-DET/R14-DET/R15-DET/R16A-DET/R16B-DET
+For each non-Taxi suite s:
+  suite_det[s] + R05A-ATTACH + R12-E2E -> suite_e2e[s] (= suite_impl[s])
+
+For each suite s:
+  suite_det[s] -> R24-DET[s]
+  suite_impl[s] + R19/R20 -> R17A[s]
+  R24-DET[s] + suite_impl[s] + R17A[s] -> R24-E2E[s] (= R24[s])
+  R24[s] + R21A -> R25[s]
+All six suite_impl[s] + all R17A[s] -> R17B -> R18
+All R24[s] -> R24-ALL; all R25[s] -> R25-ALL
+D11 -> R21A
+R08 + R18 + R19 + R21A + (R25-ALL iff Public Dev is selected) -> R21B (= R21 closed)
+All suite_impl[s] + R19 + R24-ALL -> R22
+R09 + R20 + R21B + R22 + R18 + R24-ALL + R25-ALL -> R23
 R23 -> R26 -> R27
+D15 -> R05 -> R06/R07/R08/R09/R10
+D06 -> R05A-ATTACH
+D16 -> R05A-BUILD
+D18 -> R16A
+D19 -> R16B
 ```
 
-`R01-doc`表示本地README/handoff事实修复；GitHub reopen/relabel是owner授权的`BLOCKED_GOVERNANCE`动作，不阻塞R02–R04。R00–R04恢复可信开发基线；R05修复canonical contracts和artifact registrations；R05A建立profile build/attestation/resolution；R06只完成composition root/restart/fake-adapter slice；R12完成真实Taxi pre-training E2E，R07再完成Taxi training/export/evaluate。R13–R16B在共享seams稳定后可并行扩展。R19刷新学术来源，R20冻结task cards，R17/R18才实现六方法和六消融。R24/R25产生nonconfirmatory engineering和non-overlapping Public Dev证据。R21若使用Public Dev nuisance inputs，必须发生在R25之后；若只用一手先验/保守边界，R25结果不得追溯进入已冻结design。R20–R22形成实际freeze inputs，R23才允许冻结，R26/R27才运行和交付。
+`suite_det[s]`是只依赖built profile、RemoteEnv、official API/seed、runner core和确定性fixtures的suite子门；`suite_impl[s]`是R12、R13、R14、R15、R16A、R16B中对应suite的DET+E2E总门。`R24-DET[s]`是不依赖LLM的engineering pilot子门，`R24-E2E[s]`才联合suite/method/LLM证据关闭`R24[s]`。`R17A[s]`、`R24[s]`、`R25[s]`是同一suite的partial状态，`R24-ALL`/`R25-ALL`才是六suite全局关闭门。任一外部asset未解决时，只把相应`s`标为`WAITING_ASSET`，不阻塞Taxi、MiniGrid、MPE2或其他已就绪suite的R17A/R24/R25；但R17B、R18、R22全局关闭、R23及confirmatory run仍要求六suite全部闭合。`R01-doc`表示本地README/handoff事实修复；GitHub reopen/relabel和D17处置是owner授权的governance/delivery blockers，不阻塞只读R00或本地R02–R04。R00–R04恢复可信开发基线；D15必须在R05替换late schema前决定，R05下游继承该write/migration/read policy。R05修复canonical contracts和artifact registrations；D16是唯一的OCI build/registry/attestation authority决策，D06只管理runtime签名/审批keys和approved attach relay/service principal。R05A-BUILD和R05A-ATTACH可并行；R06用production-shape fake adapters完成composition root也可并行。R12-DET只在R05A-BUILD后完成真实Taxi profile/RemoteEnv/sealed确定性基础，并解锁R07-CORE和其他suite的DET工作；R12-E2E另等R05A-ATTACH后运行真实generation。R07-CORE不等attach；R07-TAXI-E2E只在R12-E2E后关闭R07。D18/D19分别处理MetaDrive/CityLearn数据授权。R13–R16B的DET子门不等LLM，E2E子门才等R05A-ATTACH/R12-E2E。R19刷新学术来源，R20冻结task cards；R17A可逐suite实现非blocked方法，全部资产具备后R17B才允许关闭六suite方法合同，随后R18实现六消融。R24/R25产生nonconfirmatory engineering和non-overlapping Public Dev证据。D11先经R21A冻结不含outcome的nuisance-source选择和Public Dev partition/probe合同，然后R25才运行；若选Public Dev，R21B在R25-ALL后读取冻结rows并做design-power，若选一手先验/保守边界则不等R25结果。R20、R21B、R22形成实际freeze inputs，R23才允许冻结，R26/R27才运行和交付。
 
 ### 4.2 R00：证据快照与状态对账
 
@@ -247,7 +278,7 @@ R23 -> R26 -> R27
   - handoff 指向当前 blocker，不保留已过期 relay/暂存状态；
   - issue state 是工作流状态，规格 gate report 是工程事实，两者不可互相替代。
 - Completion criterion: tracker 中不存在 closed-but-unproven ticket；README/handoff/issue 对当前 HEAD 无矛盾。
-- Governance degradation: 未获GitHub授权时，本地文档可完成并继续R02；tracker动作保持`BLOCKED_GOVERNANCE`，必须在release前解决。
+- Governance degradation: 未获GitHub授权时，本地文档可完成并继续R02；tracker动作保持`BLOCKED`（`reason_code=governance_authorization_missing`），必须在release前解决。
 
 ### 4.4 R02：恢复 provenance 与 restricted-source policy
 
@@ -260,11 +291,12 @@ R23 -> R26 -> R27
   2. restricted policy 拒绝 import、vendored paths、package/lock ingress和已知 source fingerprints，而不是拒绝合法文档中的项目名称；
   3. release identity 在 clean build 后生成外部 subject hashes、SBOM 和 signed provenance statement；
   4. 若保留 `_REGISTERED_SOURCE_HASHES`，其文件必须由仓库外签名 authority 冻结，不能把同一 commit 内可一起修改的字典当独立信任根；
-  5. Agent2World declaration files 只允许概念、许可、commit和禁止事项，不允许源码/prompt/test片段。
+  5. restricted-upstream相关文档必须走registered typed ingress：`ResearchSourceStatement`只允许项目名、URL、commit、license hash/摘要、概念级论文事实和禁止事项，结构化标记`metadata_only=true`、`executable_content=false`、`redistribution=false`；源码、prompt、test、archive、patch、expressive pseudocode、package/lock/container ingress仍拒绝；
+  6. `docs/research/2026-08-25-recovery-upstream-standards-refresh.md`在上述schema/AST/path检查和positive/negative fixtures与它同commit通过前保持未跟踪；不得为让CI变绿而改写项目名或删掉许可风险。
 - Target files: `src/automarkov/provenance.py`、对应 provenance tests、`.github/workflows/provenance.yml`、必要时新 ADR。
 - Negative tests: import、encoded import、archive member、symlink、Git index/worktree divergence、lock dependency、container COPY、generated wheel/sdist ingress。
-- Positive tests: docs/research/spec 可直接写正确项目名称；合法 clean-room method ID 不被误判为受限源码。
-- Completion criterion: local verifier和 clean-checkout CI均 valid；修改任一受保护输入会稳定 red；合法声明文本不需字符串拼接规避。
+- Positive tests: registered docs/research/spec可直接写正确项目名称和必要许可事实；合法 clean-room method ID 不被误判为受限源码。
+- Completion criterion: 研究笔记被纳入typed document registry后，local verifier和含该文件的clean-checkout CI均 valid；将restricted code/prompt/test或未登记文档换入同一路径会稳定 red；合法声明文本不需字符串拼接规避。
 
 ### 4.5 R03：恢复 lint、type 和测试反馈速度
 
@@ -296,7 +328,7 @@ R23 -> R26 -> R27
 
 ### 4.7 R05：重建 benchmark、method 和 ablation identity
 
-- Blocked by: R04。
+- Blocked by: R04、D15。
 - Canonical suites: `taxi_mdp`、`memory_pomdp`、`mpe2_full_state_mg`、`smacv2_posg`、`metadrive_pomdp`、`citylearn_posg`。
 - Canonical variants: `v1_canonical`、`v2_paraphrased`、`v3_reordered_longform`、`v4_evidence_split`、`v5_clarification_required`。
 - Canonical methods: `single_llm`、`react_executor`、`alamp_paper_spec`、`agent2_paper_spec`、`agent2world_clean_controlled`、`automarkov`。
@@ -312,24 +344,29 @@ R23 -> R26 -> R27
 - ArtifactRepository integration: training/benchmark/method/ablation/statistics/preflight/redaction/release每种新工件必须注册schema version、exact/payload-bound parent contract和migration/read policy；不能只写JSON目录。
 - Completion criterion: 所有合法grid可由单一manifest重建并持久化到ArtifactRepository；上述反例全部失败。
 
-### 4.8 R05A：Runtime profile build、attestation 与 specified-head resolution
+### 4.8 R05A：Runtime profile build/attach、attestation 与 specified-head resolution
 
-- Blocked by: R04/R05；OCI build host和attestation issuer另受owner runtime authority。
-- Objective: 补齐`recipe_frozen -> built`的唯一生产升级路径，而不是放宽verifier相信manifest字符串。
+- Sub-gates: `R05A-BUILD` blocked by R04、R05、D16；`R05A-ATTACH` blocked by R04、R05、D06。approved service/relay暂时不可达时标记`WAITING_RUNTIME`并保留resume state，不误标`BLOCKED`。两子门可并行，任一不得伪写另一类状态。
+- Objective: 对recipe profile补齐`recipe_frozen -> built`的唯一生产升级路径；对复用现场服务补齐`attached_unverified -> RUNTIME_VERIFIED attach`证据路径。tracked `profile.json`仍保持配置态，runtime结论来自immutable attach manifest/attestation，不把attached service伪写为`built`或要求OCI image fields。
 - Implementation:
-  - clean build从allowlisted context和exact lock生成OCI image；
-  - 签发content-addressed build attestation和profile-local import-smoke attestation；
-  - ArtifactRepository以caller-specified head解析并重验两份attestations；
-  - verifier校验OCI manifest digest、linux/amd64、libc/OpenSSL/CA和profile identity后才返回built view；
+  - BUILD: clean build从allowlisted context和exact lock生成OCI image，签发content-addressed build/import-smoke attestations，ArtifactRepository以caller-specified head重验它们；
+  - BUILD: verifier校验OCI manifest digest、linux/amd64、libc/OpenSSL/CA和profile identity后才返回built view；
+  - ATTACH: operator-side attestor在当前connection上绑定listener/process/package/model/tokenizer/weights/cache/network/redacted-argv和probe identities，生成signed/content-addressed immutable attach manifest；consumer从specified ArtifactRepository head解析并重验；
   - moving tag、wrong head/digest/platform、缺attestation、unknown/revoked issuer全部fail closed；
+  - package provenance按ingress分流：PyPI-sourced工件验官方filename/URL/hash，VCS source验repository/commit/tree hash，内部local-version wheel验immutable artifact ID/wheel hash/base-source/build-context/toolchain attestation；不为PyPI未发布的`0.25.1+cu129`伪造或要求PyPI hash；
   - tracked `profile.json`保持recipe/attached/disabled状态，不原地冒充现场built identity。
+- Local-LLM security inputs: 冻结expected model ID/revision、weights shard/tokenizer/chat-template hashes、vLLM version/container digest、closed/redacted startup-argv projection、proxy route allowlist和network namespace/listener contract。还必须枚举model/HF、`VLLM_CACHE_ROOT`、Triton/torch-compile及临时cache roots，为每个root冻结canonical path、mount/source artifact identity、owner UID/GID、mode、可写principal、launch-time content/empty-state hash和reuse/disposal policy；API key只是一层控制，不作完整security perimeter。
+- Local-LLM security gates: raw vLLM internal listener位于generation worker无法加入的独立network namespace，internal port只对relay principal可达，必须用namespace/cgroup/UID-aware firewall或等价隔离证明generation principal即使在同host也不能直连。项目owned relay向`LocalLlmRuntime`只暴露规格允许的authenticated loopback `/v1` endpoint（或未来ADR批准的Unix socket）；`AUTOMARKOV_VLLM_BASE_URL`指向relay而不是raw vLLM port。generation→relay edge冻结source/target principal、protocol/schema、API-key credential ID和transport capability；relay→vLLM edge在隔离namespace内用受限veth/firewall或mTLS。单纯把raw vLLM绑到与generation worker共享namespace的loopback不合格。外部请求只能通过鉴权relay的closed route allowlist。relay的closed text-only schema必须在转发前拒绝所有非文本content parts和HTTP(S)/`data:`/`file:` media fields，vLLM namespace对外default-deny egress；仅把`allowed_local_media_path`置空或把`allowed_media_domains`留空均不算关闭media。`trust_remote_code=false`，tool server、runtime LoRA和未冻结multimodal/tool endpoints默认关闭。model/HF cache只能是已attest的content-addressed只读mount；可变compile/runtime cache必须专用于exact service identity、service launch时为空、只对service principal可写、不挂载给其他profile，并在service lifecycle结束后销毁；跨service identity reuse必须先出新的content manifest/attestation。identity canary必须同时核对`/health`、`/v1/models`、一次真实generation、tokenization边界和上述hash/redacted argv projection；model listing单独不算ready。
 - Taxi minimum graph: `runner-control`、`rllib-taxi-synthesis`、`sealed-env-taxi-gold`、`sealed-evaluator-rllib`，以及实际需要的authoring/local-LLM edges。
-- Test paths: `tests/contract/test_profile_build_attestations.py`、`tests/runner/test_runtime_profile_resolution.py`、`tests/security/test_runtime_profile_substitution.py`。
-- Completion criterion: Taxi所需profile graph可从specified head解析为verified runtime identities；伪造built和任一identity substitution被拒绝。
+- Test paths: `tests/contract/test_profile_build_attestations.py`、`tests/runner/test_runtime_profile_resolution.py`、`tests/security/test_runtime_profile_substitution.py`、`tests/security/test_vllm_network_boundary.py`、`tests/integration/test_local_llm_identity_canary.py`。
+- Negative tests: 绕过proxy直连internal port、未在allowlist的route、HTTP/`data:`/`file:` media payload、媒体请求产生任何egress、`trust_remote_code=true`、任一tool/runtime-LoRA capability未授权开启、cache root可被其他principal写入、预热cache无attestation或content drift、可变cache非空启动/跨service identity复用或挂载到其他profile、model/tokenizer/weights/chat-template/redacted-argv任一identity drift、只返回model listing但真实inference/tokenization失败，均必须fail closed。
+- Sensitive-argv rule: attestation issuer可在运行时私有边界比对raw process argv，但持久化工件只保存allowlisted non-secret flags/values、credential ID和private-locator的opaque artifact/profile ID；API key、credential path、Authorization、private locator、raw argv及它们的可枚举hash全部禁止。report仅对该redacted projection做domain-separated hash，并记录issuer签名的`raw_argv_matches_projection=true`。
+- Attach failure classification: 只有listener/process暂时不可达、未超出冻结deadline的瞬时transport失败或尚未provision的approved service才进`WAITING_RUNTIME`。任一signature/binding/schema/principal/auth/route/media/cache/package/model/tokenizer/weights/argv identity不匹配、负例未被拒绝或protocol violation都产生terminal `FAILED`/`protocol_integrity_violation`证据，禁止沿原resume path继续；必须修正后用新runtime identity和new attempt重做。
+- Completion criterion: Taxi所需recipe nodes经R05A-BUILD、local-LLM node经R05A-ATTACH，均可从specified head解析为verified runtime identities；伪造built/attach、两种状态互换和任一identity substitution被拒绝；另存一份content-addressed local-LLM security report，其包含proxy/listener/egress证据、冻结feature flags、cache root/source/permission/reuse证据、model/tokenizer/weights hashes、redacted argv projection/hash、真实generation/tokenization canary及所有负例结果；secret/private locator scan必须为空。
 
 ### 4.9 R06：深化 Compiler 并接通真实 adapters
 
-- Blocked by: R05；真实runtime execution另依赖R05A，R06先用typed production-shape test adapters完成composition root。
+- Blocked by: R05。R06用typed production-shape test adapters完成composition root，不被R05A-ATTACH暂时不可用阻塞；后续真实profile execution按branch分别依赖R05A-BUILD或R05A-ATTACH。
 - Interface target: 保持 `start/dispatch/resume/package`，复杂阶段路由隐藏在Compiler实现内；不增加一组平行 `experiment_*` public methods。
 - Implementation:
   - repository-backed composition root显式注入六条 seam adapters；
@@ -344,7 +381,7 @@ R23 -> R26 -> R27
 
 ### 4.10 R07：实现 RLlib 2.56 TrainingRunner
 
-- Blocked by: R05、R05A、R06、R12。
+- Sub-gates: `R07-CORE` blocked by R05、R05A-BUILD、R06、R12-DET；`R07-TAXI-E2E` blocked by R07-CORE和R12-E2E。R07-CORE不依赖LocalLlmRuntime，可先向其他suite提供确定性runner/checkpoint/export seams；两子门均通过才关闭R07。
 - Official route:
   - `PPOConfig`/`AlgorithmConfig`；
   - `RLModule`/`MultiRLModule`；
@@ -352,6 +389,7 @@ R23 -> R26 -> R27
   - `EnvRunner`/`MultiAgentEnvRunner`或经验证的RemoteEnv adapter；
   - `LearnerGroup`；
   - PyTorch only。
+- RemoteEnv integration: RLlib 2.56.1新栈external-environment support仍为under development；production实现必须是AutoMarkov自有、versioned、authenticated custom `EnvRunner`/adapter，不得宣称复用了稳定官方wire protocol。multi-agent setup也不能默认套用单智能体`num_envs_per_env_runner` vectorization。
 - Contract corrections:
   - `train_batch_size_per_learner`；
   - `minibatch_size`；
@@ -362,10 +400,11 @@ R23 -> R26 -> R27
   - exact seed/environment/policy/evaluation streams。
 - TrainingRunner responsibilities: compile plan、validate capability、CPU smoke、fixed-budget train、checkpoint commit、weights-only export request、failure taxonomy；不拥有sealed evaluator。
 - Policy export/evaluation responsibilities: checkpoint entries拒绝absolute/`..`/symlink；manifest/request实现domain-separated signing bytes、trusted key/clock/revocation/replay、repository identity/lineage resolution；success/failure/Q mappings全部由terminal evidence派生。
+- Checkpoint boundary: RLlib checkpoint官方结构含pickle/class constructor和algorithm/subcomponent state，只允许同一trusted trainer profile内crash recovery；跨profile和sealed evaluator只接收经one-shot trusted exporter核验的finite weights-only safetensors与strict manifest。
 - Required policies: feed-forward PPO、stateful recurrent PPO、independent PPO、CTDE-PPO；DQN/SAC/TD3只在对应paper-replication contract启用。
 - Red tests: actor读取critic-only state、multi-agent缺CTDE、violation但audit pass、failed assertion但smoke pass、old ModelV2/Policy/RolloutWorker config、wrong seed count、budget extension、checkpoint path traversal/locator跨profile、伪签名/replay、success branch与Q矛盾、export含critic fields。
-- Runtime proof: CartPole仅作engineering smoke；Taxi完成训练→restart→export→evaluate tracer。
-- Completion criterion: 统一runner在exact profile下生成可验证的10 seed terminal slots和safetensors manifests。
+- `R07-CORE` proof: CartPole仅作engineering smoke；production-shape RemoteEnv fixture完成config→one-iteration train→checkpoint→fresh-process restart→weights-only export→trusted evaluator load，并用synthetic ten-slot ledger验证success/failure派生；不声称Taxi或策略效果。
+- `R07-TAXI-E2E` proof: 对R12-E2E冻结candidate执行Taxi训练→restart→export→evaluate tracer，生成exact-profile terminal records和safetensors manifest；未通过时留terminal failure且不关闭R07。
 
 ### 4.11 R08：实现确定性统计深模块
 
@@ -430,6 +469,7 @@ R23 -> R26 -> R27
   - pilot/experiment submission；
   - release bundle verification。
 - Workflow rules: actions用full commit pin、最小permissions、无persisted write credential、所有输出有retention和hash、失败不自动retry。
+- Release attestation: 只对已redact并通过bundle verifier的final bytes生成artifact attestation；生成成功和独立`gh attestation verify`成功分别记录，workflow green不能替代subject digest/signature verification。
 - Completion criterion: clean fork/checkout可运行metadata CI；手动heavy workflow产出独立attestation，不把其成功自动升级为实验完成或owner release approval。
 
 ### 4.15 旧 ticket 与恢复工作包映射
@@ -439,9 +479,9 @@ R23 -> R26 -> R27
 | T18 | config/schema objects和mock smoke存在 | R07、R12–R16 | official RLlib production runner + six-suite runtime evidence |
 | T19 | export/evaluation request模型可构造 | R07、R22、R27 | real checkpoint commitment→safetensors→sealed ten-seed evaluation |
 | T20 | 360个对象数量正确 | R05、R20、R23 | exact canonical Cartesian grid、30 reviewed task cards、frozen pair ledger |
-| T21 | 六个名称出现在pair模型 | R05、R17 | six executable common-backend methods和capability/transcript隔离 |
+| T21 | 六个名称出现在pair模型 | R05、R17A、R17B | six executable common-backend methods和capability/transcript隔离 |
 | T22 | 单一no-evidence ledger存在 | R14、R18 | six component ablations + MPE2 info ablation完整paired bindings |
-| T23 | replication manifest列出名称 | R17、R19 | three source/licensing matrices、paper-spec implementations、deviation records |
+| T23 | replication manifest列出名称 | R17A、R17B、R19、R26 | three source/licensing matrices、paper-spec implementations、terminal/deviation records |
 | T24 | result schema可保存CI/p-value | R08、R21、R22、R27 | production counter/bootstrap/calibration/design-power重算 |
 | T25 | `frozen=true`对象可构造 | R09、R23、R26 | derived preflight READY + complete terminal intention matrix |
 | T26 | redaction引用模型可构造 | R10、R27 | isolated taint closure、signed attestation、fixed rendered files |
@@ -473,7 +513,7 @@ R23 -> R26 -> R27
 
 ### 5.1 R12：Taxi MDP compiler tracer
 
-- Blocked by: R05、R05A、R06。
+- Sub-gates: `R12-DET` blocked by R05、R05A-BUILD、R06；`R12-E2E` blocked by R12-DET和R05A-ATTACH。只有两者通过才关闭R12。
 - Input: 已批准Taxi TaskContract、SYNTHESIS/GENERATE suite manifest、只含公开规则/API的Allowed Evidence。
 - Generation side: 禁止官方Taxi源码、transition table和sealed gold；生成完整有限环境。
 - Validation: strict schema、API、seed、transition totality、property/metamorphic、public behavioral tests。
@@ -481,59 +521,66 @@ R23 -> R26 -> R27
 - Output: candidate bundle、E2E request/verdict、terminal record/result、execution attestation。
 - Target files: `environment_implementation.py`、`environment_sandbox.py`、`remote_env*.py`、`suite_adapters.py`、`sealed_evaluation.py`、`adapters.py`、`repository.py`和Taxi profile-local worker；不得复用硬编码CartPole worker冒充Taxi。
 - Red tests: trainer读取official Taxi source/transition table、candidate/gold principal/session复用、in-process backend跨profile、unbuilt profile launch、wrong specified head。
-- Completion criterion: 一条真实SQLite/restart/fixed-commit slice可重放；candidate/gold worker权限互斥。
+- `R12-DET` completion: 真实Taxi profile、RemoteEnv、SQLite/restart/fixed-commit、candidate/gold worker权限互斥和确定性fixtures可重放；不要求LocalLlmRuntime。
+- `R12-E2E` completion: 在verified attach上执行真实generation，candidate通过public validation和single sealed E2E gate，且工件链从specified head可重放；未通过时保留terminal failure，不关闭R12。
 
 ### 5.2 R13：MiniGrid Memory POMDP tracer
 
-- Blocked by: R05A、R07、R12共享seams；可与R14/R15/R16A/R16B并行。
+- Sub-gates: `R13-DET` blocked by R05A-BUILD、R07-CORE、R12-DET；`R13-E2E` blocked by R13-DET、R05A-ATTACH、R12-E2E。前者可与其他suite DET并行，不被LLM attach阻塞；两者均通过才得关闭R13/`suite_impl[memory_pomdp]`。
 - Reuse/Compose官方MiniGrid Memory内核；actor只读局部observation/history。
 - 验证MissionSpace adapter、terminated/truncated、history lags、recurrent module state和seed determinism。
-- Completion criterion: 隐藏状态泄漏负例失败，recurrent policy可train/export/evaluate。
+- DET completion: official API/seed/history/recurrent-state和隐藏状态泄漏负例通过；E2E completion: generated candidate可train/export/evaluate并有terminal lineage。
 
 ### 5.3 R14：MPE2 full-state MG 与 native-local POSG
 
-- Blocked by: R05A、R07、R12共享seams、official MPE2 profile runtime；可与其他suite扩展并行。
+- Sub-gates: `R14-DET` blocked by R05A-BUILD、R07-CORE、R12-DET和official MPE2 runtime；`R14-E2E` blocked by R14-DET、R05A-ATTACH、R12-E2E。前者不被LLM attach阻塞；两者均通过才关闭R14/`suite_impl[mpe2_full_state_mg]`。
 - 官方事实合同：native observation 18D、global state 54D。
 - Full condition: actor/critic按预注册full-state MG adaptation获取54D state。
 - Native condition: actor只读18D local observation，global state只给centralized critic。
 - 两condition除actor input capability外保持相同policy shapes、optimizer、budget和seeds。
-- Completion criterion: official `state()`逐元素复用；post-terminal binding后才能分析paired contrast。
+- DET completion: official `state()`逐元素复用、native actor无state capability、信息结构负例通过；E2E completion: 两condition的generated candidate可train/export/evaluate，post-terminal binding后才分析paired contrast。
 
 ### 5.4 R15：SMACv2 POSG
 
-- Blocked by: R05A、R07、R12共享seams和D04 asset gate；可与其他非blocked suite并行。
+- Sub-gates: `R15-DET` blocked by R05A-BUILD、R07-CORE、R12-DET和D04 asset gate；`R15-E2E` blocked by R15-DET、R05A-ATTACH、R12-E2E。其他suite DET不等D04；两者均通过才关闭R15/`suite_impl[smacv2_posg]`。
 - Manual gate: SC2 binary/maps exact build、license和content hash未解决时保持`WAITING_ASSET`。
 - Reuse/Compose官方SMACv2 battle core、action masks、decentralized actor、centralized critic。
-- Completion criterion: 50 battles/seed评价合同、crash/reconnect/step identity和asset provenance通过。
+- DET completion: official battle core/action mask/API、crash/reconnect/step identity和asset provenance通过；E2E completion: generated candidate可train/export并按50 battles/seed合同evaluate。
 
 ### 5.5 R16A：MetaDrive POMDP
 
-- Blocked by: R05A、R07、R12共享seams，以及ScenarioNet dataset locator/revision/license owner gate。
+- Sub-gates: `R16A-DET` blocked by R05A-BUILD、R07-CORE、R12-DET和ScenarioNet dataset owner gate；`R16A-E2E` blocked by R16A-DET、R05A-ATTACH、R12-E2E。前者不被LLM attach阻塞；两者均通过才关闭R16A/`suite_impl[metadrive_pomdp]`。
 - 固定MetaDrive/ScenarioNet revision和partition、POMDP sensor view；道路/物理只复用不重写；100 episodes/seed。
 - Red tests: dev/sealed scenario overlap、scenario hash drift、physics reimplementation route、global state泄漏给actor。
-- Completion criterion: partition不重叠、dataset内容hash/license齐全，经RemoteEnv与统一TrainingRunner运行。
+- DET completion: partition不重叠、dataset内容hash/license、sensor/API/physics reuse和RemoteEnv通过；E2E completion: generated candidate经统一TrainingRunner train/export/evaluate 100 episodes/seed。
 
 ### 5.6 R16B：CityLearn POSG
 
-- Blocked by: R05A、R07、R12共享seams，以及CityLearn dataset/schema locator/revision/license owner gate。
+- Sub-gates: `R16B-DET` blocked by R05A-BUILD、R07-CORE、R12-DET和CityLearn dataset/schema owner gate；`R16B-E2E` blocked by R16B-DET、R05A-ATTACH、R12-E2E。前者不被LLM attach阻塞；两者均通过才关闭R16B/`suite_impl[citylearn_posg]`。
 - 固定dataset/schema/held-out period、multi-agent observation/reward和完整period评价。
 - Red tests: train/held-out overlap、schema mutation、agent keyset drift、partial period冒充完整evaluation。
-- Completion criterion: dataset内容hash/license齐全，held-out period隔离，经RemoteEnv与统一TrainingRunner运行。
+- DET completion: dataset/schema/hash/license、held-out period隔离、agent keyset和RemoteEnv通过；E2E completion: generated candidate经统一TrainingRunner train/export并评估完整held-out period。
 
-### 5.7 R17：六方法共同后端
+### 5.7 R17A：六方法共同后端的可并行实现
 
-- Blocked by: R13、R14、R15或其明确WAITING_ASSET状态、R16A、R16B、R19、R20；R12提供AutoMarkov Taxi最小方法路径。
+- Blocked by: 每个`R17A[s]`只依赖对应`suite_impl[s]`、R19和R20；R12提供AutoMarkov Taxi最小方法路径。R15、R16A或R16B因owner/asset gate保持`WAITING_ASSET`时，均不阻塞其他suite/method实现。
 - 所有方法共享model checkpoint、sampling、task card、pair、retrieval/tool/HITL/training budgets。
 - `single_llm`: 单次直接生成，无隐藏修复。
 - `react_executor`: 六suite×五variant×两track全部60 cells。
 - A-LAMP/Agent2: paper-spec reimplementation，公开差异进入deviation ledger。
 - Agent2World: clean controlled inference-time implementation，不port/vendor受限代码，不执行SFT。
 - AutoMarkov: 完整编译器路线。
-- Completion criterion: capability view、budget、cache和transcript隔离可机械审计；运行后eligibility不变。
+- Completion criterion: 每个非blocked suite的六方法capability view、budget、cache和transcript隔离可机械审计；运行后eligibility不变。该状态只能标为`PARTIAL_METHOD_IMPLEMENTATION`，不得声明六suite完成。
 
-### 5.8 R18：六项组件消融
+### 5.8 R17B：六suite方法合同最终关闭
 
-- Blocked by: R07、R08、R17，以及public-validation/lifecycle omission events。
+- Blocked by: R12–R16B六个`suite_impl[s]`和全部`R17A[s]`；任一suite的owner/asset gate未解决时不得关闭。
+- Required closure: 六suite的六方法路径均取得同等级的runtime/terminal/capability证据；60个ReAct cells和所有method eligibility masks可从manifests重算。
+- Completion criterion: 六suite六方法全部实现或pre-run `N/A`有合法paper-contract证据，且R17A的partial状态升级为完整method contract；任何`WAITING_ASSET`仍存在时不得关闭。
+
+### 5.9 R18：六项组件消融
+
+- Blocked by: R07、R08、R17B，以及public-validation/lifecycle omission events。
 - 精确144 cells：六suite×四variants×AUTO×六ablations；每cell `n_pair` slots。
 - 每项只有一个登记capability diff；其余gates、budget、seeds和outcome evaluator保持不变。
 - full run不重跑；双方terminal后才签发`AblationReferenceBinding`。
@@ -548,6 +595,8 @@ R23 -> R26 -> R27
 - 为30篇必读论文分别创建结构化passport：版本、RQ、算法、inputs/outputs、benchmarks、training、metrics、ablations、official code、license、limitations、AutoMarkov映射。
 - 每项外部实现必须进入typed upstream manifest或显式`blocked_unresolved`。
 - Agent2候选仓库必须核验作者关系、exact commit、代码/数据/模型license；无LICENSE时只可读研究，不能集成或发布。
+- 在作者/权利人确认前，“只读研究”精确限制为网页和metadata审计：不clone/复制实质代码、不执行、不构建、不进入模型上下文、不生成diff、不集成或发布。
+- Agent2World许可采用fixed commit根`LICENSE`的Research/Evaluation Only条款；README中的Apache badge与根LICENSE冲突，必须记录冲突并以根LICENSE fail closed，网站CC BY-SA也不覆盖仓库代码。
 - A-LAMP/Agent2无可用官方代码时保持paper-spec；发现官方代码也不能在许可审查前自动升级。
 - Completion criterion: 三条replication suite各有source matrix和deviation template；30个passport无空的load-bearing字段。
 
@@ -559,20 +608,21 @@ R23 -> R26 -> R27
 - 输出: task-card manifest、text hashes、allowed/blocked sources、sealed commitments、review receipts。
 - Completion criterion: 任一语义漂移先修task card，不扩大gold tolerance。
 
-### 6.3 R21：DesignPowerManifest/Report
+### 6.3 R21A/R21B：Nuisance source freeze 与 DesignPowerManifest/Report
 
-- Blocked by: R08、R18、R19；若nuisance inputs使用Public Dev，则另blocked by R25。
+- `R21A` blocked by: D11。它必须在R25前生成signed/content-addressed `NuisanceSourceDeclaration`，closed selector仅允许`PUBLIC_DEV | LITERATURE_PRIOR | CONSERVATIVE_MAX_VARIANCE`。选Public Dev时只冻结不重叠的suite/variant/seed/scenario partitions、probe algorithm/config、允许字段/单位、coverage和missing policy，不得含未来outcome值；选先验时冻结citation/evidence IDs；选保守边界时冻结closed构造规则。
+- `R21B` blocked by: R08、R18、R19、R21A；只当R21A选`PUBLIC_DEV`时另blocked by `R25-ALL`。R21A既不读取R25结果也不被R25阻塞，因而无循环。
 - Candidate set: `n_pair ∈ {20,24,30,40,60,80}`。
 - 2,000 deterministic datasets；每gate至少10,000 production-equivalent bootstraps。
 - Alternative: E2E difference `+0.10`，policy difference `0.00`；null boundaries `0.00/-0.05`。
 - Nuisance inputs只来自non-overlapping Public Dev、正式一手先验或保守最大方差边界。
 - Selection: 最小candidate同时满足joint-power lower≥0.80、各marginal lower≥0.90、null false-success upper≤0.025。
 - 无合格值或预算不足: `BLOCKED_DESIGN`，不得创建Run。
-- Completion criterion: 独立实现按manifest可byte-reproduce report和selected n_pair。
+- Completion criterion: R21A声明和R21B的独立实现/report均可byte-reproduce，selected n_pair与source selector、exact evidence rows绑定；两者通过才关闭R21。
 
 ### 6.4 R22：GoldScoreCalibration
 
-- Blocked by: R12–R16、R19、R24，以及所需sealed/reference runtime authority。
+- Blocked by: R12–R16B的六suite实现、R19、`R24-ALL`，以及所需sealed/reference runtime authority。各suite可在`R24[s]`后准备calibration证据，但R22全局关闭要求七个condition都有terminal gate。
 - 至少七份独立signed calibration：六个main suites各一份，加`mpe2_native_local_posg` condition一份；若后续新增不同gold environment/reward/adapter condition，必须新增对应calibration，不能复用名字相近的记录。
 - reference/random在相同pilot seed×episode/scenario上paired评价。
 - 100,000 nested counter bootstrap；direction-adjusted gap 97.5% LCB严格大于positive `min_reference_random_gap`。
@@ -582,7 +632,7 @@ R23 -> R26 -> R27
 
 ### 6.5 R23：Pre-run freeze
 
-- Blocked by: R05A、R07、R09–R11、R17、R18、R20–R22、R24、R25，以及D04–D12中适用的owner/manual gates。
+- Blocked by: R05A、R07、R09–R11、R17B、R18、R20–R22、`R24-ALL`、`R25-ALL`，以及D04–D12中适用的owner/manual gates。
 - Freeze: plan revision、source commit、30 task cards、suite/method/ablation manifests、selected n_pair、pair IDs、ten RL seeds、budgets、keys、replacement policy、outcome masks、Holm families、runner policy、RemoteEnv codec、analysis hashes。
 - Dry runs: nonterminal runner job、Run-terminal job、policy export私有descriptor path、sealed request handshake、redactor/publisher fixtures。
 - Freeze后任一byte变更产生新experiment version；旧/新run family不混合。
@@ -612,28 +662,29 @@ R23 -> R26 -> R27
 | `automarkov experiment evaluate-clarification` | `PLANNED` | AUTO/v5 terminal result/attestation后的sealed clarification evaluation |
 | `automarkov experiment analyze` | `PLANNED` | intention matrix terminal coverage闭合后 |
 
-当前accepted experiment plan没有定义`automarkov experiment publish`。R10 publisher由`Compiler.package`/fixed-commit packaging job调用；若要增加public publish CLI，必须先修订规格和命令合同，不能由实现者自行添加。
+当前accepted experiment plan没有定义`automarkov experiment publish`。`Compiler.package(run_id,head)`只打包单Run；实验级publisher由analysis完成后的内部coordinator提交独立fixed-commit packaging job。若要增加public publish CLI，必须先修订规格和命令合同，不能由实现者自行添加。
 
 当前计划也没有为DesignPower和GoldScoreCalibration定义独立CLI。R21/R22必须先冻结其fixed-commit payload schema、command和output contracts；在该设计完成前，文档不得虚构`design-power`或`calibrate`命令。
 
 ### 7.2 R24：Engineering pilots
 
-- Blocked by: R05A、R07、R12–R18中对应的非blocked实现；blocked suite只记录未满足gate，不伪造pilot。
+- Phase dependencies: `R24-DET[s]`的profile import/reset/step/API/seed和lightweight learning phases只依赖R05A-BUILD、R07-CORE和对应`suite_det[s]`；`R24-E2E[s]`的generation/method/security phases另依赖R05A-ATTACH、对应`suite_impl[s]`和`R17A[s]`。因此LLM attach未就绪不阻塞或取消R24-DET；两子门通过才关闭`R24[s]`，但它不等R17B/R18或其他suite的asset。blocked suite只记录未满足gate，不伪造pilot。R18所需的ablation-specific pilot可后续追加，不倒置阻塞base suite pilot。
 - Purpose: 验证profile/runtime/transport，不估计confirmatory outcome。
-- Sequence: Taxi CPU smoke → one fixed-commit Taxi train/export/evaluate → 每个非blocked suite的import/reset/step → 每个非blocked suite的lightweight learning probe → sealed dry run。
+- Branch order: 不依赖LLM的Taxi CPU smoke、各已就绪suite import/reset/step、lightweight learning probe和sealed transport dry run可并行先行；local-LLM security/identity canary通过后，另运行one fixed-commit Taxi train/export/evaluate和各suite generation/method probes。这不是“canary失败就停止全序列”的串行链。
+- vLLM gate: 使用`LocalLlmRuntime`的pilot branch必须绑定R05A-ATTACH的local-LLM security report；重验proxy route allowlist、principal-bound transport、internal-port isolation/default-deny egress、text-only schema、`trust_remote_code=false`、tool/runtime-LoRA disabled、cache root/source/owner/mode/writable-principal/launch-state和model/tokenizer/weights identity。对每个禁止route/feature及HTTP/`data:`/`file:` media运行负例，验证media无egress，并重做真实generation/tokenization canary；重新扫描持久化argv projection不含secret/private locator。暂时connection/service不可用只标记当前LLM-dependent branch为`WAITING_RUNTIME`；任一security/identity/binding/schema/protocol谓词失败则该attempt记`FAIL`并生成terminal `FAILED`/`protocol_integrity_violation`，修正后必须使用new runtime identity/new attempt，不得resume原attempt。两类情况都只停止LLM-dependent branch；import/reset/step、profile metadata、environment API/seed等不依赖LLM的确定性branch继续运行并各自留存terminal evidence。
 - Official environment checks: Gymnasium adapter至少通过官方`check_env`及deterministic seed checks；PettingZoo adapter至少通过`api_test`或`parallel_api_test`及seed checks；这些只证明接口/seed合同，不替代AutoMarkov行为和sealed gates。
 - Monitoring: process alive、phase、elapsed/wall budget、stdout/stderr bytes、metrics rows、env steps、artifact count/hash、heartbeat freshness。
 - Retry: 不自动retry；失败先分类为code/runtime/asset/protocol/budget，再由新engineering job处理。
-- Completion criterion: 每个pilot有terminal record、attestation、compact report和nonconfirmatory label。
+- Completion criterion: 每个attempted pilot都有terminal record、attestation、compact report和nonconfirmatory label，但failure/`WAITING_*`只完成证据覆盖，不关闭readiness gate。冻结`PilotReadinessMatrix`对每个`suite_id × required_phase`记录`required`、`phase_group=DET|E2E`、exact success predicate、terminal artifact/attestation IDs和`PASS | FAIL | WAITING | MISSING`；DET组required rows全PASS即可关闭`R24-DET[s]`，不等E2E组。`R24[s]`只在DET/E2E的全部required rows为`PASS`时关闭，`R24-ALL`只在六suite的`R24[s]`均关闭、所有LLM-dependent required rows完成network/feature/cache/identity security gate且无`FAIL/WAITING/MISSING`时成立。
 
 ### 7.3 R25：Public Dev 与恢复演练
 
-- Blocked by: R24，以及R21将使用哪些nuisance input来源的预先声明。
+- Blocked by: 对应suite的`R24[s]`和已冻结的R21A `NuisanceSourceDeclaration`。`R25[s]`可逐suite执行，不等待其他asset；六suite failure/recovery matrix均有terminal证据后才得记为`R25-ALL`。
 - 运行public validation和learning probe，验证nearest-cause rollback。
 - 注入crash、timeout、schema drift、hash mismatch、runtime replacement、approval revocation。
 - 证明restart/resume只从specified head恢复，pre-generation replacement与post-generation slot failure按policy区分。
 - Public Dev结果可以调试实现，但不得进入design nuisance以外的confirmatory分析；任何使用必须有预注册evidence row。
-- Completion criterion: failure/recovery matrix每格均有预期terminal状态和artifact lineage。
+- Completion criterion: 对应suite的failure/recovery matrix每格均有预期terminal状态和artifact lineage；全部`s`闭合后才计为`R25-ALL`。
 
 ### 7.4 R26：Confirmatory matrix
 
@@ -784,19 +835,24 @@ R23 -> R26 -> R27
 | ID | 决定 | 推荐选项 | 需要owner提供 | 阻塞 |
 |---|---|---|---|---|
 | D01 | 同仓中央source-hash allowlist/字符串扫描是否替换 | 使用Git tree + typed ingress policy +外部signed release provenance | 接受设计方向；若改变ADR则批准ADR讨论 | R02 |
-| D02 | T18–T27重新打开还是创建Recovery tickets | 重新打开；若需保留历史则创建R tickets并链接旧票 | GitHub写入授权和选择 | R01 |
-| D03 | Agent2候选仓库是否作为官方source | 先`blocked_unresolved`，等待作者关系和license证据 | 许可/作者证据或保持paper-spec | R19 |
+| D02 | 按R00矩阵处置所有closed-but-unproven tickets | 逐项reopen；若需保留历史则创建对应Recovery tickets并链接旧票 | GitHub写入授权和选择 | R01 |
+| D03 | Agent2候选仓库是否作为官方source | 先`authorship_unverified + license_unresolved`，只做网页/metadata审计 | 许可/作者证据或保持paper-spec | R19 |
 | D04 | SC2 binary/maps来源和研究许可 | 使用官方可审计build；无hash/许可保持WAITING_ASSET | asset locator、license approval | R15/R23 |
 | D05 | confirmatory compute budget | design-power选择n_pair后再批准 | CPU/GPU/时长/成本上限 | R23/R26 |
-| D06 | signing keys与runtime host authority | 由operator provision，不入仓库 | key IDs/public keys/validity/revocation和host resolver | R23 |
+| D06 | runtime签名/审批key与attach authority | 由operator provision，不入仓库；不决定OCI build/registry/issuer | approval/replacement/runtime key IDs、public keys、validity/revocation、principal绑定和approved attach relay/service identity | R05A-ATTACH/R23 |
 | D07 | 正式发布目标 | 先私有release candidate，再public remote | repository/tag/registry/DOI目标和授权 | R27 |
 | D08 | task-card reviewers与sealed-gold owner | 两名独立domain reviewers + 独立sealed owner | 人员/角色、签名key和conflict声明 | R20/R22 |
 | D09 | design-power计算预算 | 与confirmatory预算分开批准 | 2,000 datasets/bootstraps所需CPU/时长上限 | R21 |
 | D10 | preregistration registry与公开策略 | time-stamped、read-only registration；必要时embargo | registry、公开/embargo、提交授权 | R23 |
-| D11 | calibration/训练先验 | 冻结`min_reference_random_gap`、training budget rule和nuisance来源 | 数值、证据、批准 | R21/R22 |
+| D11 | calibration/训练先验与nuisance source selector | 先在R21A从`PUBLIC_DEV | LITERATURE_PRIOR | CONSERVATIVE_MAX_VARIANCE`选一并冻结来源合同，再冻结`min_reference_random_gap`和training budget rule | selector、分区/证据/保守规则、数值和批准 | R21A/R21B/R22 |
 | D12 | 三项paper replication预算/资产 | 分别批准，不由common matrix预算覆盖 | model/tool/data/compute/license批准 | R19/R26 |
 | D13 | independent verifier capsule | 最小signed/redacted seed-level inputs，禁止sealed payload | verifier身份、内容allowlist、传输/保留政策 | R27 |
 | D14 | citation/archive元数据 | `CITATION.cff` + archival DOI + release checksums | title/authors/version/DOI授权 | R27 |
+| D15 | schema migration/write-version policy | 一个current write version；历史verified-read/migrate/reference-only | 各late schema旧版本处置 | R05–R10 |
+| D16 | OCI build authority | 作为唯一authority冻结build host、registry、platform和build/import attestation issuer；与D06的runtime keys不重叠 | registry/issuer/host和有效期 | R05A-BUILD |
+| D17 | 未授权`3cea996`处置 | owner审阅后明确ratify，或批准非force revert/follow-up；禁止agent自行改历史 | 保留/撤销决定及Git写入授权 | R01/交付；R00只记录 |
+| D18 | MetaDrive/ScenarioNet数据授权 | 冻结dataset locator/revision/hash/license和partition authority | locator/revision/license/owner | R16A |
+| D19 | CityLearn数据授权 | 冻结challenge schema/data locator/revision/hash/license和held-out authority | locator/revision/license/owner | R16B |
 
 ### 10.1 决策记录格式
 
@@ -966,21 +1022,24 @@ Delivery verifier按固定顺序执行，首个失败项决定`NO_GO` reason；�
 
 ## 14. 外部开源和学术规范对齐
 
-详细的一手来源、版本和无法核验项记录在`docs/research/2026-08-25-recovery-upstream-standards-refresh.md`。主文档只保留会改变实现或交付门禁的规则。任何`latest`网页只能用于发现；生产身份必须回到本项目锁定release/commit和runtime conformance tests。
+详细的一手来源、版本和无法核验项记录在[上游规范刷新](research/2026-08-25-recovery-upstream-standards-refresh.md)。主文档只保留会改变实现或交付门禁的规则。任何`latest`网页只能用于发现；生产身份必须回到本项目锁定release/commit和runtime conformance tests。
 
 | 来源 | 本项目必须采用的规则 | 落地工作包 |
 |---|---|---|
-| [RLlib new API migration](https://docs.ray.io/en/latest/rllib/new-api-stack-migration-guide.html) | `AlgorithmConfig/PPOConfig`、`RLModule/MultiRLModule`、`ConnectorV2`、`EnvRunner`、`LearnerGroup`；新栈使用per-learner batch/resource配置 | R07 |
-| [RLlib multi-agent environments](https://docs.ray.io/en/latest/rllib/multi-agent-envs.html) | agent→module mapping、PettingZoo/OpenSpiel adapter和multi-agent episode语义必须由pinned runtime验证；external env能力变化时不得凭文档猜测 | R05A/R07/R13–R16B |
-| [Gymnasium env checker](https://gymnasium.farama.org/api/utils/#gymnasium.utils.env_checker.check_env) | 单智能体adapter运行official checker和seed/reset/step tests；checker pass不升级数学/行为正确性 | R12/R13/R16A |
-| [PettingZoo environment tests](https://pettingzoo.farama.org/content/environment_tests/) | AEC/Parallel adapter运行official API/parallel/seed tests；再叠加AutoMarkov information/reward/history tests | R14/R15/R16B |
+| [RLlib 2.56.1 new API migration](https://docs.ray.io/en/releases-2.56.1/rllib/new-api-stack-migration-guide.html) | `AlgorithmConfig/PPOConfig`、`RLModule/MultiRLModule`、`ConnectorV2`、`EnvRunner`、`LearnerGroup`；新栈使用per-learner batch/resource配置 | R07 |
+| [RLlib 2.56.1 environments](https://docs.ray.io/en/releases-2.56.1/rllib/package_ref/env.html) | external env under development，使用project-owned custom EnvRunner；agent→module/multi-agent语义由pinned runtime验证 | R05A/R07/R13–R16B |
+| [RLlib 2.56.1 checkpointing](https://docs.ray.io/en/releases-2.56.1/rllib/checkpoints.html) | checkpoint含pickle/class/state，只允许trainer-local recovery；跨域必须weights-only export | R07 |
+| [Gymnasium 1.2.2 Env API](https://gymnasium.farama.org/v1.2.2/api/env/) | `rllib-core`/Taxi candidate、MiniGrid、MPE2和sealed evaluator在各自1.2.2 profile运行checker/seed/reset/step tests | R12/R13/R14 |
+| [Gymnasium 1.3.0 Env API](https://gymnasium.farama.org/v1.3.0/api/env/) | sealed Taxi gold和MetaDrive 1.3.0 lock按该profile运行检查；不能套用1.2.2 identity | R12/R16A |
+| [Gymnasium 0.28.1 Env API](https://gymnasium.farama.org/v0.28.1/api/env/) | CityLearn兼容profile按0.28.1 contract运行检查；不得跨profile升级 | R16B |
+| [PettingZoo 1.26.1 environment tests](https://pettingzoo.farama.org/1.26.1/content/environment_tests/) | AEC/Parallel adapter运行official API/parallel/seed tests；再叠加AutoMarkov information/reward/history tests | R14/R15/R16B |
 | [MPE2 Simple Spread](https://mpe2.farama.org/environments/simple_spread/) | native observation/state维度和官方physics/reward来自pinned MPE2；full-state与native-local估计分开 | R14/R22 |
-| [vLLM 0.25.1 security](https://docs.vllm.ai/en/v0.25.1/usage/security/) | API key不是完整perimeter；只允许冻结route allowlist、loopback/network namespace和current-connection proof | R05A/R24 |
+| [vLLM 0.25.1 security](https://docs.vllm.ai/en/v0.25.1/usage/security/) | API key不是完整perimeter；internal listener与generation principal必须namespace/firewall/authenticated-IPC隔离，并冻结relay route allowlist与current-connection proof | R05A/R24 |
 | [safetensors](https://github.com/huggingface/safetensors) | 跨profile只交付finite weights-only tensors和strict manifest；不反序列化pickle/cloudpickle checkpoint | R07 |
-| [SLSA provenance v1.1](https://slsa.dev/spec/v1.1/provenance) | release build产生外部subject/build provenance；同仓hash allowlist不冒充独立签名来源 | D01/R02/R11 |
+| [SLSA v1.2](https://slsa.dev/spec/v1.2/) | release build产生外部subject/build provenance；level取决于builder/签名/隔离，同仓hash allowlist不冒充独立签名来源 | D01/R02/R11 |
 | [SPDX specifications](https://spdx.dev/use/specifications/) | SBOM使用可验证SPDX document/package/relationship语义，package/license/source可追溯 | R11/R27 |
 | [REUSE Specification 3.3](https://reuse.software/spec/) | 源文件/third-party材料具有machine-readable copyright/license metadata；restricted和no-license明确表达 | R11/R19 |
-| [GitHub Actions security hardening](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions) | action full-SHA pin、least permissions、不信任PR input、build/release凭据隔离 | R11 |
+| [GitHub Actions secure use](https://docs.github.com/en/actions/reference/security/secure-use) | action full-SHA pin、least permissions、不信任PR input、build/release凭据隔离 | R11 |
 | [OpenSSF Scorecard](https://scorecard.dev/) | 作为recommended hardening report；只有owner将其纳入release policy后才成为blocking gate | D07/R11 |
 | [ACM Artifact Review and Badging](https://www.acm.org/publications/policies/artifact-review-and-badging-current) | documented、complete、exercisable、reusable和independently reproduced分别给证据，不能互相替代 | R27/§13 |
 | [NeurIPS Paper Checklist](https://neurips.cc/public/guides/PaperChecklist) | 公开training/test details、error bars/statistics、compute和code/data availability边界 | R19/R27 |

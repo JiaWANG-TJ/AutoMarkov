@@ -10,8 +10,8 @@ from typing import Literal, cast
 import pytest
 import rfc8785
 
-import automarkov.canonical as canonical_module
-from automarkov.canonical import (
+import automarkov.domain.canonical as canonical_module
+from automarkov.domain.canonical import (
     MAX_CANONICAL_DOCUMENT_BYTES,
     MAX_JSON_NESTING_DEPTH,
     MAX_JSON_NODES,
@@ -26,7 +26,7 @@ from automarkov.canonical import (
     parse_json_payload,
     validate_and_measure_raw_json_tree,
 )
-from automarkov.domain import (
+from automarkov.domain.models import (
     RequestBudget,
     RequestPermissions,
     StrictFrozenModel,

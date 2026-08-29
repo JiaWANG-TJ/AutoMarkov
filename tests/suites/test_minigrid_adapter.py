@@ -5,14 +5,14 @@ from hashlib import sha256
 
 import pytest
 
-from automarkov.lifecycle import ArtifactReference
-from automarkov.remote_env_contracts import (
+from automarkov.contracts.remote_env import (
     BoxSpace,
     DictEntry,
     DictSpace,
     DiscreteSpace,
     FiniteTextSpace,
 )
+from automarkov.lifecycle import ArtifactReference
 from automarkov.suite_adapters import (
     IntegerResetSeedContract,
     MiniGridMemoryBackend,

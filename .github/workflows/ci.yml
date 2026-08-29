@@ -1,0 +1,282 @@
+# AutoMarkov CI matrix — static, unit/contract, integration, runtime-smoke, security, build, docs
+# Trigger: push to main, pull requests, workflow_dispatch
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Restr concurrency so duplicate runs for same ref cancel the earlier one
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ---------------------------------------------------------------------------
+# Per-job minimal permissions (principle of least privilege)
+# ---------------------------------------------------------------------------
+
+jobs:
+  # ---- 1. ci-metadata  — lock / profile verification ----
+  ci-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: Install frozen core dependencies
+        run: uv sync --locked
+      - name: Verify all profile locks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for profile in profiles/*; do
+            uv lock --check --directory "${profile}"
+          done
+
+  # ---- 2. ci-static  — Ruff + Pyright ----
+  ci-static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: Install dev dependencies
+        run: uv sync --locked --group dev
+      - name: Ruff lint
+        run: uv run ruff check src/ tests/
+      - name: Ruff format check
+        run: uv run ruff format --check src/ tests/
+      - name: Pyright
+        run: uv run pyright src/ tests/
+
+  # ---- 3. ci-unit-contract  — unit + contract tests ----
+  ci-unit-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: Install test dependencies
+        run: uv sync --locked --group dev --group test
+      - name: Unit tests
+        run: uv run pytest -q tests/unit/
+      - name: Contract tests
+        run: uv run pytest -q tests/contract/
+
+  # ---- 4. ci-integration  — integration tests ----
+  ci-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: Install test dependencies
+        run: uv sync --locked --group dev --group test
+      - name: Integration tests
+        run: uv run pytest -q tests/integration/
+
+  # ---- 5. ci-runtime-smoke  — profile import smoke tests ----
+  ci-runtime-smoke:
+    needs: ci-metadata
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        profile:
+          - authoring
+          - core
+          - env-citylearn
+          - env-metadrive
+          - env-minigrid
+          - env-mpe2
+          - env-smacv2
+          - ood-openspiel
+          - ood-pddl
+          - retrieval-tavily
+          - rllib-core
+          - rllib-taxi-synthesis
+          - runner-control
+          - sealed-env-taxi-gold
+          - sealed-evaluator-rllib
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.16"
+          enable-cache: false
+          restore-cache: false
+          save-cache: false
+      - name: Run profile import smoke
+        env:
+          PROFILE: ${{ matrix.profile }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          profile_root="profiles/${PROFILE}"
+          python_version="$(
+            python - "${profile_root}/profile.json" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as handle:
+              print(json.load(handle)["python_version"])
+          PY
+          )"
+          uv python install "${python_version}"
+          uv python pin --directory "${profile_root}" "${python_version}"
+          mapfile -t source_build_package < <(
+            python - "${profile_root}/pyproject.toml" <<'PY'
+          import sys
+          import tomllib
+
+          with open(sys.argv[1], "rb") as handle:
+              settings = tomllib.load(handle).get("tool", {}).get("uv", {})
+          for package in settings.get("no_build_isolation_package", []):
+              print(package)
+          PY
+          )
+          sync_omit_args=()
+          for package in "${source_build_package[@]}"; do
+            sync_omit_args+=(--no-install-package "${package}")
+          done
+          if [ "${PROFILE}" = "rllib-taxi-synthesis" ]; then
+            profile_cache="$(mktemp -d "/tmp/automarkov-taxi-uv-cache.XXXXXX")"
+            trap 'rm -rf -- "${profile_cache}"' EXIT
+            UV_CACHE_DIR="${profile_cache}" uv sync --locked --python "${python_version}" --no-dev --no-install-project --directory "${profile_root}"
+            "${profile_root}/.venv/bin/python" "${profile_root}/taxi_deny.py" harden --cache-root "${profile_cache}"
+            "${profile_root}/.venv/bin/python" "${profile_root}/taxi_deny.py" verify --cache-root "${profile_cache}"
+            rm -rf -- "${profile_cache}"
+            test ! -e "${profile_cache}"
+            trap - EXIT
+          else
+            uv sync --locked --python "${python_version}" --no-dev --no-install-project --directory "${profile_root}" "${sync_omit_args[@]}" && if [ "${#source_build_package[@]}" -gt 0 ]; then test "$("${profile_root}/.venv/bin/python" -c 'import importlib.metadata; print(importlib.metadata.version("setuptools"))')" = "84.0.0"; uv sync --locked --python "${python_version}" --no-dev --no-install-project --directory "${profile_root}"; fi
+          fi
+          actual_python_version="$("${profile_root}/.venv/bin/python" -c 'import platform; print(platform.python_version())')"
+          test "${actual_python_version}" = "${python_version}"
+          "${profile_root}/.venv/bin/python" -I - "${profile_root}/smoke.json" <<'PY'
+          import importlib
+          import importlib.util
+          import json
+          import sys
+          from pathlib import Path
+
+          smoke = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          for module_name in smoke["imports"]:
+              importlib.import_module(module_name)
+          visible = [
+              module_name
+              for module_name in smoke["forbidden_imports"]
+              if importlib.util.find_spec(module_name) is not None
+          ]
+          if visible:
+              raise SystemExit(f"forbidden imports are visible: {visible}")
+          PY
+
+  # ---- 6. ci-security  — security negative tests ----
+  ci-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: Install test dependencies
+        run: uv sync --locked --group dev --group test
+      - name: Security tests
+        run: uv run pytest -q tests/security/
+
+  # ---- 7. ci-build  — build wheel + sdist ----
+  ci-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral_sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: Build wheel
+        run: uv build --wheel
+      - name: Build sdist
+        run: uv build --sdist
+      - name: Verify artifacts
+        run: |
+          set -euo pipefail
+          ls dist/
+          test "$(find dist/ -name '*.whl' | wc -l)" -eq 1
+          test "$(find dist/ -name '*.tar.gz' | wc -l)" -eq 1
+
+  # ---- 8. ci-docs  — docs schema links ----
+  ci-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: astral_sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: Install docs dependencies
+        run: uv sync --locked --group docs
+      - name: Verify docs structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d docs/ || { echo "::error::docs/ directory missing"; exit 1; }
+          # Check for orphaned markdown files referenced by no index
+          for md in docs/**/*.md; do
+            test -f "$md" || continue
+            # Ensure every .md file is reachable (basic existence check)
+            echo "OK: $md"
+          done
+          # Verify JSON/YAML schema files parse cleanly
+          for schema in docs/**/*.json docs/**/*.yml docs/**/*.yaml; do
+            test -f "$schema" || continue
+            uv run python -c "
+          import json, sys
+          p = sys.argv[1]
+          try:
+              if p.endswith('.json'):
+                  json.load(open(p))
+              else:
+                  import yaml; yaml.safe_load(open(p))
+          except Exception as e:
+              print(f'::error::Invalid schema {p}: {e}', file=sys.stderr)
+              sys.exit(1)
+          " "$schema"
+            echo "OK: $schema"
+          done

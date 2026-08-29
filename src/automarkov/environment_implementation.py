@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from automarkov.environment_contracts import (
+from automarkov.contracts.environment import (
     FrozenImplementationCatalog,
     ImplementationPlan,
     SignedRouteRequest,

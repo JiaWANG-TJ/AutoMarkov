@@ -19,9 +19,10 @@ from automarkov.adapters import (
     ScriptedRemoteEnv,
     ScriptedTrainingRunner,
 )
-from automarkov.canonical import MAX_CANONICAL_DOCUMENT_BYTES
-from automarkov.domain import ArtifactId, RunId, Sha256Digest, VerifiedEventHead
-from automarkov.errors import ArtifactSchemaError
+from automarkov.application.stages import STAGE_FUNCTIONS
+from automarkov.domain.canonical import MAX_CANONICAL_DOCUMENT_BYTES
+from automarkov.domain.errors import ArtifactSchemaError, CapabilityDeferredError
+from automarkov.domain.models import ArtifactId, RunId, Sha256Digest, VerifiedEventHead
 from automarkov.lifecycle import ArtifactReference, LifecycleCommitResult, RunProjection
 from automarkov.public import (
     ArtifactBytesResult,
@@ -79,6 +80,15 @@ def test_adapter_exports_preserve_t01_and_add_the_sqlite_repository() -> None:
         adapter_module.PrivilegedUnixRuntimeConnectionProvider
         is PrivilegedUnixRuntimeConnectionProvider
     )
+
+
+@pytest.mark.parametrize(
+    "stage_id",
+    ("public_tests", "package_candidate", "terminal_cas"),
+)
+def test_unverified_terminal_compile_stages_fail_closed(stage_id: str) -> None:
+    with pytest.raises(CapabilityDeferredError):
+        STAGE_FUNCTIONS[stage_id](object())
 
 
 @pytest.mark.parametrize(

@@ -17,7 +17,7 @@ from typing import cast
 import pytest
 from pydantic import ValidationError
 
-from automarkov.canonical import canonical_json_bytes
+from automarkov.domain.canonical import canonical_json_bytes
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _PROFILES_ROOT = _REPOSITORY_ROOT / "profiles"
@@ -79,7 +79,7 @@ _RUNTIME_SECURITY_IDENTITY_VALUES = {
 
 def _provenance() -> ModuleType:
     try:
-        return importlib.import_module("automarkov.provenance")
+        return importlib.import_module("automarkov.security.provenance")
     except ModuleNotFoundError:
         pytest.fail("T04 requires the public automarkov.provenance deep module")
 
@@ -898,6 +898,19 @@ def test_verify_provenance_cli_uses_the_same_closed_report() -> None:
     )
     assert report.valid is True
     assert report.profile_count == len(_PROFILE_IDS)
+
+
+def test_cli_does_not_expose_planned_experiment_commands() -> None:
+    completed = subprocess.run(
+        ["python", "-m", "automarkov", "--help"],
+        cwd=_REPOSITORY_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert "exp-" not in completed.stdout
 
 
 def test_verifier_rejects_semantic_summary_drift_and_unresolved_built_evidence(

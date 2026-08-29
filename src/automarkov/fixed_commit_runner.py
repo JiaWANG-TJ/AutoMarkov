@@ -29,7 +29,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 )
 from pydantic import Field, model_validator
 
-from automarkov.canonical import (
+from automarkov.contracts.task import FixedCommitRunAuthorization, RunManifest
+from automarkov.domain.canonical import (
     CanonicalJsonValue,
     FrozenSequence,
     FrozenStringMapping,
@@ -39,15 +40,15 @@ from automarkov.canonical import (
     canonical_json_bytes,
     parse_json_payload,
 )
-from automarkov.domain import (
+from automarkov.domain.models import (
     ArtifactId,
     StrictFrozenModel,
     VerifiedEventHead,
 )
-from automarkov.domain import (
+from automarkov.domain.models import (
     RunId as DomainRunId,
 )
-from automarkov.domain import (
+from automarkov.domain.models import (
     Sha256Digest as DomainSha256Digest,
 )
 from automarkov.lifecycle import (
@@ -65,14 +66,13 @@ from automarkov.lifecycle import (
     TerminalResult,
     validate_lifecycle_command,
 )
-from automarkov.provenance import RuntimeProfileId, RuntimeProfileManifest
 from automarkov.public import (
     ArtifactPutResult,
     ArtifactRepository,
     AuthenticatedCommandContext,
     LifecycleCommandInput,
 )
-from automarkov.task_contracts import FixedCommitRunAuthorization, RunManifest
+from automarkov.security.provenance import RuntimeProfileId, RuntimeProfileManifest
 
 NonEmptyId = Annotated[
     str,

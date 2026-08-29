@@ -14,10 +14,10 @@ from automarkov.multi_agent_suite_adapters import (
     build_multi_agent_suite_profile_contract,
     formal_multi_agent_suite_readiness,
 )
-from automarkov.provenance import RuntimeProfileManifest
+from automarkov.security.provenance import RuntimeProfileManifest
 
 ROOT = Path(__file__).resolve().parents[2]
-from automarkov.multi_agent_suite_contracts import (
+from automarkov.contracts.multi_agent import (
     Mpe2AdapterManifest,
     suite_adapter_parent_references,
 )

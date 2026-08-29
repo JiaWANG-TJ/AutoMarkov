@@ -8,12 +8,11 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
+from automarkov.lifecycle import ArtifactReference
 from automarkov.rllib_training import (
     CtdePolicySpec,
     InformationBoundaryAudit,
     InformationLeakReport,
-    TrainingJobManifest,
-    TrainingPolicyKind,
 )
 
 
@@ -34,10 +33,10 @@ def _ctde_spec(
 
 def _audit(spec: CtdePolicySpec | None = None, passed: bool = True) -> InformationBoundaryAudit:
     return InformationBoundaryAudit(
-        training_job={
-            "artifact_id": "artifact_" + "a" * 64,
-            "payload_hash": "sha256:" + "c" * 64,
-        },
+        training_job=ArtifactReference(
+            artifact_id="artifact_" + "a" * 64,
+            payload_hash="sha256:" + "c" * 64,
+        ),
         ctde_spec=spec or _ctde_spec(),
         leaks=(),
         passed=passed,
@@ -106,10 +105,10 @@ class TestInformationBoundaryAudit:
             ),
         )
         audit = InformationBoundaryAudit(
-            training_job={
-                "artifact_id": "artifact_" + "a" * 64,
-                "payload_hash": "sha256:" + "d" * 64,
-            },
+            training_job=ArtifactReference(
+                artifact_id="artifact_" + "a" * 64,
+                payload_hash="sha256:" + "d" * 64,
+            ),
             ctde_spec=_ctde_spec(),
             leaks=leaks,
             passed=False,

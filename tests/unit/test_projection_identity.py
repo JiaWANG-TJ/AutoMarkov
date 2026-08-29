@@ -8,7 +8,7 @@ from typing import cast
 from uuid import UUID
 
 from automarkov import lifecycle
-from automarkov.canonical import canonical_json_bytes
+from automarkov.domain.canonical import canonical_json_bytes
 from automarkov.lifecycle import (
     ZERO_EVENT_HASH,
     EventHead,

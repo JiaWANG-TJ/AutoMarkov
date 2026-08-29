@@ -1,10 +1,3 @@
-from __future__ import annotations
+"""Backward-compatible re-export shim — use automarkov.application.api directly."""
 
-from automarkov.adapters import InMemoryCompiler
-from automarkov.domain import RunId, TaskRequest
-from automarkov.public import Compiler
-
-
-def compile_task(request: TaskRequest, *, compiler: Compiler | None = None) -> RunId:
-    active_compiler = InMemoryCompiler() if compiler is None else compiler
-    return active_compiler.start(request)
+from automarkov.application.api import *

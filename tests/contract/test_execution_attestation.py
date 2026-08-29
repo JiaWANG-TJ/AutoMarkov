@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from automarkov.adapters import FixedCommitExecutionSandbox
-from automarkov.domain import ArtifactId, RunId, Sha256Digest, VerifiedEventHead
+from automarkov.domain.models import ArtifactId, RunId, Sha256Digest, VerifiedEventHead
 from automarkov.fixed_commit_runner import (
     ExecutionResourceUsage,
     FixedCommitExecutionRequest,

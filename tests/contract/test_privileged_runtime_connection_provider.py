@@ -13,11 +13,11 @@ from pathlib import Path
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from automarkov.canonical import canonical_json_bytes
-from automarkov.llm_contracts import (
+from automarkov.contracts.llm import (
     REQUIRED_RUNTIME_ROUTE_POLICY_HASH,
     RuntimeCurrentConnectionProof,
 )
+from automarkov.domain.canonical import canonical_json_bytes
 from automarkov.local_llm_runtime import (
     CurrentRuntimeConnectionIdentityError,
     PrivilegedUnixRuntimeConnectionProvider,

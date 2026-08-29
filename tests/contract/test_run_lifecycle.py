@@ -27,22 +27,22 @@ from automarkov.adapters import (
     InMemoryArtifactRepository,
     SqliteArtifactRepository,
 )
-from automarkov.canonical import (
+from automarkov.contracts.classification import ClassificationResult
+from automarkov.contracts.task import (
+    FixedCommitRunAuthorization,
+    RunManifest,
+    TaskContract,
+    TaskContractTraceabilityReport,
+    TextCriticReport,
+    task_contract_claim_paths,
+)
+from automarkov.domain.canonical import (
     CanonicalPayloadCodec,
     FrozenSequence,
     SafeCanonicalInt,
     canonical_json_bytes,
 )
-from automarkov.classification_contracts import ClassificationResult
-from automarkov.domain import (
-    ArtifactId,
-    RunId,
-    RunState,
-    Sha256Digest,
-    StrictFrozenModel,
-    VerifiedEventHead,
-)
-from automarkov.errors import (
+from automarkov.domain.errors import (
     ArtifactIntegrityError,
     ArtifactParentContractError,
     ArtifactWriteAuthorityError,
@@ -53,6 +53,14 @@ from automarkov.errors import (
     RunProjectorIdentityError,
     TerminalProvenanceError,
     UnknownArtifactError,
+)
+from automarkov.domain.models import (
+    ArtifactId,
+    RunId,
+    RunState,
+    Sha256Digest,
+    StrictFrozenModel,
+    VerifiedEventHead,
 )
 from automarkov.fixed_commit_runner import (
     ArtifactRepositoryRunnerCheckpointFinalizer,
@@ -94,7 +102,6 @@ from automarkov.lifecycle import (
     validate_lifecycle_command,
     validate_projection_request,
 )
-from automarkov.provenance import RuntimeProfileManifest
 from automarkov.public import (
     AuthenticatedCommandContext,
     CommandAuthority,
@@ -119,14 +126,7 @@ from automarkov.sealed_evaluation import (
     sign_e2e_request,
     sign_e2e_verdict,
 )
-from automarkov.task_contracts import (
-    FixedCommitRunAuthorization,
-    RunManifest,
-    TaskContract,
-    TaskContractTraceabilityReport,
-    TextCriticReport,
-    task_contract_claim_paths,
-)
+from automarkov.security.provenance import RuntimeProfileManifest
 
 _ISSUED_AT = "2026-08-10T11:00:00Z"
 _STARTED_AT = "2026-08-10T10:59:00Z"

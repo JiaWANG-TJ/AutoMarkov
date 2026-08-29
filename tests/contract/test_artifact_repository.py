@@ -14,21 +14,21 @@ import pytest
 import rfc8785
 from pydantic import ValidationError
 
+import automarkov.adapters.repository._core as repository_core
 import automarkov.public as public_module
-import automarkov.repository as repository_module
 from automarkov.adapters import InMemoryArtifactRepository, SqliteArtifactRepository
-from automarkov.canonical import (
+from automarkov.domain.canonical import (
     MAX_CANONICAL_DOCUMENT_BYTES,
     MAX_JSON_PAYLOAD_BYTES,
     CanonicalPayloadCodec,
 )
-from automarkov.domain import (
+from automarkov.domain.errors import AutoMarkovError
+from automarkov.domain.models import (
     ArtifactId,
     Sha256Digest,
     StrictFrozenModel,
     TaskRequest,
 )
-from automarkov.errors import AutoMarkovError
 from automarkov.public import (
     ArtifactPutRequest,
     ArtifactPutResult,
@@ -391,7 +391,7 @@ def test_identity_collision_is_idempotent_only_for_identical_canonical_bytes(
 
     with monkeypatch.context() as patch:
         patch.setattr(
-            repository_module,
+            repository_core,
             "_default_artifact_id",
             lambda _: forced_id,
         )

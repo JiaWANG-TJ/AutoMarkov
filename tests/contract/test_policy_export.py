@@ -5,12 +5,13 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from automarkov.policy_export import (
+from automarkov.contracts.policy import (
     CheckpointTreeEntry,
     CheckpointTreeManifest,
     PolicyExportManifest,
     TensorSpec,
 )
+from automarkov.lifecycle import ArtifactReference
 
 HX = "0" * 64  # valid hex for sha256
 ART = "artifact_" + HX
@@ -32,15 +33,15 @@ def _tensor(name: str) -> TensorSpec:
 def _export() -> PolicyExportManifest:
     return PolicyExportManifest(
         export_id="export001", experiment_id="expt19", run_id="runt19001",
-        candidate_bundle={"artifact_id": ART, "payload_hash": HASH},
+        candidate_bundle=ArtifactReference(artifact_id=ART, payload_hash=HASH),
         seed=1001,
-        training_terminal_record={"artifact_id": ART, "payload_hash": HASH},
-        export_terminal_record={"artifact_id": ART, "payload_hash": HASH},
+        training_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+        export_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
         source_checkpoint_commitment=HASH, architecture_id="arch001",
         connector_id="conn001", observation_adapter_id="obs001",
         action_adapter_id="act001", trainer_execution_id="trainer001",
         exporter_execution_id="exporter001",
-        tensor_artifact={"artifact_id": ART, "payload_hash": HASH},
+        tensor_artifact=ArtifactReference(artifact_id=ART, payload_hash=HASH),
         tensors=(_tensor("policy"), _tensor("value")),
         issued_at="2026-08-21T12:00:00Z", nonce_b64url="A" * 43,
         principal_id="principal001", signing_key_id="key001",
@@ -108,15 +109,15 @@ class TestPolicyExportManifest:
         with pytest.raises(ValidationError, match="at least one"):
             PolicyExportManifest(
                 export_id="e1", experiment_id="ex", run_id="rx",
-                candidate_bundle={"artifact_id": ART, "payload_hash": HASH},
+                candidate_bundle=ArtifactReference(artifact_id=ART, payload_hash=HASH),
                 seed=1001,
-                training_terminal_record={"artifact_id": ART, "payload_hash": HASH},
-                export_terminal_record={"artifact_id": ART, "payload_hash": HASH},
+                training_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+                export_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
                 source_checkpoint_commitment=HASH, architecture_id="a",
                 connector_id="c", observation_adapter_id="o",
                 action_adapter_id="a", trainer_execution_id="t",
                 exporter_execution_id="x",
-                tensor_artifact={"artifact_id": ART, "payload_hash": HASH},
+                tensor_artifact=ArtifactReference(artifact_id=ART, payload_hash=HASH),
                 tensors=(),
                 issued_at="2026-08-21T12:00:00Z", nonce_b64url="A" * 43,
                 principal_id="p", signing_key_id="k",
@@ -127,15 +128,15 @@ class TestPolicyExportManifest:
         with pytest.raises(ValidationError, match="unique"):
             PolicyExportManifest(
                 export_id="e2", experiment_id="ex", run_id="rx",
-                candidate_bundle={"artifact_id": ART, "payload_hash": HASH},
+                candidate_bundle=ArtifactReference(artifact_id=ART, payload_hash=HASH),
                 seed=1001,
-                training_terminal_record={"artifact_id": ART, "payload_hash": HASH},
-                export_terminal_record={"artifact_id": ART, "payload_hash": HASH},
+                training_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+                export_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
                 source_checkpoint_commitment=HASH, architecture_id="a",
                 connector_id="c", observation_adapter_id="o",
                 action_adapter_id="a", trainer_execution_id="t",
                 exporter_execution_id="x",
-                tensor_artifact={"artifact_id": ART, "payload_hash": HASH},
+                tensor_artifact=ArtifactReference(artifact_id=ART, payload_hash=HASH),
                 tensors=(_tensor("dup"), _tensor("dup")),
                 issued_at="2026-08-21T12:00:00Z", nonce_b64url="A" * 43,
                 principal_id="p", signing_key_id="k",

@@ -6,8 +6,7 @@ from copy import deepcopy
 import pytest
 from pydantic import ValidationError
 
-from automarkov.domain import ArtifactId, Sha256Digest
-from automarkov.llm_contracts import (
+from automarkov.contracts.llm import (
     REQUIRED_RUNTIME_ROUTE_POLICY_HASH,
     LlmCompletionResponseArtifact,
     LlmCompletionResult,
@@ -24,6 +23,7 @@ from automarkov.llm_contracts import (
     RuntimeProbeEvidence,
     RuntimeProcessEvidence,
 )
+from automarkov.domain.models import ArtifactId, Sha256Digest
 
 _MODEL_REVISION = "995ad96eacd98c81ed38be0c5b274b04031597b0"
 _MODEL_ID = "Qwen/Qwen3.6-35B-A3B"

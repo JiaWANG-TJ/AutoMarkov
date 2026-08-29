@@ -14,16 +14,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
 from automarkov.adapters import InMemoryArtifactRepository
-from automarkov.canonical import canonical_json_bytes
-from automarkov.domain import Sha256Digest
-from automarkov.evidence_access import (
-    EvidenceAccessController,
-    EvidenceCapabilityGrant,
-    EvidenceStoreRef,
-    GenerationEvidenceView,
-    validate_evidence_grant_payload,
-)
-from automarkov.llm_contracts import (
+from automarkov.contracts.llm import (
     OFFICIAL_QWEN_WEIGHT_SHARD_HASHES,
     REQUIRED_RUNTIME_ROUTE_POLICY_HASH,
     LlmCompletionRequest,
@@ -38,6 +29,15 @@ from automarkov.llm_contracts import (
     RuntimePackageEvidence,
     RuntimeProcessEvidence,
     UserChatMessage,
+)
+from automarkov.domain.canonical import canonical_json_bytes
+from automarkov.domain.models import Sha256Digest
+from automarkov.evidence_access import (
+    EvidenceAccessController,
+    EvidenceCapabilityGrant,
+    EvidenceStoreRef,
+    GenerationEvidenceView,
+    validate_evidence_grant_payload,
 )
 from automarkov.local_llm_runtime import (
     AttachedLocalLlmRuntime,

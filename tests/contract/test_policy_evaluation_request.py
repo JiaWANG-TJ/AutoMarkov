@@ -9,13 +9,13 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from automarkov.policy_export import (
+from automarkov.contracts.policy import (
     CANONICAL_TEN_SEEDS,
     PolicyEvaluationOutcome,
     PolicyEvaluationRequest,
     PolicyEvaluationSeedBinding,
 )
-
+from automarkov.lifecycle import ArtifactReference
 
 ART = "artifact_" + "a" * 64
 HASH = "sha256:" + "0" * 64
@@ -26,23 +26,23 @@ def _seed_binding(seed: int, branch: str = "success") -> PolicyEvaluationSeedBin
         return PolicyEvaluationSeedBinding(
             seed=seed,
             branch="success",
-            training_terminal_record={"artifact_id": ART, "payload_hash": HASH},
-            export_terminal_record={"artifact_id": ART, "payload_hash": HASH},
-            export_manifest={"artifact_id": ART, "payload_hash": HASH},
-            tensor_artifact={"artifact_id": ART, "payload_hash": HASH},
+            training_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+            export_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+            export_manifest=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+            tensor_artifact=ArtifactReference(artifact_id=ART, payload_hash=HASH),
         )
     elif branch == "training_failure":
         return PolicyEvaluationSeedBinding(
             seed=seed,
             branch="training_failure",
-            training_terminal_record={"artifact_id": ART, "payload_hash": HASH},
+            training_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
         )
     else:
         return PolicyEvaluationSeedBinding(
             seed=seed,
             branch="export_failure",
-            training_terminal_record={"artifact_id": ART, "payload_hash": HASH},
-            export_terminal_record={"artifact_id": ART, "payload_hash": HASH},
+            training_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+            export_terminal_record=ArtifactReference(artifact_id=ART, payload_hash=HASH),
         )
 
 
@@ -56,11 +56,11 @@ def _request(
         request_id=prefix,
         experiment_id="expt19",
         run_id="runt19eval",
-        candidate_bundle={"artifact_id": ART, "payload_hash": HASH},
-        run_manifest={"artifact_id": ART, "payload_hash": HASH},
-        e2e_verdict={"artifact_id": ART, "payload_hash": HASH},
-        smoke_attestation={"artifact_id": ART, "payload_hash": HASH},
-        suite_calibration={"artifact_id": ART, "payload_hash": HASH},
+        candidate_bundle=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+        run_manifest=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+        e2e_verdict=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+        smoke_attestation=ArtifactReference(artifact_id=ART, payload_hash=HASH),
+        suite_calibration=ArtifactReference(artifact_id=ART, payload_hash=HASH),
         evaluator_profile_id="evalprofile01",
         evaluator_profile_hash=HASH,
         observation_adapter_id="obsadapter01",
@@ -105,9 +105,9 @@ class TestPolicyEvaluationSeedBinding:
             PolicyEvaluationSeedBinding(
                 seed=1001,
                 branch="success",
-                training_terminal_record={
-                    "artifact_id": ART, "payload_hash": HASH
-                },
+                training_terminal_record=ArtifactReference(
+                    artifact_id=ART, payload_hash=HASH
+                ),
             )
 
     def test_training_failure_rejects_extra_fields(self) -> None:
@@ -115,10 +115,10 @@ class TestPolicyEvaluationSeedBinding:
             PolicyEvaluationSeedBinding(
                 seed=1001,
                 branch="training_failure",
-                training_terminal_record={
-                    "artifact_id": ART, "payload_hash": HASH
-                },
-                export_manifest={"artifact_id": ART, "payload_hash": HASH},
+                training_terminal_record=ArtifactReference(
+                    artifact_id=ART, payload_hash=HASH
+                ),
+                export_manifest=ArtifactReference(artifact_id=ART, payload_hash=HASH),
             )
 
     def test_rejects_seed_outside_range(self) -> None:
@@ -194,11 +194,11 @@ def _request_fields() -> dict:
         "request_id": "req001",
         "experiment_id": "expt19",
         "run_id": "runt19eval",
-        "candidate_bundle": {"artifact_id": ART, "payload_hash": HASH},
-        "run_manifest": {"artifact_id": ART, "payload_hash": HASH},
-        "e2e_verdict": {"artifact_id": ART, "payload_hash": HASH},
-        "smoke_attestation": {"artifact_id": ART, "payload_hash": HASH},
-        "suite_calibration": {"artifact_id": ART, "payload_hash": HASH},
+        "candidate_bundle": ArtifactReference(artifact_id=ART, payload_hash=HASH),
+        "run_manifest": ArtifactReference(artifact_id=ART, payload_hash=HASH),
+        "e2e_verdict": ArtifactReference(artifact_id=ART, payload_hash=HASH),
+        "smoke_attestation": ArtifactReference(artifact_id=ART, payload_hash=HASH),
+        "suite_calibration": ArtifactReference(artifact_id=ART, payload_hash=HASH),
         "evaluator_profile_id": "evalprofile01",
         "evaluator_profile_hash": HASH,
         "observation_adapter_id": "obsadapter01",

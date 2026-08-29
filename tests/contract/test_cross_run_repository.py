@@ -16,15 +16,15 @@ from automarkov.adapters import (
     InMemoryArtifactRepository,
     SqliteArtifactRepository,
 )
-from automarkov.canonical import (
+from automarkov.domain.canonical import (
     CanonicalPayloadCodec,
     FrozenSequence,
     FrozenStringMapping,
     SafeCanonicalInt,
     canonical_json_bytes,
 )
-from automarkov.domain import StrictFrozenModel
-from automarkov.errors import ArtifactIntegrityError, EventReplayConflictError
+from automarkov.domain.errors import ArtifactIntegrityError, EventReplayConflictError
+from automarkov.domain.models import StrictFrozenModel
 from automarkov.lifecycle import (
     RUN_PROJECTOR_HASH,
     RUN_PROJECTOR_VERSION,

@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
-from automarkov.evidence_contracts import TAVILY_SLOT_IDS
+from automarkov.contracts.evidence import TAVILY_SLOT_IDS
 from automarkov.tavily_gateway import (
     EvidenceBudgetLimitError,
     SqliteTavilyKeyLeaseStore,

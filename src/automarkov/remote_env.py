@@ -28,18 +28,7 @@ from cryptography.x509.oid import (
     SignatureAlgorithmOID,
 )
 
-from automarkov.canonical import (
-    MAX_JSON_PAYLOAD_BYTES,
-    canonical_json_bytes,
-    parse_json_payload,
-)
-from automarkov.remote_env_codec import (
-    decode_remote_env_frame,
-    encode_remote_env_frame,
-    make_tensor_descriptor,
-    remote_env_transition_hash,
-)
-from automarkov.remote_env_contracts import (
+from automarkov.contracts.remote_env import (
     BoxSpace,
     DiscreteSpace,
     MultiAgentStepResultPayload,
@@ -55,6 +44,17 @@ from automarkov.remote_env_contracts import (
     RemoteEnvTlsEndpoint,
     StepResultPayload,
     TensorDescriptor,
+)
+from automarkov.domain.canonical import (
+    MAX_JSON_PAYLOAD_BYTES,
+    canonical_json_bytes,
+    parse_json_payload,
+)
+from automarkov.remote_env_codec import (
+    decode_remote_env_frame,
+    encode_remote_env_frame,
+    make_tensor_descriptor,
+    remote_env_transition_hash,
 )
 
 _CERTIFICATE_URI_PREFIX = "urn:automarkov:remote-env:v1:"

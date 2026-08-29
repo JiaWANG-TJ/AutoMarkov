@@ -5,13 +5,13 @@ from hashlib import sha256
 import pytest
 from pydantic import ValidationError
 
-from automarkov.lifecycle import ArtifactReference
-from automarkov.multi_agent_suite_adapters import CityLearnSuiteAdapter
-from automarkov.multi_agent_suite_contracts import (
+from automarkov.contracts.multi_agent import (
     CityLearnAdapterManifest,
     CityLearnEnergyBalance,
     PettingZooKeysetAudit,
 )
+from automarkov.lifecycle import ArtifactReference
+from automarkov.multi_agent_suite_adapters import CityLearnSuiteAdapter
 
 
 def _ref(name: str, digit: str) -> ArtifactReference:

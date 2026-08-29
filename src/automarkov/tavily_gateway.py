@@ -15,18 +15,7 @@ from secrets import token_hex
 from typing import Literal, Protocol, cast
 from urllib.parse import urlsplit
 
-from automarkov.canonical import canonical_json_bytes, parse_json_payload
-from automarkov.domain import (
-    EvidenceStoreRef,
-    GenerationEvidenceView,
-    StrictFrozenModel,
-)
-from automarkov.errors import (
-    EvidenceBudgetLimitError,
-    EvidenceGatewayAuthenticationError,
-    EvidenceProviderContractError,
-)
-from automarkov.evidence_contracts import (
+from automarkov.contracts.evidence import (
     TAVILY_SLOT_IDS,
     AblationExecutionPlanRef,
     CrawlEvidenceRequest,
@@ -46,6 +35,17 @@ from automarkov.evidence_contracts import (
     RawEvidenceDocumentArtifact,
     SearchEvidenceRequest,
     SearchSnapshot,
+)
+from automarkov.domain.canonical import canonical_json_bytes, parse_json_payload
+from automarkov.domain.errors import (
+    EvidenceBudgetLimitError,
+    EvidenceGatewayAuthenticationError,
+    EvidenceProviderContractError,
+)
+from automarkov.domain.models import (
+    EvidenceStoreRef,
+    GenerationEvidenceView,
+    StrictFrozenModel,
 )
 from automarkov.lifecycle import ArtifactReference
 from automarkov.public import (

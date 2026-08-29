@@ -6,9 +6,9 @@ from hashlib import sha256
 import pytest
 from pydantic import ValidationError
 
+from automarkov.contracts.multi_agent import Smacv2AdapterManifest
 from automarkov.lifecycle import ArtifactReference
 from automarkov.multi_agent_suite_adapters import Smacv2SuiteAdapter
-from automarkov.multi_agent_suite_contracts import Smacv2AdapterManifest
 
 
 def _ref(name: str, digit: str) -> ArtifactReference:

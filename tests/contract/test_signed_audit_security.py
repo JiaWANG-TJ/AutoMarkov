@@ -10,7 +10,7 @@ from uuid import UUID
 import pytest
 import test_cross_run_repository as cross_run
 
-from automarkov.errors import (
+from automarkov.domain.errors import (
     CommandAuthenticationError,
     EventReplayConflictError,
     TerminalProvenanceError,

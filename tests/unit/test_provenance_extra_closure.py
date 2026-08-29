@@ -1,4 +1,4 @@
-from automarkov.provenance import _target_installation_package_names
+from automarkov.security.provenance import _target_installation_package_names
 
 
 def test_target_closure_revisits_base_dependencies_for_late_extras() -> None:

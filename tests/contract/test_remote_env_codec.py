@@ -6,6 +6,7 @@ import struct
 import pytest
 from pydantic import ValidationError
 
+from automarkov.contracts.remote_env import SPACE_ADAPTER, RemoteEnvFrameHeader
 from automarkov.remote_env_codec import (
     canonicalize_tensor_bytes,
     decode_remote_env_frame,
@@ -14,7 +15,6 @@ from automarkov.remote_env_codec import (
     remote_env_frame_hash,
     remote_env_transition_hash,
 )
-from automarkov.remote_env_contracts import SPACE_ADAPTER, RemoteEnvFrameHeader
 
 _DIGEST = "sha256:" + "1" * 64
 _SESSION = "sha256:" + "2" * 64

@@ -5,7 +5,9 @@ from typing import Annotated, Literal, Self, TypeAlias, cast
 
 from pydantic import AfterValidator, Field, model_validator
 
-from automarkov.canonical import (
+from automarkov.contracts.task import TaskValidationTargetSpec
+from automarkov.contracts.validation import ValidationClaim, ValidationReport
+from automarkov.domain.canonical import (
     CanonicalPayloadCodec,
     FrozenSequence,
     NonNegativeSafeCanonicalInt,
@@ -13,7 +15,7 @@ from automarkov.canonical import (
     StrictFalse,
     StrictTrue,
 )
-from automarkov.domain import StrictFrozenModel
+from automarkov.domain.models import StrictFrozenModel
 from automarkov.lifecycle import (
     ArtifactReference,
     ArtifactSuperseded,
@@ -31,8 +33,6 @@ from automarkov.lifecycle import (
     encode_event_record,
     parse_event_bytes,
 )
-from automarkov.task_contracts import TaskValidationTargetSpec
-from automarkov.validation_contracts import ValidationClaim, ValidationReport
 
 PublicReportKind: TypeAlias = Literal[
     "unit_validation",

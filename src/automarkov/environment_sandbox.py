@@ -5,8 +5,7 @@ from typing import Protocol, TypeVar, cast
 
 from pydantic import BaseModel, TypeAdapter
 
-from automarkov.domain import VerifiedEventHead
-from automarkov.environment_contracts import (
+from automarkov.contracts.environment import (
     EnvironmentCandidateBundle,
     EnvironmentSandboxRequest,
     EnvironmentSandboxResult,
@@ -17,8 +16,9 @@ from automarkov.environment_contracts import (
     SandboxLimits,
     SandboxPolicy,
 )
+from automarkov.domain.models import VerifiedEventHead
 from automarkov.lifecycle import ArtifactReference, CanonicalTimestamp
-from automarkov.provenance import RuntimeProfileId
+from automarkov.security.provenance import RuntimeProfileId
 
 PayloadModel = TypeVar("PayloadModel", bound=BaseModel)
 

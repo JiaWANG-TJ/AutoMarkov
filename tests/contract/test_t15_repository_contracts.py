@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from automarkov.adapters import InMemoryArtifactRepository
-from automarkov.errors import ArtifactSchemaError
+from automarkov.domain.errors import ArtifactSchemaError
 
 
 @pytest.mark.parametrize(

@@ -13,9 +13,9 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import Field
 
 from automarkov.adapters import InMemoryArtifactRepository
-from automarkov.canonical import canonical_json_bytes
-from automarkov.domain import RunState, StrictFrozenModel
-from automarkov.errors import AutoMarkovError
+from automarkov.domain.canonical import canonical_json_bytes
+from automarkov.domain.errors import AutoMarkovError
+from automarkov.domain.models import RunState, StrictFrozenModel
 from automarkov.lifecycle import (
     RUN_PROJECTOR_HASH,
     RUN_PROJECTOR_VERSION,

@@ -20,8 +20,16 @@ from cryptography.hazmat.primitives.serialization import (
 )
 from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
 
-from automarkov.canonical import parse_json_payload
-from automarkov.domain import Sha256Digest
+from automarkov.contracts.remote_env import (
+    RemoteEnvCertificateIdentity,
+    RemoteEnvFrameHeader,
+    RemoteEnvHandshake,
+    RemoteEnvRunnerGrantPolicy,
+    RemoteEnvSessionTranscript,
+    RemoteEnvTlsEndpoint,
+)
+from automarkov.domain.canonical import parse_json_payload
+from automarkov.domain.models import Sha256Digest
 from automarkov.remote_env import (
     REMOTE_ENV_GRANT_SCHEMA_HASH,
     RemoteEnvRuntimeUnavailable,
@@ -34,14 +42,6 @@ from automarkov.remote_env import (
     sign_remote_env_grant,
 )
 from automarkov.remote_env_codec import decode_remote_env_frame, encode_remote_env_frame
-from automarkov.remote_env_contracts import (
-    RemoteEnvCertificateIdentity,
-    RemoteEnvFrameHeader,
-    RemoteEnvHandshake,
-    RemoteEnvRunnerGrantPolicy,
-    RemoteEnvSessionTranscript,
-    RemoteEnvTlsEndpoint,
-)
 
 _DIGEST = "sha256:" + "1" * 64
 _NONCE = base64.urlsafe_b64encode(bytes(32)).decode("ascii").rstrip("=")

@@ -7,8 +7,7 @@ from typing import cast
 import pytest
 from pydantic import BaseModel, ValidationError
 
-from automarkov.domain import RunId, Sha256Digest, VerifiedEventHead
-from automarkov.environment_contracts import (
+from automarkov.contracts.environment import (
     EnvironmentCandidateBundle,
     EnvironmentSandboxRequest,
     ImplementationPlan,
@@ -20,9 +19,10 @@ from automarkov.environment_contracts import (
     SandboxLimits,
     SandboxPolicy,
 )
+from automarkov.domain.models import RunId, Sha256Digest, VerifiedEventHead
 from automarkov.environment_sandbox import EnvironmentSandbox
 from automarkov.lifecycle import ArtifactReference
-from automarkov.provenance import RuntimeProfileId
+from automarkov.security.provenance import RuntimeProfileId
 
 
 def _ref(name: str, digit: str) -> ArtifactReference:

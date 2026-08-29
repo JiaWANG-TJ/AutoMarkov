@@ -5,9 +5,8 @@ from hashlib import sha256
 from threading import Lock
 from typing import Literal, Protocol, cast
 
-from automarkov.canonical import canonical_json_bytes
-from automarkov.environment_contracts import RuntimeImageStatus
-from automarkov.multi_agent_suite_contracts import (
+from automarkov.contracts.environment import RuntimeImageStatus
+from automarkov.contracts.multi_agent import (
     AgentFlag,
     AgentInfo,
     AgentScalar,
@@ -28,7 +27,8 @@ from automarkov.multi_agent_suite_contracts import (
     Smacv2AdapterManifest,
     Smacv2AgentObservation,
 )
-from automarkov.provenance import RuntimeProfileManifest
+from automarkov.domain.canonical import canonical_json_bytes
+from automarkov.security.provenance import RuntimeProfileManifest
 from automarkov.suite_adapters import (
     SuiteProfileContract,
     verify_official_suite_profile,

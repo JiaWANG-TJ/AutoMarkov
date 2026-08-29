@@ -10,10 +10,10 @@ _PACKAGE_ROOT = _REPOSITORY_ROOT / "src" / "automarkov"
 _SEAM_ROOTS = ("automarkov.domain", "automarkov.public")
 _ALLOWED_INTERNAL_PREFIXES = (
     "automarkov.domain",
-    "automarkov.evidence_contracts",
+    "automarkov.contracts.evidence",
     "automarkov.errors",
     "automarkov.canonical",
-    "automarkov.llm_contracts",
+    "automarkov.contracts.llm",
     "automarkov.public",
     "automarkov.provenance",
 )

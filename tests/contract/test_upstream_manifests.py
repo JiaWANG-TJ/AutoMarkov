@@ -11,7 +11,7 @@ from types import ModuleType
 import pytest
 from pydantic import ValidationError
 
-from automarkov.canonical import MAX_CANONICAL_DOCUMENT_BYTES, canonical_json_bytes
+from automarkov.domain.canonical import MAX_CANONICAL_DOCUMENT_BYTES, canonical_json_bytes
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _MANIFEST_PATH = _REPOSITORY_ROOT / "references" / "manifest.yaml"
@@ -59,9 +59,9 @@ _REQUIRED_RESOURCE_IDS = {
 
 def _provenance() -> ModuleType:
     try:
-        return importlib.import_module("automarkov.provenance")
+        return importlib.import_module("automarkov.security.provenance")
     except ModuleNotFoundError:
-        pytest.fail("T04 requires the public automarkov.provenance deep module")
+        pytest.fail("T04 requires the public automarkov.security.provenance deep module")
 
 
 def _upstream_payload() -> dict[str, object]:

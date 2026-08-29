@@ -20,7 +20,19 @@ from pydantic import (
     model_validator,
 )
 
-from automarkov.canonical import (
+from automarkov.contracts.evidence import (
+    CrawlEvidenceRequest,
+    EvidenceGatewayResult,
+    ExtractEvidenceRequest,
+    SearchEvidenceRequest,
+)
+from automarkov.contracts.llm import (
+    LlmCompletionRequest,
+    LlmCompletionResult,
+    LlmProbeResult,
+    LlmStartRequest,
+)
+from automarkov.domain.canonical import (
     MAX_CANONICAL_DOCUMENT_BYTES,
     MAX_JSON_NODES,
     MAX_JSON_PAYLOAD_BYTES,
@@ -29,7 +41,7 @@ from automarkov.canonical import (
     parse_json_payload,
     validate_and_measure_raw_json_tree,
 )
-from automarkov.domain import (
+from automarkov.domain.models import (
     ArtifactId,
     RunId,
     Sha256Digest,
@@ -38,19 +50,7 @@ from automarkov.domain import (
     VerifiedEventHead,
     validate_task_request_payload,
 )
-from automarkov.evidence_contracts import (
-    CrawlEvidenceRequest,
-    EvidenceGatewayResult,
-    ExtractEvidenceRequest,
-    SearchEvidenceRequest,
-)
 from automarkov.lifecycle import ArtifactReference, LifecycleCommitResult, RunProjection
-from automarkov.llm_contracts import (
-    LlmCompletionRequest,
-    LlmCompletionResult,
-    LlmProbeResult,
-    LlmStartRequest,
-)
 from automarkov.provenance import RuntimeProfileId
 
 LifecycleCommandInput: TypeAlias = dict[str, CanonicalJsonValue]

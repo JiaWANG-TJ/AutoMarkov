@@ -6,8 +6,8 @@ from typing import Literal
 import pytest
 
 from automarkov.adapters import InMemoryArtifactRepository
-from automarkov.domain import StrictFrozenModel
-from automarkov.errors import ArtifactParentContractError
+from automarkov.domain.errors import ArtifactParentContractError
+from automarkov.domain.models import StrictFrozenModel
 from automarkov.repository import ArtifactSchemaRegistry
 
 

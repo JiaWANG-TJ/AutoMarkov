@@ -10,8 +10,7 @@ from uuid import UUID
 import pytest
 from pydantic import BaseModel
 
-from automarkov.domain import RunState
-from automarkov.errors import (
+from automarkov.domain.errors import (
     BudgetContractError,
     EventSchemaError,
     InvalidRunTransitionError,
@@ -19,6 +18,7 @@ from automarkov.errors import (
     RunResumeContractError,
     RunTerminalError,
 )
+from automarkov.domain.models import RunState
 from automarkov.lifecycle import (
     TERMINAL_STATES,
     ZERO_EVENT_HASH,

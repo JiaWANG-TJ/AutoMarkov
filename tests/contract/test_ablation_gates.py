@@ -6,6 +6,7 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
+from automarkov.contracts.validation import ValidationReport
 from automarkov.lifecycle import (
     EventReference,
     GateOmittedByDesign,
@@ -27,7 +28,6 @@ from automarkov.public_validation import (
     UnitValidationReport,
     public_validation_payload_hash,
 )
-from automarkov.validation_contracts import ValidationReport
 
 
 def _ref(digit: str) -> dict[str, str]:

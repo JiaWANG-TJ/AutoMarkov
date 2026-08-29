@@ -12,8 +12,8 @@ from typing import cast
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from automarkov import provenance
-from automarkov.provenance import (
+from automarkov.security import provenance
+from automarkov.security.provenance import (
     ProvenanceVerificationReport,
     UpstreamManifest,
     verify_provenance,

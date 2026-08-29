@@ -17,13 +17,21 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 )
 from pydantic import AfterValidator, Field, TypeAdapter, model_validator
 
-from automarkov.canonical import (
+from automarkov.contracts.task import FixedCommitRunAuthorization, RunManifest
+from automarkov.domain.canonical import (
     CanonicalPayloadCodec,
     FrozenSequence,
     PositiveSafeCanonicalInt,
     canonical_json_bytes,
 )
-from automarkov.domain import (
+from automarkov.domain.ids import (
+    NonEmptyId,
+    PrincipalIdValue,
+    RequestIdValue,
+    RunIdValue,
+    Sha256Value,
+)
+from automarkov.domain.models import (
     ArtifactId,
     CanonicalNonce,
     RunId,
@@ -54,21 +62,15 @@ from automarkov.lifecycle import (
     ExecutionAttestation,
     LifecycleCommitReceipt,
     ManifestEventSigningKey,
-    NonEmptyId,
-    PrincipalIdValue,
     ProcessExecutionTerminalRecord,
-    RequestIdValue,
-    RunIdValue,
-    Sha256Value,
     StageGatePassed,
     TerminalResult,
     ValidationFailed,
     _event_hash,
     validate_lifecycle_command,
 )
-from automarkov.provenance import RuntimeProfileManifest
 from automarkov.public import ArtifactRepository, AuthenticatedCommandContext
-from automarkov.task_contracts import FixedCommitRunAuthorization, RunManifest
+from automarkov.security.provenance import RuntimeProfileManifest
 
 
 def _decode_canonical_b64url(value: str, expected_length: int) -> bytes:

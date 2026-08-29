@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from automarkov import provenance
-from automarkov.provenance import ProvenanceVerificationReport, verify_provenance
+from automarkov.security import provenance
+from automarkov.security.provenance import ProvenanceVerificationReport, verify_provenance
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _COPY_IGNORE = shutil.ignore_patterns(

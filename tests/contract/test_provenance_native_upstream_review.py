@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from automarkov.provenance import UpstreamManifest, verify_provenance
+from automarkov.security.provenance import UpstreamManifest, verify_provenance
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _MANIFEST_PATH = _REPOSITORY_ROOT / "references" / "manifest.yaml"

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from automarkov.classification_contracts import (
+from automarkov.contracts.classification import (
     ClassificationResult,
     validate_classification_payload,
 )
@@ -74,3 +74,40 @@ def test_classification_accepts_only_the_closed_no_evidence_ablation_binding() -
     payload["evidence_binding"]["ablation_method_id"] = "custom_ablation"  # type: ignore[index]
     with pytest.raises((ValueError, ValidationError)):
         validate_classification_payload(payload)
+
+
+# ── Negative / defensive tests ──────────────────────────────────────
+
+
+class TestClassificationNegativeInvariants:
+    """Deceptive counter-examples that must be rejected by classification contracts."""
+
+    def test_wrong_schema_version_is_rejected(self) -> None:
+        payload = _classification_payload()
+        payload["schema_version"] = "automarkov.classification-result.v2"
+        with pytest.raises((ValueError, ValidationError)):
+            validate_classification_payload(payload)
+
+    def test_wrong_result_kind_is_rejected(self) -> None:
+        payload = _classification_payload()
+        payload["result_kind"] = "regression"
+        with pytest.raises((ValueError, ValidationError)):
+            validate_classification_payload(payload)
+
+    def test_missing_classification_field_is_rejected(self) -> None:
+        payload = _classification_payload()
+        del payload["classification"]
+        with pytest.raises((ValueError, KeyError, ValidationError)):
+            validate_classification_payload(payload)
+
+    def test_duplicate_rationale_rejected(self) -> None:
+        payload = _classification_payload()
+        payload["rationale"] = ["same text", "same text"]
+        with pytest.raises((ValueError, ValidationError)):
+            validate_classification_payload(payload)
+
+    def test_empty_rationale_rejected(self) -> None:
+        payload = _classification_payload()
+        payload["rationale"] = []
+        with pytest.raises((ValueError, ValidationError)):
+            validate_classification_payload(payload)

@@ -23,19 +23,7 @@ from urllib.parse import urlsplit
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from automarkov.canonical import canonical_json_bytes, parse_json_payload
-from automarkov.domain import (
-    ArtifactId,
-    GenerationEvidenceView,
-    Sha256Digest,
-    validate_strict_frozen_payload,
-)
-from automarkov.errors import (
-    AutoMarkovError,
-    LocalLlmRuntimeCapacityError,
-    LocalLlmRuntimeStateError,
-)
-from automarkov.llm_contracts import (
+from automarkov.contracts.llm import (
     LlmCompletionRequest,
     LlmCompletionResponseArtifact,
     LlmCompletionResult,
@@ -55,6 +43,18 @@ from automarkov.llm_contracts import (
     RuntimeProcessEvidence,
     validate_llm_completion_payload,
     validate_llm_start_payload,
+)
+from automarkov.domain.canonical import canonical_json_bytes, parse_json_payload
+from automarkov.domain.errors import (
+    AutoMarkovError,
+    LocalLlmRuntimeCapacityError,
+    LocalLlmRuntimeStateError,
+)
+from automarkov.domain.models import (
+    ArtifactId,
+    GenerationEvidenceView,
+    Sha256Digest,
+    validate_strict_frozen_payload,
 )
 from automarkov.public import ArtifactRepository, CloseResult
 

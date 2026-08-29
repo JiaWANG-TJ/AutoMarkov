@@ -7,7 +7,7 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
-from automarkov.environment_contracts import (
+from automarkov.contracts.environment import (
     EnvironmentCandidate,
     FrozenImplementationCatalog,
     ImplementationRoute,

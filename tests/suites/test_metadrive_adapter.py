@@ -7,7 +7,7 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
-from automarkov.canonical import canonical_json_bytes
+from automarkov.domain.canonical import canonical_json_bytes
 from automarkov.lifecycle import ArtifactReference
 from automarkov.suite_adapters import (
     MetaDriveScenarioBackend,

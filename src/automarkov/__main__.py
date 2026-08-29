@@ -1,3 +1,3 @@
-from automarkov.cli import main
+from automarkov.cli.main import main
 
 raise SystemExit(main())
